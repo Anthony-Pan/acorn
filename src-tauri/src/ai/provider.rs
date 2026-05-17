@@ -6,9 +6,7 @@ use tokio::sync::mpsc;
 use super::error::{ProviderError, ProviderResult};
 use super::metadata::{ApiFormat, ProviderMetadata};
 use super::providers::{
-    acorn_cloud::AcornCloudProvider,
-    anthropic::AnthropicProvider,
-    ollama::OllamaProvider,
+    acorn_cloud::AcornCloudProvider, anthropic::AnthropicProvider, ollama::OllamaProvider,
     openai_compatible::OpenAiCompatibleProvider,
 };
 use super::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
@@ -34,7 +32,12 @@ pub struct ProviderInputs {
 }
 
 pub fn build_provider(inputs: ProviderInputs) -> ProviderResult<Box<dyn Provider>> {
-    let ProviderInputs { metadata, api_key, model, custom_endpoint } = inputs;
+    let ProviderInputs {
+        metadata,
+        api_key,
+        model,
+        custom_endpoint,
+    } = inputs;
     let model = model.unwrap_or_else(|| metadata.default_model.to_string());
     let api_key = api_key.unwrap_or_default();
 

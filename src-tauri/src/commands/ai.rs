@@ -19,10 +19,7 @@ pub fn list_providers() -> Vec<ProviderMetadata> {
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn save_provider_credentials(
-    provider_id: String,
-    api_key: String,
-) -> ProviderResult<()> {
+pub async fn save_provider_credentials(provider_id: String, api_key: String) -> ProviderResult<()> {
     keychain::save_api_key(&provider_id, &api_key)
 }
 
@@ -91,12 +88,11 @@ async fn resolve_provider(
         .ok_or_else(|| ProviderError::NotImplemented(format!("unknown provider {provider_id}")))?;
 
     let api_key = keychain::load_api_key(provider_id)?;
-    let config = sqlx::query_as::<_, ProviderConfig>(
-        "SELECT * FROM provider_configs WHERE provider_id = ?",
-    )
-    .bind(provider_id)
-    .fetch_optional(db.pool())
-    .await?;
+    let config =
+        sqlx::query_as::<_, ProviderConfig>("SELECT * FROM provider_configs WHERE provider_id = ?")
+            .bind(provider_id)
+            .fetch_optional(db.pool())
+            .await?;
 
     build_provider(ProviderInputs {
         metadata,

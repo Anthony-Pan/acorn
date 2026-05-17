@@ -6,9 +6,7 @@ use tokio::sync::mpsc;
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::prompts::DECOMPOSE_SYSTEM_PROMPT;
-use crate::ai::provider::{
-    emit_decomposed, format_user_input, strip_code_fences, Provider,
-};
+use crate::ai::provider::{emit_decomposed, format_user_input, strip_code_fences, Provider};
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 pub struct OpenAiCompatibleProvider {
@@ -139,7 +137,9 @@ impl Provider for OpenAiCompatibleProvider {
         }
         if !status.is_success() {
             let text = resp.text().await.unwrap_or_default();
-            return Err(ProviderError::ProviderResponse(format!("HTTP {status}: {text}")));
+            return Err(ProviderError::ProviderResponse(format!(
+                "HTTP {status}: {text}"
+            )));
         }
 
         let parsed: ChatResponse = resp.json().await?;

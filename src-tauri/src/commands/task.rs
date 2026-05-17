@@ -104,10 +104,7 @@ pub async fn update_task_status(
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn list_subtasks(
-    db: State<'_, Database>,
-    task_id: String,
-) -> AppResult<Vec<Subtask>> {
+pub async fn list_subtasks(db: State<'_, Database>, task_id: String) -> AppResult<Vec<Subtask>> {
     sqlx::query_as::<_, Subtask>(
         "SELECT * FROM subtasks WHERE task_id = ? ORDER BY order_index ASC",
     )
@@ -118,10 +115,7 @@ pub async fn list_subtasks(
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn toggle_subtask(
-    db: State<'_, Database>,
-    subtask_id: String,
-) -> AppResult<Subtask> {
+pub async fn toggle_subtask(db: State<'_, Database>, subtask_id: String) -> AppResult<Subtask> {
     let rows = sqlx::query("UPDATE subtasks SET done = 1 - done WHERE id = ?")
         .bind(&subtask_id)
         .execute(db.pool())

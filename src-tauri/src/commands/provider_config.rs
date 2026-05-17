@@ -40,20 +40,15 @@ pub async fn save_provider_config(
     .execute(db.pool())
     .await?;
 
-    sqlx::query_as::<_, ProviderConfig>(
-        "SELECT * FROM provider_configs WHERE provider_id = ?",
-    )
-    .bind(&provider_id)
-    .fetch_one(db.pool())
-    .await
-    .map_err(Into::into)
+    sqlx::query_as::<_, ProviderConfig>("SELECT * FROM provider_configs WHERE provider_id = ?")
+        .bind(&provider_id)
+        .fetch_one(db.pool())
+        .await
+        .map_err(Into::into)
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn touch_provider(
-    db: State<'_, Database>,
-    provider_id: String,
-) -> AppResult<()> {
+pub async fn touch_provider(db: State<'_, Database>, provider_id: String) -> AppResult<()> {
     let now = Utc::now();
     sqlx::query("UPDATE provider_configs SET last_used_at = ? WHERE provider_id = ?")
         .bind(now)
@@ -65,19 +60,15 @@ pub async fn touch_provider(
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn get_active_provider(db: State<'_, Database>) -> AppResult<Option<String>> {
-    let row: Option<(String,)> =
-        sqlx::query_as("SELECT value FROM settings WHERE key = ?")
-            .bind(ACTIVE_PROVIDER_KEY)
-            .fetch_optional(db.pool())
-            .await?;
+    let row: Option<(String,)> = sqlx::query_as("SELECT value FROM settings WHERE key = ?")
+        .bind(ACTIVE_PROVIDER_KEY)
+        .fetch_optional(db.pool())
+        .await?;
     Ok(row.map(|(v,)| v))
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn set_active_provider(
-    db: State<'_, Database>,
-    provider_id: String,
-) -> AppResult<()> {
+pub async fn set_active_provider(db: State<'_, Database>, provider_id: String) -> AppResult<()> {
     sqlx::query(
         "INSERT INTO settings (key, value) VALUES (?, ?)
          ON CONFLICT(key) DO UPDATE SET value = excluded.value",

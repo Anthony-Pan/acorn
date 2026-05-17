@@ -6,9 +6,7 @@ use tokio::sync::mpsc;
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::prompts::DECOMPOSE_SYSTEM_PROMPT;
-use crate::ai::provider::{
-    emit_decomposed, format_user_input, strip_code_fences, Provider,
-};
+use crate::ai::provider::{emit_decomposed, format_user_input, strip_code_fences, Provider};
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 const ANTHROPIC_VERSION: &str = "2023-06-01";
@@ -72,7 +70,9 @@ struct AnthropicResponse {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 enum AnthropicContent {
-    Text { text: String },
+    Text {
+        text: String,
+    },
     #[serde(other)]
     Other,
 }
@@ -122,7 +122,9 @@ impl Provider for AnthropicProvider {
         }
         if !status.is_success() {
             let text = resp.text().await.unwrap_or_default();
-            return Err(ProviderError::ProviderResponse(format!("HTTP {status}: {text}")));
+            return Err(ProviderError::ProviderResponse(format!(
+                "HTTP {status}: {text}"
+            )));
         }
 
         let parsed: AnthropicResponse = resp.json().await?;

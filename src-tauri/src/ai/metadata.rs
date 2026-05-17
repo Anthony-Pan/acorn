@@ -51,11 +51,7 @@ pub fn provider_catalog() -> Vec<ProviderMetadata> {
             category: ProviderCategory::Recommended,
             api_format: ApiFormat::Anthropic,
             default_model: "claude-haiku-4-5",
-            available_models: &[
-                "claude-haiku-4-5",
-                "claude-sonnet-4-5",
-                "claude-opus-4-5",
-            ],
+            available_models: &["claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5"],
             default_endpoint: "https://api.anthropic.com/v1/messages",
             allow_custom_endpoint: true,
             requires_api_key: true,

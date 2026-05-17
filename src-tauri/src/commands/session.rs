@@ -15,15 +15,13 @@ pub async fn create_session(
     let id = Uuid::new_v4().to_string();
     let now = Utc::now();
 
-    sqlx::query(
-        "INSERT INTO sessions (id, raw_input, language, created_at) VALUES (?, ?, ?, ?)",
-    )
-    .bind(&id)
-    .bind(&raw_input)
-    .bind(&language)
-    .bind(now)
-    .execute(db.pool())
-    .await?;
+    sqlx::query("INSERT INTO sessions (id, raw_input, language, created_at) VALUES (?, ?, ?, ?)")
+        .bind(&id)
+        .bind(&raw_input)
+        .bind(&language)
+        .bind(now)
+        .execute(db.pool())
+        .await?;
 
     sqlx::query_as::<_, Session>("SELECT * FROM sessions WHERE id = ?")
         .bind(&id)
@@ -111,12 +109,9 @@ pub async fn list_today_sessions(db: State<'_, Database>) -> AppResult<Vec<Sessi
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn list_recent_sessions(
-    db: State<'_, Database>,
-    limit: i64,
-) -> AppResult<Vec<Session>> {
+pub async fn list_recent_sessions(db: State<'_, Database>, limit: i64) -> AppResult<Vec<Session>> {
     sqlx::query_as::<_, Session>("SELECT * FROM sessions ORDER BY created_at DESC LIMIT ?")
-        .bind(limit.max(1).min(200))
+        .bind(limit.clamp(1, 200))
         .fetch_all(db.pool())
         .await
         .map_err(Into::into)

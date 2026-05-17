@@ -22,9 +22,8 @@ pub fn run() {
             let app_data_dir = app.path().app_data_dir()?;
             let db_path = app_data_dir.join("acorn.db");
 
-            let database = tauri::async_runtime::block_on(async {
-                db::Database::initialize(&db_path).await
-            })?;
+            let database =
+                tauri::async_runtime::block_on(async { db::Database::initialize(&db_path).await })?;
 
             app.manage(database);
             Ok(())
