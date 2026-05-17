@@ -1,3 +1,4 @@
+mod ai;
 mod commands;
 mod db;
 mod error;
@@ -46,6 +47,13 @@ pub fn run() {
             commands::provider_config::touch_provider,
             commands::provider_config::get_active_provider,
             commands::provider_config::set_active_provider,
+            commands::ai::list_providers,
+            commands::ai::save_provider_credentials,
+            commands::ai::delete_provider_credentials,
+            commands::ai::has_provider_credentials,
+            commands::ai::test_provider_connection,
+            commands::ai::decompose,
+            commands::ai::transcribe_audio,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
