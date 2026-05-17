@@ -1,3 +1,5 @@
+import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -22,6 +24,33 @@ function App() {
   useEffect(() => {
     void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession()]);
   }, [hydrateSession, hydrateSettings, hydrateProviders]);
+
+  useEffect(() => {
+    const unlistenSubmit = listen<{ text: string }>("quick:submit", async (event) => {
+      const { activeProviderId, language } = useSettingsStore.getState();
+      const window = getCurrentWindow();
+      await window.show();
+      await window.setFocus();
+      if (!activeProviderId) {
+        setView("settings");
+        return;
+      }
+      try {
+        await useSessionStore.getState().stash(event.payload.text, activeProviderId, language);
+      } catch (err) {
+        console.error("quick stash failed", err);
+      }
+    });
+
+    const unlistenNavigate = listen<string>("navigate", (event) => {
+      if (event.payload === "settings") setView("settings");
+    });
+
+    return () => {
+      void unlistenSubmit.then((fn) => fn());
+      void unlistenNavigate.then((fn) => fn());
+    };
+  }, []);
 
   useEffect(() => {
     if (view === "settings") return;
