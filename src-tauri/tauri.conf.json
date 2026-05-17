@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "acorn",
+  "productName": "Acorn",
   "version": "0.1.0",
   "identifier": "app.acorn.desktop",
   "build": {
@@ -12,9 +12,16 @@
   "app": {
     "windows": [
       {
-        "title": "acorn",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Acorn",
+        "width": 880,
+        "height": 720,
+        "minWidth": 640,
+        "minHeight": 520,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true
       }
     ],
     "security": {
@@ -24,6 +31,11 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Stash your day, one acorn at a time.",
+    "longDescription": "Acorn is a warm, AI-powered desktop companion that turns a messy day into focused task cards and walks you through them, one at a time.",
+    "copyright": "Copyright © 2026 Acorn Contributors",
+    "publisher": "Acorn Contributors",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
