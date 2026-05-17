@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/onyxcraft/acorn/discussions
+    about: For questions, design ideas, or "is this a bug or expected?" — start a discussion before filing an issue.

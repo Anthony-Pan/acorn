@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose something Acorn should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Quick sanity check first: is this on the roadmap in the README? If yes, +1 the existing issue instead of opening a new one.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: Describe the friction or gap you hit. Skip "wouldn't it be cool" — start with the actual pain.
+      placeholder: When I switch providers mid-stash, I lose the in-progress task list.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: A short sketch is fine. Pseudocode or a screenshot helps.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Rough scope
+      options:
+        - Small (under a day)
+        - Medium (a few days)
+        - Large (a week or more)
+        - I don't know
+    validations:
+      required: true
