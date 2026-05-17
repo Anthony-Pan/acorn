@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "main",
@@ -22,6 +23,23 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true
+      },
+      {
+        "label": "quick",
+        "title": "Acorn Quick",
+        "url": "quick.html",
+        "width": 640,
+        "height": 160,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "center": true,
+        "focus": true,
+        "resizable": false,
+        "shadow": false,
+        "hiddenTitle": true
       }
     ],
     "security": {

@@ -3,7 +3,14 @@ mod commands;
 mod db;
 mod error;
 
-use tauri::Manager;
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::TrayIconBuilder;
+use tauri::{Emitter, Manager};
+
+#[cfg(desktop)]
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+
+use commands::window::toggle_quick_window;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -15,17 +22,33 @@ pub fn run() {
         ));
 
     #[cfg(desktop)]
-    let builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
+    let builder = builder.plugin(
+        tauri_plugin_global_shortcut::Builder::new()
+            .with_handler(|app, _shortcut, event| {
+                if event.state() == ShortcutState::Pressed {
+                    toggle_quick_window(app);
+                }
+            })
+            .build(),
+    );
 
     builder
         .setup(|app| {
             let app_data_dir = app.path().app_data_dir()?;
             let db_path = app_data_dir.join("acorn.db");
 
-            let database =
-                tauri::async_runtime::block_on(async { db::Database::initialize(&db_path).await })?;
+            let database = tauri::async_runtime::block_on(async {
+                db::Database::initialize(&db_path).await
+            })?;
 
             app.manage(database);
+
+            #[cfg(desktop)]
+            {
+                register_global_shortcuts(app.handle())?;
+                build_tray(app.handle())?;
+            }
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -53,7 +76,62 @@ pub fn run() {
             commands::ai::test_provider_connection,
             commands::ai::decompose,
             commands::ai::transcribe_audio,
+            commands::window::show_main,
+            commands::window::toggle_quick,
+            commands::window::hide_quick,
+            commands::window::open_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(desktop)]
+fn register_global_shortcuts(app: &tauri::AppHandle) -> anyhow::Result<()> {
+    let summon = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyA);
+    app.global_shortcut().register(summon)?;
+    Ok(())
+}
+
+fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {
+    let show = MenuItem::with_id(app, "show", "Show Acorn", true, None::<&str>)?;
+    let summon = MenuItem::with_id(app, "summon", "Summon  ⌘⇧A", true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Acorn", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&show, &summon, &settings, &separator, &quit])?;
+
+    let icon = app
+        .default_window_icon()
+        .expect("acorn bundle ships with a default window icon")
+        .clone();
+
+    TrayIconBuilder::with_id("acorn-tray")
+        .menu(&menu)
+        .icon(icon)
+        .icon_as_template(true)
+        .on_menu_event(handle_tray_menu)
+        .build(app)?;
+
+    Ok(())
+}
+
+fn handle_tray_menu(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {
+    match event.id.as_ref() {
+        "show" => {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }
+        "summon" => toggle_quick_window(app),
+        "settings" => {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+                let _ = app.emit_to("main", "navigate", "settings");
+            }
+        }
+        "quit" => app.exit(0),
+        _ => {}
+    }
 }
