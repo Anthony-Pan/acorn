@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-05-17
+
 ### Added
 
 - Initial scaffolding: Tauri 2 + React 19 + TypeScript + Tailwind v4 + shadcn/ui.
@@ -17,3 +19,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Task cards with four lifecycle states and a live timer for the active task.
 - GitHub Actions CI (frontend + Rust) and a tag-triggered release pipeline producing `.dmg` / `.AppImage` / `.exe`.
 - `scripts/install.sh` one-liner installer for macOS and Linux.
+
+[1.0.0]: https://github.com/onyxcraft/acorn/releases/tag/v1.0.0

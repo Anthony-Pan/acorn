@@ -1,6 +1,6 @@
 [package]
 name = "acorn"
-version = "0.1.0"
+version = "1.0.0"
 description = "A warm, AI-powered desktop companion that stashes your day into task cards."
 authors = ["Acorn Contributors"]
 edition = "2021"

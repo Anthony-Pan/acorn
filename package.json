@@ -1,6 +1,6 @@
 {
   "name": "acorn",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "A warm, open-source AI desktop companion that stashes your messy day into clean task cards.",
