@@ -1,20 +1,63 @@
-import { format } from "date-fns";
-import { AcornLogo } from "@/components/acorn-logo";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+import { AcornStash } from "@/components/acorn-stash";
+import { SettingsPage } from "@/components/settings/settings-page";
+import { TaskInput } from "@/components/task-input";
+import { useProvidersStore } from "@/stores/providers";
+import { useSessionStore } from "@/stores/session";
+import { useSettingsStore } from "@/stores/settings";
+
+type View = "input" | "stash" | "settings";
 
 function App() {
-  const today = format(new Date(), "EEEE, MMMM d");
+  const hydrateSession = useSessionStore((s) => s.hydrate);
+  const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const hydrateProviders = useProvidersStore((s) => s.hydrate);
+  const current = useSessionStore((s) => s.current);
+  const isStashing = useSessionStore((s) => s.isStashing);
+
+  const [view, setView] = useState<View>("input");
+
+  useEffect(() => {
+    void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession()]);
+  }, [hydrateSession, hydrateSettings, hydrateProviders]);
+
+  useEffect(() => {
+    if (view === "settings") return;
+    if (current && current.tasks.length > 0) {
+      setView("stash");
+    } else if (!isStashing) {
+      setView("input");
+    }
+  }, [current, isStashing, view]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background text-foreground">
-      <div className="flex flex-col items-center gap-4">
-        <AcornLogo size={64} />
-        <h1 className="text-2xl font-medium tracking-tight">Acorn</h1>
-        <p className="text-sm text-muted-foreground">{today}</p>
-        <p className="text-xs text-muted-foreground mt-6 max-w-xs text-center">
-          Stash your day, one acorn at a time.
-        </p>
-      </div>
-    </main>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={view}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18 }}
+      >
+        {view === "settings" ? (
+          <SettingsPage
+            onClose={() => setView(current && current.tasks.length > 0 ? "stash" : "input")}
+          />
+        ) : view === "stash" ? (
+          <AcornStash
+            onOpenSettings={() => setView("settings")}
+            onAddMore={() => {
+              useSessionStore.getState().startNew();
+              setView("input");
+            }}
+          />
+        ) : (
+          <TaskInput onOpenSettings={() => setView("settings")} />
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
