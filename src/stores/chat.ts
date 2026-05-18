@@ -1,6 +1,8 @@
+import { toast } from "sonner";
 import { create } from "zustand";
 
 import { conversations as conversationsApi, chat as runChat } from "@/lib/chat";
+import { useSessionStore } from "@/stores/session";
 import type { ChatEvent, Conversation, ConversationWithMessages, Message } from "@/types/chat";
 
 type Phase = "idle" | "thinking" | "tool" | "responding";
@@ -108,11 +110,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
         return;
       }
       if (event.kind === "toolResult") {
+        const callId = event.result.toolCallId;
+        const matching = get().activeTools.find((t) => t.id === callId);
         set((s) => ({
           activeTools: s.activeTools.map((t) =>
-            t.id === event.result.toolCallId ? { ...t, result: event.result.content } : t,
+            t.id === callId ? { ...t, result: event.result.content } : t,
           ),
         }));
+        if (matching) {
+          announceToolResult(matching.name, event.result.content);
+        }
         return;
       }
       if (event.kind === "text") {
@@ -132,9 +139,32 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await runChat(providerId, conversation.id, text, handleEvent);
       const refreshed = await conversationsApi.get(conversation.id);
       set({ current: refreshed, phase: "idle", activeTools: [] });
+      await useSessionStore.getState().hydrate();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       set({ phase: "idle", error: message });
+      toast.error("Chat failed", { description: message });
     }
   },
 }));
+
+function announceToolResult(toolName: string, resultJson: string): void {
+  try {
+    const parsed = JSON.parse(resultJson) as Record<string, unknown>;
+    if (parsed.error) {
+      toast.error(`${toolName} failed`, { description: String(parsed.error) });
+      return;
+    }
+    if (toolName === "add_task" && typeof parsed.title === "string") {
+      toast.success(`Added "${parsed.title}"`);
+    } else if (toolName === "complete_task") {
+      toast.success("Marked as done");
+    } else if (toolName === "start_task") {
+      toast.success("Started");
+    } else if (toolName === "skip_task") {
+      toast("Skipped");
+    }
+  } catch {
+    /* result is not JSON — nothing to announce */
+  }
+}
