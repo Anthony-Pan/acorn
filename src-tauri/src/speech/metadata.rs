@@ -20,7 +20,6 @@ pub enum SpeechApiFormat {
 #[serde(rename_all = "snake_case")]
 pub enum SpeechProviderStatus {
     Available,
-    PlatformUnsupported,
     ComingSoon,
 }
 
@@ -42,6 +41,7 @@ pub struct SpeechProviderMetadata {
     /// the user to enter the same OpenAI key twice.
     pub api_key_provider_id: Option<&'static str>,
     pub featured: bool,
+    pub status: SpeechProviderStatus,
 }
 
 impl SpeechProviderMetadata {
@@ -79,13 +79,15 @@ pub fn speech_provider_catalog() -> Vec<SpeechProviderMetadata> {
             id: "system",
             display_name: "System (Built-in)",
             description: "Uses your operating system's on-device speech recognition. \
-                          No API key required, audio never leaves your machine.",
+                          No API key required, audio never leaves your machine. \
+                          Ships in v1.1.",
             api_format: SpeechApiFormat::System,
             supported_platforms: &[PLATFORM_MACOS, PLATFORM_WINDOWS],
             on_device: true,
             requires_api_key: false,
             api_key_provider_id: None,
             featured: true,
+            status: SpeechProviderStatus::ComingSoon,
         },
         SpeechProviderMetadata {
             id: "whisper_openai",
@@ -98,6 +100,7 @@ pub fn speech_provider_catalog() -> Vec<SpeechProviderMetadata> {
             requires_api_key: true,
             api_key_provider_id: Some("openai"),
             featured: false,
+            status: SpeechProviderStatus::Available,
         },
     ]
 }
@@ -106,25 +109,16 @@ pub fn find_speech_metadata(id: &str) -> Option<SpeechProviderMetadata> {
     speech_provider_catalog().into_iter().find(|m| m.id == id)
 }
 
-/// Default speech provider id for first launch — pick the system-native
-/// recogniser when the platform supports it, otherwise fall back to Whisper.
+/// Default speech provider id for first launch — picks the first catalogue
+/// entry that is `Available` and platform-supported. With `system` currently
+/// `ComingSoon`, `whisper_openai` is the default everywhere; once v1.1 flips
+/// `system` to `Available`, macOS and Windows will pick it up automatically.
 pub fn default_speech_provider_id() -> &'static str {
-    let system = SpeechProviderMetadata {
-        id: "system",
-        display_name: "",
-        description: "",
-        api_format: SpeechApiFormat::System,
-        supported_platforms: &[PLATFORM_MACOS, PLATFORM_WINDOWS],
-        on_device: true,
-        requires_api_key: false,
-        api_key_provider_id: None,
-        featured: true,
-    };
-    if system.available_on_current_platform() {
-        "system"
-    } else {
-        "whisper_openai"
-    }
+    speech_provider_catalog()
+        .into_iter()
+        .find(|m| m.status == SpeechProviderStatus::Available && m.available_on_current_platform())
+        .map(|m| m.id)
+        .unwrap_or("whisper_openai")
 }
 
 #[cfg(test)]
@@ -155,11 +149,21 @@ mod tests {
     }
 
     #[test]
-    fn default_provider_id_matches_current_platform() {
-        let default_id = default_speech_provider_id();
-        #[cfg(any(target_os = "macos", target_os = "windows"))]
-        assert_eq!(default_id, "system");
-        #[cfg(all(not(target_os = "macos"), not(target_os = "windows")))]
-        assert_eq!(default_id, "whisper_openai");
+    fn default_provider_id_is_whisper_until_system_lands() {
+        // Today system is ComingSoon, so default is whisper everywhere.
+        // Flip this test when the native impls land in v1.1.
+        assert_eq!(default_speech_provider_id(), "whisper_openai");
+    }
+
+    #[test]
+    fn system_is_coming_soon() {
+        let m = find_speech_metadata("system").unwrap();
+        assert_eq!(m.status, SpeechProviderStatus::ComingSoon);
+    }
+
+    #[test]
+    fn whisper_is_available() {
+        let m = find_speech_metadata("whisper_openai").unwrap();
+        assert_eq!(m.status, SpeechProviderStatus::Available);
     }
 }

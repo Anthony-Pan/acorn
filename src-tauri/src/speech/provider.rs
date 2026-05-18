@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use super::error::{SpeechError, SpeechResult};
-use super::metadata::{SpeechApiFormat, SpeechProviderMetadata};
+use super::metadata::{SpeechApiFormat, SpeechProviderMetadata, SpeechProviderStatus};
 use super::providers::whisper_cloud::WhisperCloudProvider;
 use super::types::TranscribeResponse;
 
@@ -32,10 +32,16 @@ pub fn build_speech_provider(
     if !metadata.available_on_current_platform() {
         return Err(SpeechError::Unavailable);
     }
+    if metadata.status == SpeechProviderStatus::ComingSoon {
+        return Err(SpeechError::NotImplemented(format!(
+            "{} ships in v1.1",
+            metadata.display_name
+        )));
+    }
 
     match metadata.api_format {
         SpeechApiFormat::System => Err(SpeechError::NotImplemented(
-            "system speech provider not yet wired (added in later commit)".into(),
+            "system speech provider lands in v1.1".into(),
         )),
         SpeechApiFormat::WhisperOpenAi => Ok(Box::new(WhisperCloudProvider::new(
             metadata,
