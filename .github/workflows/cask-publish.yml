@@ -1,0 +1,100 @@
+name: Publish Homebrew Cask
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v1.0.0)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  bump-cask:
+    name: Bump onyxcraft/homebrew-acorn
+    runs-on: macos-latest
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            tag="${{ inputs.tag }}"
+          else
+            tag="${{ github.event.release.tag_name }}"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download universal DMG
+        run: |
+          set -euo pipefail
+          url="https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/Acorn_${{ steps.tag.outputs.version }}_universal.dmg"
+          echo "Fetching $url"
+          curl -fL --retry 3 -o /tmp/acorn.dmg "$url"
+          test -s /tmp/acorn.dmg
+
+      - name: Compute SHA256
+        id: sha
+        run: |
+          sum=$(shasum -a 256 /tmp/acorn.dmg | cut -d' ' -f1)
+          echo "sha256=$sum" >> "$GITHUB_OUTPUT"
+          echo "SHA256: $sum"
+
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+        with:
+          repository: onyxcraft/homebrew-acorn
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Update cask file
+        env:
+          NEW_VERSION: ${{ steps.tag.outputs.version }}
+          NEW_SHA: ${{ steps.sha.outputs.sha256 }}
+        run: |
+          set -euo pipefail
+          cd tap
+          python3 - <<'PY'
+          import os, pathlib, re, sys
+
+          version = os.environ["NEW_VERSION"]
+          sha = os.environ["NEW_SHA"]
+          cask = pathlib.Path("Casks/acorn.rb")
+          if not cask.exists():
+              sys.exit(
+                  "Casks/acorn.rb missing in tap repo. "
+                  "Seed it once by copying homebrew/tap/Casks/acorn.rb "
+                  "from the main acorn repository."
+              )
+          text = cask.read_text()
+          text = re.sub(r'version "[^"]+"', f'version "{version}"', text, count=1)
+          text = re.sub(r'sha256 "[^"]+"', f'sha256 "{sha}"', text, count=1)
+          cask.write_text(text)
+          PY
+
+      - name: Audit cask
+        run: |
+          cd tap
+          brew audit --cask Casks/acorn.rb || {
+            echo "::warning::brew audit emitted warnings (non-fatal)"
+          }
+
+      - name: Commit and push
+        env:
+          NEW_VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/acorn.rb
+          if git diff --cached --quiet; then
+            echo "Cask already at v$NEW_VERSION — nothing to do."
+            exit 0
+          fi
+          git commit -m "feat: bump acorn to $NEW_VERSION"
+          git push
