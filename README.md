@@ -22,7 +22,7 @@ It's a desktop app. Open it, work with it, close it. Data lives in a local SQLit
 
 - **Model-agnostic.** Ships with Anthropic, OpenAI, DeepSeek, OpenRouter, Ollama, plus seven more in the catalogue. Bring your own key — or run a local Qwen with Ollama for free.
 - **Native desktop.** Tauri 2 + React 19. ~10× smaller than the equivalent Electron app and feels like one.
-- **Voice in.** Hold the 🎙️ button, talk, drop. Whisper transcribes into the input box.
+- **Voice in.** Hold the 🎙️ button, talk, drop. OpenAI Whisper transcribes today; OS-native on-device recognition (macOS Speech, Windows.Media.SpeechRecognition) lands in v1.1 and will become the default — both go through the same pluggable `SpeechProvider` layer so switching is a settings click.
 - **Warm, not corporate.** Autumn palette designed around an actual aesthetic, not a default Tailwind theme.
 - **Your data, your machine.** SQLite on disk, API keys in macOS Keychain / Windows Credential Manager / Linux Secret Service.
 
@@ -89,6 +89,8 @@ That's it.
 - macOS code signing + notarisation
 - Auto-update via Tauri updater
 - Gemini provider (different request shape, deferred from v1.0)
+- OS-native speech recognition (macOS `SFSpeechRecognizer`, Windows
+  `SpeechRecognizer`) wired into the existing `SpeechProvider` catalogue
 - True incremental JSON parsing during decompose for faster TTFB
 - Global hotkey to summon Acorn from anywhere
 - Past days view (history of stashes)
