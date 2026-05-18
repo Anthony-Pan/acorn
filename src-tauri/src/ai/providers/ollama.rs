@@ -3,10 +3,12 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 
+use crate::ai::chat::{ChatMessage, ChatRole, ChatTurn};
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::prompts::DECOMPOSE_SYSTEM_PROMPT;
 use crate::ai::provider::{emit_decomposed, format_user_input, strip_code_fences, Provider};
+use crate::ai::tools::ToolSpec;
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 pub struct OllamaProvider {
@@ -156,5 +158,69 @@ impl Provider for OllamaProvider {
             )));
         }
         Ok(())
+    }
+
+    async fn chat_turn(
+        &self,
+        messages: &[ChatMessage],
+        _tools: &[ToolSpec],
+        system_prompt: &str,
+    ) -> ProviderResult<ChatTurn> {
+        let mut ollama_messages = vec![serde_json::json!({
+            "role": "system",
+            "content": system_prompt,
+        })];
+        for msg in messages {
+            let role = match msg.role {
+                ChatRole::System => "system",
+                ChatRole::User | ChatRole::Tool => "user",
+                ChatRole::Assistant => "assistant",
+            };
+            let content = if matches!(msg.role, ChatRole::Tool) {
+                format!("[tool result]\n{}", msg.content)
+            } else {
+                msg.content.clone()
+            };
+            ollama_messages.push(serde_json::json!({
+                "role": role,
+                "content": content,
+            }));
+        }
+
+        let body = serde_json::json!({
+            "model": self.model,
+            "messages": ollama_messages,
+            "stream": false,
+            "options": { "temperature": 0.4 },
+        });
+
+        let resp = self
+            .client
+            .post(self.chat_url())
+            .json(&body)
+            .send()
+            .await
+            .map_err(|err| {
+                if err.is_connect() {
+                    ProviderError::OllamaNotRunning(self.endpoint.clone())
+                } else {
+                    ProviderError::Network(err.to_string())
+                }
+            })?;
+
+        if !resp.status().is_success() {
+            let text = resp.text().await.unwrap_or_default();
+            return Err(ProviderError::ProviderResponse(text));
+        }
+
+        let parsed: OllamaResponse = resp.json().await?;
+        Ok(ChatTurn {
+            text: parsed.message.content,
+            tool_calls: vec![],
+        })
+    }
+
+    fn supports_tools(&self) -> bool {
+        false
     }
 }

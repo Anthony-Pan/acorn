@@ -3,12 +3,14 @@ use std::time::Duration;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
+use super::chat::{ChatMessage, ChatTurn};
 use super::error::{ProviderError, ProviderResult};
 use super::metadata::{ApiFormat, ProviderMetadata};
 use super::providers::{
     acorn_cloud::AcornCloudProvider, anthropic::AnthropicProvider, ollama::OllamaProvider,
     openai_compatible::OpenAiCompatibleProvider,
 };
+use super::tools::ToolSpec;
 use super::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 #[async_trait]
@@ -22,6 +24,17 @@ pub trait Provider: Send + Sync {
     ) -> ProviderResult<DecomposeResponse>;
 
     async fn validate_credentials(&self) -> ProviderResult<()>;
+
+    async fn chat_turn(
+        &self,
+        messages: &[ChatMessage],
+        tools: &[ToolSpec],
+        system_prompt: &str,
+    ) -> ProviderResult<ChatTurn>;
+
+    fn supports_tools(&self) -> bool {
+        true
+    }
 }
 
 pub struct ProviderInputs {
