@@ -96,7 +96,6 @@ export const useSessionStore = create<SessionState>((set) => ({
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       set({ isStashing: false, error: message });
-      throw err;
     }
   },
 
