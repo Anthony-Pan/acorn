@@ -67,6 +67,22 @@ pub fn tool_catalog() -> Vec<ToolSpec> {
                 "required": ["task_id"]
             }),
         },
+        ToolSpec {
+            name: "search_past_activity",
+            description: "Full-text search across the user's past chat messages, task titles \
+                and descriptions, and stash inputs. Use when the user asks about something \
+                they did before ('did I finish the interview prep?', 'what did I work on \
+                last Tuesday?'). Returns up to 10 short snippets, each tagged with its source \
+                (message / task / session) and id. Do not invent results — only quote what \
+                comes back.",
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "query": { "type": "string", "description": "Free-text search terms." }
+                },
+                "required": ["query"]
+            }),
+        },
     ]
 }
 
@@ -81,10 +97,53 @@ pub async fn execute_tool(
         "start_task" => set_status(pool, arguments, "in_progress").await,
         "complete_task" => set_status(pool, arguments, "completed").await,
         "skip_task" => set_status(pool, arguments, "skipped").await,
-        other => Err(ProviderError::InvalidResponse(format!(
-            "unknown tool {other}"
-        ))),
+        "search_past_activity" => search_past_activity(pool, arguments).await,
+        other => Err(ProviderError::InvalidResponse(format!("unknown tool {other}"))),
     }
+}
+
+async fn search_past_activity(
+    pool: &SqlitePool,
+    args: &serde_json::Value,
+) -> ProviderResult<String> {
+    let query = args
+        .get("query")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| ProviderError::InvalidResponse("search_past_activity: missing query".into()))?;
+    let trimmed = query.trim();
+    if trimmed.is_empty() {
+        return Ok("[]".to_string());
+    }
+
+    let rows: Vec<(String, String, String, String)> = sqlx::query_as(
+        "SELECT source, source_id, created_at, snippet(search_index, 3, '[[', ']]', '...', 12) AS snippet
+         FROM search_index
+         WHERE search_index MATCH ?
+         ORDER BY created_at DESC
+         LIMIT 10",
+    )
+    .bind(trimmed)
+    .fetch_all(pool)
+    .await
+    .map_err(|err| ProviderError::ProviderResponse(format!("search failed: {err}")))?;
+
+    if rows.is_empty() {
+        return Ok("[]".to_string());
+    }
+
+    let payload: Vec<_> = rows
+        .into_iter()
+        .map(|(source, source_id, created_at, snippet)| {
+            serde_json::json!({
+                "source": source,
+                "source_id": source_id,
+                "created_at": created_at,
+                "snippet": snippet,
+            })
+        })
+        .collect();
+
+    Ok(serde_json::to_string(&payload)?)
 }
 
 async fn list_today_tasks(pool: &SqlitePool) -> ProviderResult<String> {
