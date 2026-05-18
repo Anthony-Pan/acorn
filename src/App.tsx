@@ -2,6 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 
 import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
@@ -68,39 +69,52 @@ function App() {
   const defaultView = current && current.tasks.length > 0 ? "stash" : "input";
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={view}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.18 }}
-      >
-        {view === "settings" ? (
-          <SettingsPage onClose={() => setView(defaultView)} />
-        ) : view === "chat" ? (
-          <ChatView onBack={() => setView(defaultView)} />
-        ) : view === "calendar" ? (
-          <CalendarView onBack={() => setView(defaultView)} />
-        ) : view === "stash" ? (
-          <AcornStash
-            onOpenSettings={() => setView("settings")}
-            onOpenChat={() => setView("chat")}
-            onOpenCalendar={() => setView("calendar")}
-            onAddMore={() => {
-              useSessionStore.getState().startNew();
-              setView("input");
-            }}
-          />
-        ) : (
-          <TaskInput
-            onOpenSettings={() => setView("settings")}
-            onOpenChat={() => setView("chat")}
-            onOpenCalendar={() => setView("calendar")}
-          />
-        )}
-      </motion.div>
-    </AnimatePresence>
+    <>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={view}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          {view === "settings" ? (
+            <SettingsPage onClose={() => setView(defaultView)} />
+          ) : view === "chat" ? (
+            <ChatView onBack={() => setView(defaultView)} />
+          ) : view === "calendar" ? (
+            <CalendarView onBack={() => setView(defaultView)} />
+          ) : view === "stash" ? (
+            <AcornStash
+              onOpenSettings={() => setView("settings")}
+              onOpenChat={() => setView("chat")}
+              onOpenCalendar={() => setView("calendar")}
+              onAddMore={() => {
+                useSessionStore.getState().startNew();
+                setView("input");
+              }}
+            />
+          ) : (
+            <TaskInput
+              onOpenSettings={() => setView("settings")}
+              onOpenChat={() => setView("chat")}
+              onOpenCalendar={() => setView("calendar")}
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: "var(--acorn-paper)",
+            color: "var(--acorn-ink)",
+            border: "0.5px solid rgba(139, 69, 19, 0.18)",
+            fontSize: "13px",
+          },
+        }}
+      />
+    </>
   );
 }
 
