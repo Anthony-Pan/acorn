@@ -3,5 +3,11 @@
   "identifier": "default",
   "description": "Capability for both windows",
   "windows": ["main", "quick"],
-  "permissions": ["core:default", "opener:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
+    "opener:default"
+  ]
 }
