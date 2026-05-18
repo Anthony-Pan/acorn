@@ -95,3 +95,44 @@ pub struct NewTaskInput {
 pub struct NewSubtaskInput {
     pub title: String,
 }
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, sqlx::Type, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[sqlx(rename_all = "snake_case")]
+pub enum MessageRole {
+    User,
+    Assistant,
+    Tool,
+    System,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct Conversation {
+    pub id: String,
+    pub title: String,
+    pub provider_id: Option<String>,
+    pub model: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub last_message_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct Message {
+    pub id: String,
+    pub conversation_id: String,
+    pub role: MessageRole,
+    pub content: String,
+    pub tool_calls: Option<String>,
+    pub tool_call_id: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConversationWithMessages {
+    #[serde(flatten)]
+    pub conversation: Conversation,
+    pub messages: Vec<Message>,
+}

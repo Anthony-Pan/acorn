@@ -1,9 +1,11 @@
+pub mod chat;
 pub mod error;
 pub mod keychain;
 pub mod metadata;
 pub mod prompts;
 pub mod provider;
 pub mod providers;
+pub mod tools;
 pub mod transcribe;
 pub mod types;
 
