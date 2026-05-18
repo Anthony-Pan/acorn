@@ -7,6 +7,7 @@ use super::types::TranscribeResponse;
 
 #[async_trait]
 pub trait SpeechProvider: Send + Sync {
+    #[allow(dead_code)]
     fn metadata(&self) -> &SpeechProviderMetadata;
 
     async fn transcribe(
@@ -16,6 +17,9 @@ pub trait SpeechProvider: Send + Sync {
         language: Option<&str>,
     ) -> SpeechResult<TranscribeResponse>;
 
+    // Reserved for a future test_speech_provider_connection command (mirrors
+    // the existing test_provider_connection for AI providers).
+    #[allow(dead_code)]
     async fn validate_availability(&self) -> SpeechResult<()>;
 }
 

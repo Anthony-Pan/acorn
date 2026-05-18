@@ -1,10 +1,14 @@
 use serde::{Serialize, Serializer};
 
+// Variants tagged #[allow(dead_code)] are reserved for the v1.1 native-impl PR
+// (PermissionDenied, UnsupportedFormat, Decode, NativeApi, Io). Keeping them
+// in the enum now lets the trait signature stay stable across PRs.
 #[derive(Debug, thiserror::Error)]
 pub enum SpeechError {
     #[error("speech recognition is not available on this platform")]
     Unavailable,
 
+    #[allow(dead_code)]
     #[error("permission to use speech recognition was denied")]
     PermissionDenied,
 
@@ -17,12 +21,15 @@ pub enum SpeechError {
     #[error("rate limit exceeded")]
     RateLimited,
 
+    #[allow(dead_code)]
     #[error("unsupported audio format: {0}")]
     UnsupportedFormat(String),
 
+    #[allow(dead_code)]
     #[error("audio decode error: {0}")]
     Decode(String),
 
+    #[allow(dead_code)]
     #[error("native speech API error: {0}")]
     NativeApi(String),
 
@@ -35,6 +42,7 @@ pub enum SpeechError {
     #[error("invalid response: {0}")]
     InvalidResponse(String),
 
+    #[allow(dead_code)]
     #[error("io error: {0}")]
     Io(String),
 
