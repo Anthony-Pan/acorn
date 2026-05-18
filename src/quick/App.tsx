@@ -126,6 +126,11 @@ export function QuickApp() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                void dismiss();
+                return;
+              }
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 cancel();
