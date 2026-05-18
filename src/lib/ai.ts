@@ -1,5 +1,6 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 
+import { speechProviders } from "@/lib/speech";
 import type {
   DecomposeEvent,
   DecomposeRequest,
@@ -34,14 +35,11 @@ export function decompose(
   });
 }
 
-export function transcribe(
+export async function transcribe(
   audio: Uint8Array,
   mimeType: string,
   language?: string,
 ): Promise<string> {
-  return invoke<string>("transcribe_audio", {
-    audio: Array.from(audio),
-    mimeType,
-    language: language ?? null,
-  });
+  const outcome = await speechProviders.transcribe(audio, mimeType, language);
+  return outcome.text;
 }
