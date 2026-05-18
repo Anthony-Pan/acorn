@@ -7,6 +7,9 @@ interface UiStrings {
   stashSuccess: string;
   stashFailedTitle: string;
   stashFailedHint: string;
+  hintModelNotFound: (model: string) => string;
+  hintOllamaDown: string;
+  hintInvalidKey: string;
   configureProvider: string;
   configureProviderTail: string;
   headingPrimary: string;
@@ -43,6 +46,11 @@ const EN: UiStrings = {
   stashFailedTitle: "Stash failed",
   stashFailedHint:
     "If Ollama returned malformed JSON, try qwen2.5:7b or llama3.2:3b. Otherwise switch provider in Settings.",
+  hintModelNotFound: (model) =>
+    `Ollama doesn't have '${model}' pulled. Run "ollama pull ${model}" in a terminal, or pick a model from "ollama list" in Settings.`,
+  hintOllamaDown:
+    'Ollama is not responding on http://localhost:11434. Run "ollama serve" in a terminal first.',
+  hintInvalidKey: "The API key was rejected. Double-check it in Settings or paste a fresh one.",
   configureProvider: "Configure a provider",
   configureProviderTail: "in Settings before you can stash.",
   headingPrimary: "What's on your mind today?",
@@ -79,6 +87,10 @@ const ZH: UiStrings = {
   stashSuccess: "收好了 🌰",
   stashFailedTitle: "收纳失败",
   stashFailedHint: "如果用 Ollama,试试 qwen2.5:7b 或 llama3.2:3b。或者去设置换个 provider。",
+  hintModelNotFound: (model) =>
+    `Ollama 里没有 '${model}' 这个模型。在终端跑 "ollama pull ${model}",或者去设置里换一个 "ollama list" 里有的模型。`,
+  hintOllamaDown: 'Ollama 没在 http://localhost:11434 响应。先在终端跑 "ollama serve"。',
+  hintInvalidKey: "API key 被拒了。去设置里检查或者粘一个新的。",
   configureProvider: "去设置里配一个 provider",
   configureProviderTail: "才能开始收纳。",
   headingPrimary: "今天脑子里都有什么?",

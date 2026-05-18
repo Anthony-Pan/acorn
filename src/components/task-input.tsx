@@ -24,6 +24,24 @@ interface TaskInputProps {
   onOpenCalendar: () => void;
 }
 
+function pickHint(error: string | null, t: ReturnType<typeof strings>): string {
+  if (!error) return t.stashFailedHint;
+  const lower = error.toLowerCase();
+  const modelMatch = lower.match(/model ['"]([^'"]+)['"] not found/);
+  if (modelMatch?.[1]) return t.hintModelNotFound(modelMatch[1]);
+  if (lower.includes("ollama not running") || lower.includes("connection refused")) {
+    return t.hintOllamaDown;
+  }
+  if (
+    lower.includes("invalid api key") ||
+    lower.includes("401") ||
+    lower.includes("unauthorized")
+  ) {
+    return t.hintInvalidKey;
+  }
+  return t.stashFailedHint;
+}
+
 export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskInputProps) {
   const [value, setValue] = useState("");
   const [voiceError, setVoiceError] = useState<string | null>(null);
@@ -41,9 +59,14 @@ export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskIn
 
   useEffect(() => {
     if (stashError && !isStashing) {
-      toast.error(t.stashFailedTitle, { description: stashError });
+      toast.error(t.stashFailedTitle, {
+        id: "stash-error",
+        description: stashError,
+      });
     }
   }, [stashError, isStashing, t.stashFailedTitle]);
+
+  const errorHint = pickHint(stashError, t);
 
   const handleStash = async () => {
     if (!canStash || !activeProviderId) return;
@@ -139,7 +162,7 @@ export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskIn
             <div className="flex-1">
               <div className="font-medium mb-0.5">{t.stashFailedTitle}</div>
               <div className="opacity-90 leading-relaxed break-words">{stashError}</div>
-              <div className="mt-1.5 opacity-70">{t.stashFailedHint}</div>
+              <div className="mt-1.5 opacity-70">{errorHint}</div>
             </div>
           </div>
         ) : null}
