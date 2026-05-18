@@ -8,7 +8,9 @@ use tauri::tray::TrayIconBuilder;
 use tauri::{Emitter, Manager, WindowEvent};
 
 #[cfg(desktop)]
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+use std::str::FromStr;
+#[cfg(desktop)]
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
 use commands::window::toggle_quick_window;
 
@@ -44,7 +46,13 @@ pub fn run() {
 
             #[cfg(desktop)]
             {
-                register_global_shortcuts(app.handle())?;
+                let stored = tauri::async_runtime::block_on(async {
+                    commands::shortcut::load_shortcut(app.state::<db::Database>().inner()).await
+                })
+                .ok()
+                .flatten()
+                .unwrap_or_else(|| commands::shortcut::DEFAULT_SHORTCUT.to_string());
+                register_global_shortcuts(app.handle(), &stored)?;
                 build_tray(app.handle())?;
                 wire_quick_window_blur(app.handle());
             }
@@ -86,14 +94,18 @@ pub fn run() {
             commands::window::toggle_quick,
             commands::window::hide_quick,
             commands::window::open_settings,
+            commands::shortcut::get_summon_shortcut,
+            commands::shortcut::set_summon_shortcut,
+            commands::shortcut::reset_summon_shortcut,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 #[cfg(desktop)]
-fn register_global_shortcuts(app: &tauri::AppHandle) -> anyhow::Result<()> {
-    let summon = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyA);
+fn register_global_shortcuts(app: &tauri::AppHandle, shortcut_str: &str) -> anyhow::Result<()> {
+    let summon = Shortcut::from_str(shortcut_str)
+        .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
     app.global_shortcut().register(summon)?;
     Ok(())
 }
