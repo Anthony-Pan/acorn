@@ -5,7 +5,7 @@ mod error;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::{Emitter, Manager};
+use tauri::{Emitter, Manager, WindowEvent};
 
 #[cfg(desktop)]
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
@@ -46,6 +46,7 @@ pub fn run() {
             {
                 register_global_shortcuts(app.handle())?;
                 build_tray(app.handle())?;
+                wire_quick_window_blur(app.handle());
             }
 
             Ok(())
@@ -118,6 +119,18 @@ fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {
         .build(app)?;
 
     Ok(())
+}
+
+#[cfg(desktop)]
+fn wire_quick_window_blur(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("quick") {
+        let window_for_handler = window.clone();
+        window.on_window_event(move |event| {
+            if let WindowEvent::Focused(false) = event {
+                let _ = window_for_handler.hide();
+            }
+        });
+    }
 }
 
 fn handle_tray_menu(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {
