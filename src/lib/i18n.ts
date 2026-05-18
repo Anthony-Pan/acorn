@@ -78,8 +78,7 @@ const ZH: UiStrings = {
   stashing: "收纳中",
   stashSuccess: "收好了 🌰",
   stashFailedTitle: "收纳失败",
-  stashFailedHint:
-    "如果用 Ollama,试试 qwen2.5:7b 或 llama3.2:3b。或者去设置换个 provider。",
+  stashFailedHint: "如果用 Ollama,试试 qwen2.5:7b 或 llama3.2:3b。或者去设置换个 provider。",
   configureProvider: "去设置里配一个 provider",
   configureProviderTail: "才能开始收纳。",
   headingPrimary: "今天脑子里都有什么?",
