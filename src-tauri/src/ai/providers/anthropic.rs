@@ -7,7 +7,7 @@ use crate::ai::chat::{ChatMessage, ChatRole, ChatTurn, ToolCall};
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::prompts::DECOMPOSE_SYSTEM_PROMPT;
-use crate::ai::provider::{emit_decomposed, format_user_input, strip_code_fences, Provider};
+use crate::ai::provider::{emit_decomposed, format_user_input, parse_decompose, Provider};
 use crate::ai::tools::ToolSpec;
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
@@ -150,8 +150,7 @@ impl Provider for AnthropicProvider {
             })
             .await;
 
-        let json = strip_code_fences(&text);
-        let response: DecomposeResponse = serde_json::from_str(json)?;
+        let response = parse_decompose(&text)?;
 
         emit_decomposed(&events, &response).await?;
         Ok(response)
