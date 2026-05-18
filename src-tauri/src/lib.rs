@@ -37,9 +37,8 @@ pub fn run() {
             let app_data_dir = app.path().app_data_dir()?;
             let db_path = app_data_dir.join("acorn.db");
 
-            let database = tauri::async_runtime::block_on(async {
-                db::Database::initialize(&db_path).await
-            })?;
+            let database =
+                tauri::async_runtime::block_on(async { db::Database::initialize(&db_path).await })?;
 
             app.manage(database);
 
@@ -76,6 +75,12 @@ pub fn run() {
             commands::ai::test_provider_connection,
             commands::ai::decompose,
             commands::ai::transcribe_audio,
+            commands::conversation::create_conversation,
+            commands::conversation::list_conversations,
+            commands::conversation::get_conversation,
+            commands::conversation::delete_conversation,
+            commands::conversation::rename_conversation,
+            commands::chat::chat,
             commands::window::show_main,
             commands::window::toggle_quick,
             commands::window::hide_quick,
