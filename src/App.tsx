@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import { AcornStash } from "@/components/acorn-stash";
+import { CalendarView } from "@/components/calendar-view";
 import { ChatView } from "@/components/chat-view";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { TaskInput } from "@/components/task-input";
@@ -12,7 +13,7 @@ import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
 
-type View = "input" | "stash" | "chat" | "settings";
+type View = "input" | "stash" | "chat" | "settings" | "calendar";
 
 function App() {
   const hydrateSession = useSessionStore((s) => s.hydrate);
@@ -56,7 +57,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (view === "settings" || view === "chat") return;
+    if (view === "settings" || view === "chat" || view === "calendar") return;
     if (current && current.tasks.length > 0) {
       setView("stash");
     } else if (!isStashing) {
@@ -79,10 +80,13 @@ function App() {
           <SettingsPage onClose={() => setView(defaultView)} />
         ) : view === "chat" ? (
           <ChatView onBack={() => setView(defaultView)} />
+        ) : view === "calendar" ? (
+          <CalendarView onBack={() => setView(defaultView)} />
         ) : view === "stash" ? (
           <AcornStash
             onOpenSettings={() => setView("settings")}
             onOpenChat={() => setView("chat")}
+            onOpenCalendar={() => setView("calendar")}
             onAddMore={() => {
               useSessionStore.getState().startNew();
               setView("input");
@@ -92,6 +96,7 @@ function App() {
           <TaskInput
             onOpenSettings={() => setView("settings")}
             onOpenChat={() => setView("chat")}
+            onOpenCalendar={() => setView("calendar")}
           />
         )}
       </motion.div>
