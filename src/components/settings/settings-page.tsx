@@ -4,9 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { AcornLogo } from "@/components/acorn-logo";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { ProviderSidebar } from "@/components/settings/provider-sidebar";
+import { ShortcutRecorder } from "@/components/settings/shortcut-recorder";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { strings } from "@/lib/i18n";
 import { useProvidersStore } from "@/stores/providers";
 import { useSettingsStore } from "@/stores/settings";
 
@@ -25,6 +27,7 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
   const language = useSettingsStore((s) => s.language);
   const setTheme = useSettingsStore((s) => s.setTheme);
   const setLanguage = useSettingsStore((s) => s.setLanguage);
+  const t = strings(language);
 
   const defaultSelection = useMemo(
     () => activeId ?? catalog.find((p) => p.status === "available")?.id ?? null,
@@ -76,10 +79,10 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
         )}
       </div>
 
-      <div className="border-t-[0.5px] border-border px-8 py-5 flex items-center gap-8">
+      <div className="border-t-[0.5px] border-border px-8 py-5 flex flex-wrap items-center gap-x-8 gap-y-4">
         <div className="flex items-center gap-3">
           <Label htmlFor="theme-toggle" className="text-sm">
-            Dark mode
+            {t.themeLabel}
           </Label>
           <Switch
             id="theme-toggle"
@@ -89,7 +92,7 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
         </div>
         <div className="flex items-center gap-3">
           <Label htmlFor="lang-select" className="text-sm">
-            Language
+            {t.languageLabel}
           </Label>
           <select
             id="lang-select"
@@ -101,6 +104,7 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
             <option value="zh">中文</option>
           </select>
         </div>
+        <ShortcutRecorder language={language} />
       </div>
     </div>
   );
