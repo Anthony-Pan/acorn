@@ -42,6 +42,18 @@ Grab the latest from [Releases](https://github.com/onyxcraft/acorn/releases):
 curl -fsSL https://raw.githubusercontent.com/onyxcraft/acorn/main/scripts/install.sh | bash
 ```
 
+### Homebrew (macOS)
+
+```sh
+brew tap onyxcraft/acorn
+brew install --cask acorn
+```
+
+The tap cask handles Gatekeeper automatically because v1.0 ships without
+Apple code signing (signing + notarisation is on the v1.1 roadmap). See
+[`homebrew/README.md`](homebrew/README.md) for the full distribution
+story, including the path to the official `homebrew-cask` tap.
+
 ### Build from source
 
 You'll need [Rust](https://rustup.rs/), [Node 20+](https://nodejs.org/), and [pnpm 10+](https://pnpm.io/).
