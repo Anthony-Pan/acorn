@@ -69,6 +69,15 @@ pub struct ProviderConfig {
     pub last_used_at: Option<DateTime<Utc>>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct SpeechProviderConfig {
+    pub provider_id: String,
+    pub enabled: bool,
+    pub selected_language: Option<String>,
+    pub last_used_at: Option<DateTime<Utc>>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionWithTasks {

@@ -1,7 +1,3 @@
-// Items become "live" as later commits wire the Tauri commands and frontend.
-// Both allows are removed in the command-routing commit.
-#![allow(dead_code, unused_imports)]
-
 pub mod error;
 pub mod metadata;
 pub mod provider;

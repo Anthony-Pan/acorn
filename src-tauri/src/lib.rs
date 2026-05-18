@@ -53,7 +53,12 @@ pub fn run() {
             commands::ai::has_provider_credentials,
             commands::ai::test_provider_connection,
             commands::ai::decompose,
-            commands::ai::transcribe_audio,
+            commands::speech::list_speech_providers,
+            commands::speech::list_speech_provider_configs,
+            commands::speech::save_speech_provider_config,
+            commands::speech::get_active_speech_provider,
+            commands::speech::set_active_speech_provider,
+            commands::speech::transcribe_audio,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
