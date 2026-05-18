@@ -1,1 +1,1 @@
-// Concrete SpeechProvider implementations land in subsequent commits.
+pub mod whisper_cloud;

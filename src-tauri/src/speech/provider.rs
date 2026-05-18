@@ -2,6 +2,7 @@ use async_trait::async_trait;
 
 use super::error::{SpeechError, SpeechResult};
 use super::metadata::{SpeechApiFormat, SpeechProviderMetadata};
+use super::providers::whisper_cloud::WhisperCloudProvider;
 use super::types::TranscribeResponse;
 
 #[async_trait]
@@ -36,11 +37,9 @@ pub fn build_speech_provider(
         SpeechApiFormat::System => Err(SpeechError::NotImplemented(
             "system speech provider not yet wired (added in later commit)".into(),
         )),
-        SpeechApiFormat::WhisperOpenAi => {
-            let _ = api_key;
-            Err(SpeechError::NotImplemented(
-                "whisper_openai speech provider not yet wired (added in later commit)".into(),
-            ))
-        }
+        SpeechApiFormat::WhisperOpenAi => Ok(Box::new(WhisperCloudProvider::new(
+            metadata,
+            api_key.unwrap_or_default(),
+        ))),
     }
 }
