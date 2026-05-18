@@ -1,4 +1,4 @@
-import { Clipboard, History, Settings as SettingsIcon, Zap } from "lucide-react";
+import { Clipboard, MessageCircle, Settings as SettingsIcon, Zap } from "lucide-react";
 import { useState } from "react";
 
 import { AcornLogo } from "@/components/acorn-logo";
@@ -10,9 +10,10 @@ import { useSettingsStore } from "@/stores/settings";
 
 interface TaskInputProps {
   onOpenSettings: () => void;
+  onOpenChat: () => void;
 }
 
-export function TaskInput({ onOpenSettings }: TaskInputProps) {
+export function TaskInput({ onOpenSettings, onOpenChat }: TaskInputProps) {
   const [value, setValue] = useState("");
   const [voiceError, setVoiceError] = useState<string | null>(null);
 
@@ -56,9 +57,9 @@ export function TaskInput({ onOpenSettings }: TaskInputProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <History />
-              Past days
+            <Button variant="outline" size="sm" onClick={onOpenChat}>
+              <MessageCircle />
+              Chat
             </Button>
             <Button variant="outline" size="icon-sm" onClick={onOpenSettings} aria-label="Settings">
               <SettingsIcon />

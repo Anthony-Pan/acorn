@@ -1,5 +1,5 @@
 import { AnimatePresence } from "framer-motion";
-import { Plus, Settings as SettingsIcon, Sparkles } from "lucide-react";
+import { MessageCircle, Plus, Settings as SettingsIcon, Sparkles } from "lucide-react";
 
 import { AcornCard } from "@/components/acorn-card";
 import { AcornLogo } from "@/components/acorn-logo";
@@ -9,10 +9,11 @@ import type { Task, TaskStatus } from "@/types/db";
 
 interface AcornStashProps {
   onOpenSettings: () => void;
+  onOpenChat: () => void;
   onAddMore: () => void;
 }
 
-export function AcornStash({ onOpenSettings, onAddMore }: AcornStashProps) {
+export function AcornStash({ onOpenSettings, onOpenChat, onAddMore }: AcornStashProps) {
   const current = useSessionStore((s) => s.current);
   const updateTaskStatus = useSessionStore((s) => s.updateTaskStatus);
 
@@ -40,6 +41,10 @@ export function AcornStash({ onOpenSettings, onAddMore }: AcornStashProps) {
           </div>
           <div className="flex items-center gap-3">
             <CountsLine counts={counts} />
+            <Button variant="outline" size="sm" onClick={onOpenChat}>
+              <MessageCircle />
+              Chat
+            </Button>
             <Button variant="outline" size="icon-sm" onClick={onOpenSettings} aria-label="Settings">
               <SettingsIcon />
             </Button>
