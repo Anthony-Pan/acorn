@@ -2,6 +2,7 @@ mod ai;
 mod commands;
 mod db;
 mod error;
+mod speech;
 
 use tauri::Manager;
 
