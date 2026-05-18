@@ -165,6 +165,6 @@ function announceToolResult(toolName: string, resultJson: string): void {
       toast("Skipped");
     }
   } catch {
-    /* result is not JSON — nothing to announce */
+    return;
   }
 }
