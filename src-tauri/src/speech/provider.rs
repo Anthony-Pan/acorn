@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use super::error::{SpeechError, SpeechResult};
 use super::metadata::{SpeechApiFormat, SpeechProviderMetadata, SpeechProviderStatus};
-use super::providers::whisper_cloud::WhisperCloudProvider;
+use super::providers::{system, whisper_cloud::WhisperCloudProvider};
 use super::types::TranscribeResponse;
 
 #[async_trait]
@@ -44,9 +44,7 @@ pub fn build_speech_provider(
     }
 
     match metadata.api_format {
-        SpeechApiFormat::System => Err(SpeechError::NotImplemented(
-            "system speech provider lands in v1.1".into(),
-        )),
+        SpeechApiFormat::System => system::build(metadata),
         SpeechApiFormat::WhisperOpenAi => Ok(Box::new(WhisperCloudProvider::new(
             metadata,
             api_key.unwrap_or_default(),

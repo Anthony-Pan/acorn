@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Acorn needs microphone access to capture your voice notes.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Acorn uses macOS on-device speech recognition to transcribe your voice notes locally. Your audio never leaves your machine.</string>
+</dict>
+</plist>

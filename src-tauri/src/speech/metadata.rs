@@ -78,16 +78,16 @@ pub fn speech_provider_catalog() -> Vec<SpeechProviderMetadata> {
         SpeechProviderMetadata {
             id: "system",
             display_name: "System (Built-in)",
-            description: "Uses your operating system's on-device speech recognition. \
+            description: "Uses macOS's on-device speech recognition (SFSpeechRecognizer). \
                           No API key required, audio never leaves your machine. \
-                          Ships in v1.1.",
+                          Windows support lands in a follow-up release.",
             api_format: SpeechApiFormat::System,
-            supported_platforms: &[PLATFORM_MACOS, PLATFORM_WINDOWS],
+            supported_platforms: &[PLATFORM_MACOS],
             on_device: true,
             requires_api_key: false,
             api_key_provider_id: None,
             featured: true,
-            status: SpeechProviderStatus::ComingSoon,
+            status: SpeechProviderStatus::Available,
         },
         SpeechProviderMetadata {
             id: "whisper_openai",
@@ -141,29 +141,26 @@ mod tests {
     }
 
     #[test]
-    fn whisper_is_available_on_every_platform() {
-        let whisper = find_speech_metadata("whisper_openai").unwrap();
-        assert!(whisper.supported_platforms.contains(&PLATFORM_MACOS));
-        assert!(whisper.supported_platforms.contains(&PLATFORM_WINDOWS));
-        assert!(whisper.supported_platforms.contains(&PLATFORM_LINUX));
-    }
-
-    #[test]
-    fn default_provider_id_is_whisper_until_system_lands() {
-        // Today system is ComingSoon, so default is whisper everywhere.
-        // Flip this test when the native impls land in v1.1.
+    fn default_provider_id_picks_system_on_macos() {
+        #[cfg(target_os = "macos")]
+        assert_eq!(default_speech_provider_id(), "system");
+        #[cfg(not(target_os = "macos"))]
         assert_eq!(default_speech_provider_id(), "whisper_openai");
     }
 
     #[test]
-    fn system_is_coming_soon() {
+    fn system_is_available_only_on_macos() {
         let m = find_speech_metadata("system").unwrap();
-        assert_eq!(m.status, SpeechProviderStatus::ComingSoon);
+        assert_eq!(m.status, SpeechProviderStatus::Available);
+        assert_eq!(m.supported_platforms, &[PLATFORM_MACOS]);
     }
 
     #[test]
-    fn whisper_is_available() {
+    fn whisper_is_available_on_every_platform() {
         let m = find_speech_metadata("whisper_openai").unwrap();
         assert_eq!(m.status, SpeechProviderStatus::Available);
+        assert!(m.supported_platforms.contains(&PLATFORM_MACOS));
+        assert!(m.supported_platforms.contains(&PLATFORM_WINDOWS));
+        assert!(m.supported_platforms.contains(&PLATFORM_LINUX));
     }
 }
