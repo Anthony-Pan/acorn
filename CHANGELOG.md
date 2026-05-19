@@ -6,6 +6,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- New `Cli` provider family — Acorn can now use a locally installed agent CLI
+  (`claude`, `codex`, `gemini`, `hermes`) as its decompose backend by shelling
+  out to the binary. Reuses the CLI's own auth, so no API key is stored in
+  Acorn's keychain. Four catalogue entries land together: `claude_cli`,
+  `codex_cli`, `gemini_cli`, `hermes_cli`.
+
+
 ## [1.0.0] - 2026-05-17
 
 ### Added

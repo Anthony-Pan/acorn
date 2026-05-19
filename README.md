@@ -20,7 +20,7 @@ It's a desktop app. Open it, work with it, close it. Data lives in a local SQLit
 
 ## Highlights
 
-- **Model-agnostic.** Ships with Anthropic, OpenAI, DeepSeek, OpenRouter, Ollama, plus seven more in the catalogue. Bring your own key — or run a local Qwen with Ollama for free.
+- **Model-agnostic.** Ships with Anthropic, OpenAI, DeepSeek, OpenRouter, Ollama, plus seven more in the catalogue. Bring your own key — or run a local Qwen with Ollama for free. Now also: reuse your existing **`claude` / `codex` / `gemini` / `hermes` CLI logins** as a provider (zero extra API keys).
 - **Native desktop.** Tauri 2 + React 19. ~10× smaller than the equivalent Electron app and feels like one.
 - **Voice in.** Hold the 🎙️ button, talk, drop. Whisper transcribes into the input box.
 - **Warm, not corporate.** Autumn palette designed around an actual aesthetic, not a default Tailwind theme.
