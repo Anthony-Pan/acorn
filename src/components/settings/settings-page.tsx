@@ -1,14 +1,12 @@
 import { X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AcornLogo } from "@/components/acorn-logo";
+import { GeneralPanel } from "@/components/settings/general-panel";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
-import { ProviderSidebar } from "@/components/settings/provider-sidebar";
-import { ShortcutRecorder } from "@/components/settings/shortcut-recorder";
+import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
+import { ShortcutsPanel } from "@/components/settings/shortcuts-panel";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { strings } from "@/lib/i18n";
 import { useProvidersStore } from "@/stores/providers";
 import { useSettingsStore } from "@/stores/settings";
 
@@ -23,17 +21,8 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
   const hydrated = useProvidersStore((s) => s.hydrated);
 
   const activeId = useSettingsStore((s) => s.activeProviderId);
-  const theme = useSettingsStore((s) => s.theme);
-  const language = useSettingsStore((s) => s.language);
-  const setTheme = useSettingsStore((s) => s.setTheme);
-  const setLanguage = useSettingsStore((s) => s.setLanguage);
-  const t = strings(language);
 
-  const defaultSelection = useMemo(
-    () => activeId ?? catalog.find((p) => p.status === "available")?.id ?? null,
-    [activeId, catalog],
-  );
-  const [selectedId, setSelectedId] = useState<string | null>(defaultSelection);
+  const [selected, setSelected] = useState<SettingsSection | null>(null);
 
   useEffect(() => {
     if (!hydrated) {
@@ -42,12 +31,11 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
   }, [hydrated, hydrate]);
 
   useEffect(() => {
-    if (selectedId === null && defaultSelection) {
-      setSelectedId(defaultSelection);
-    }
-  }, [defaultSelection, selectedId]);
+    if (!hydrated || selected !== null) return;
+    setSelected(activeId ? { kind: "provider", providerId: activeId } : { kind: "general" });
+  }, [hydrated, activeId, selected]);
 
-  const selectedProvider = catalog.find((p) => p.id === selectedId) ?? null;
+  const current: SettingsSection = selected ?? { kind: "general" };
 
   return (
     <div className="min-h-screen bg-background">
@@ -62,50 +50,33 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
       </header>
 
       <div className="flex" style={{ minHeight: "calc(100vh - 65px)" }}>
-        <ProviderSidebar
+        <SettingsSidebar
           providers={catalog}
-          selectedId={selectedId}
+          selected={current}
           activeId={activeId}
           hasCredentials={hasCredentials}
-          onSelect={setSelectedId}
+          onSelect={setSelected}
         />
 
-        {selectedProvider ? (
-          <ProviderConfigPanel provider={selectedProvider} />
-        ) : (
-          <section className="flex-1 px-8 py-7 text-muted-foreground text-sm">
-            Pick a provider on the left.
-          </section>
-        )}
-      </div>
-
-      <div className="border-t-[0.5px] border-border px-8 py-5 flex flex-wrap items-center gap-x-8 gap-y-4">
-        <div className="flex items-center gap-3">
-          <Label htmlFor="theme-toggle" className="text-sm">
-            {t.themeLabel}
-          </Label>
-          <Switch
-            id="theme-toggle"
-            checked={theme === "dark"}
-            onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-          />
-        </div>
-        <div className="flex items-center gap-3">
-          <Label htmlFor="lang-select" className="text-sm">
-            {t.languageLabel}
-          </Label>
-          <select
-            id="lang-select"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="bg-card border-[0.5px] border-border rounded-md px-3 py-1.5 text-sm"
-          >
-            <option value="en">English</option>
-            <option value="zh">中文</option>
-          </select>
-        </div>
-        <ShortcutRecorder language={language} />
+        <SettingsContent section={current} />
       </div>
     </div>
   );
+}
+
+function SettingsContent({ section }: { section: SettingsSection }) {
+  const catalog = useProvidersStore((s) => s.catalog);
+
+  if (section.kind === "general") return <GeneralPanel />;
+  if (section.kind === "shortcuts") return <ShortcutsPanel />;
+
+  const provider = catalog.find((p) => p.id === section.providerId);
+  if (!provider) {
+    return (
+      <section className="flex-1 px-8 py-7 text-muted-foreground text-sm">
+        Pick a section on the left.
+      </section>
+    );
+  }
+  return <ProviderConfigPanel provider={provider} />;
 }
