@@ -6,7 +6,10 @@ use tokio::sync::mpsc;
 use super::error::{ProviderError, ProviderResult};
 use super::metadata::{ApiFormat, ProviderMetadata};
 use super::providers::{
-    acorn_cloud::AcornCloudProvider, anthropic::AnthropicProvider, ollama::OllamaProvider,
+    acorn_cloud::AcornCloudProvider,
+    anthropic::AnthropicProvider,
+    cli::{invocation_for, CliProvider},
+    ollama::OllamaProvider,
     openai_compatible::OpenAiCompatibleProvider,
 };
 use super::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
@@ -63,6 +66,15 @@ pub fn build_provider(inputs: ProviderInputs) -> ProviderResult<Box<dyn Provider
         ApiFormat::Gemini => Err(ProviderError::NotImplemented(
             "Gemini provider lands in v1.1".into(),
         )),
+        ApiFormat::Cli => {
+            let invocation = invocation_for(metadata.id).ok_or_else(|| {
+                ProviderError::NotImplemented(format!(
+                    "no CLI invocation registered for provider id {}",
+                    metadata.id
+                ))
+            })?;
+            Ok(Box::new(CliProvider::new(metadata, invocation)))
+        }
     }
 }
 
