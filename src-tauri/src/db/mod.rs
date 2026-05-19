@@ -41,10 +41,11 @@ impl Database {
 }
 
 async fn repair_migration_history(pool: &SqlitePool) -> AppResult<()> {
-    let table_exists: Option<(String,)> =
-        sqlx::query_as("SELECT name FROM sqlite_master WHERE type='table' AND name='_sqlx_migrations'")
-            .fetch_optional(pool)
-            .await?;
+    let table_exists: Option<(String,)> = sqlx::query_as(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='_sqlx_migrations'",
+    )
+    .fetch_optional(pool)
+    .await?;
     if table_exists.is_none() {
         return Ok(());
     }

@@ -34,13 +34,17 @@ pub async fn list_ollama_models(custom_endpoint: Option<String>) -> ProviderResu
         .unwrap_or_else(|| "http://localhost:11434".to_string());
     let url = format!("{}/api/tags", endpoint.trim_end_matches('/'));
 
-    let resp = reqwest::Client::new().get(&url).send().await.map_err(|err| {
-        if err.is_connect() {
-            ProviderError::OllamaNotRunning(endpoint.clone())
-        } else {
-            ProviderError::Network(err.to_string())
-        }
-    })?;
+    let resp = reqwest::Client::new()
+        .get(&url)
+        .send()
+        .await
+        .map_err(|err| {
+            if err.is_connect() {
+                ProviderError::OllamaNotRunning(endpoint.clone())
+            } else {
+                ProviderError::Network(err.to_string())
+            }
+        })?;
 
     if !resp.status().is_success() {
         return Err(ProviderError::ProviderResponse(format!(

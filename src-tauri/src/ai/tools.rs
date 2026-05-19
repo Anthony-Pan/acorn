@@ -98,7 +98,9 @@ pub async fn execute_tool(
         "complete_task" => set_status(pool, arguments, "completed").await,
         "skip_task" => set_status(pool, arguments, "skipped").await,
         "search_past_activity" => search_past_activity(pool, arguments).await,
-        other => Err(ProviderError::InvalidResponse(format!("unknown tool {other}"))),
+        other => Err(ProviderError::InvalidResponse(format!(
+            "unknown tool {other}"
+        ))),
     }
 }
 
@@ -106,10 +108,9 @@ async fn search_past_activity(
     pool: &SqlitePool,
     args: &serde_json::Value,
 ) -> ProviderResult<String> {
-    let query = args
-        .get("query")
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| ProviderError::InvalidResponse("search_past_activity: missing query".into()))?;
+    let query = args.get("query").and_then(|v| v.as_str()).ok_or_else(|| {
+        ProviderError::InvalidResponse("search_past_activity: missing query".into())
+    })?;
     let trimmed = query.trim();
     if trimmed.is_empty() {
         return Ok("[]".to_string());
