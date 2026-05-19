@@ -1,9 +1,11 @@
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
+use crate::ai::chat::{ChatMessage, ChatTurn};
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::provider::Provider;
+use crate::ai::tools::ToolSpec;
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 pub struct AcornCloudProvider {
@@ -35,6 +37,17 @@ impl Provider for AcornCloudProvider {
     async fn validate_credentials(&self) -> ProviderResult<()> {
         Err(ProviderError::NotImplemented(
             "Acorn Cloud is not yet available.".into(),
+        ))
+    }
+
+    async fn chat_turn(
+        &self,
+        _messages: &[ChatMessage],
+        _tools: &[ToolSpec],
+        _system_prompt: &str,
+    ) -> ProviderResult<ChatTurn> {
+        Err(ProviderError::NotImplemented(
+            "Acorn Cloud is coming soon. Join the waitlist at acorn.app.".into(),
         ))
     }
 }

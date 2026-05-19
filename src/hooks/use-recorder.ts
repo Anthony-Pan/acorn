@@ -35,11 +35,9 @@ export function useRecorder(): UseRecorder {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     streamRef.current = stream;
 
-    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-      ? "audio/webm;codecs=opus"
-      : "audio/webm";
-
-    const recorder = new MediaRecorder(stream, { mimeType });
+    const mimeType = pickSupportedMimeType();
+    const recorder =
+      mimeType !== undefined ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
     chunksRef.current = [];
     recorder.ondataavailable = (event) => {
       if (event.data.size > 0) chunksRef.current.push(event.data);
@@ -82,4 +80,23 @@ export function useRecorder(): UseRecorder {
   }, [cleanup]);
 
   return { state, start, stopAndTranscribe, cancel };
+}
+
+// macOS WKWebView supports audio/mp4 (AAC) only; Chrome/Firefox/Linux WebKitGTK
+// support audio/webm with Opus. Preferring mp4 means the native macOS Speech
+// Framework can consume the file directly (no transcoding). Returns undefined
+// to let the browser pick its default if nothing in the list is supported.
+function pickSupportedMimeType(): string | undefined {
+  const candidates = [
+    "audio/mp4",
+    "audio/mp4;codecs=mp4a.40.2",
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+    "audio/wav",
+  ];
+  for (const type of candidates) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return undefined;
 }

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acorn Quick</title>
+    <style>
+      html,
+      body {
+        background: transparent;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        -webkit-app-region: drag;
+      }
+      #root,
+      input,
+      button,
+      textarea {
+        -webkit-app-region: no-drag;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/quick/main.tsx"></script>
+  </body>
+</html>

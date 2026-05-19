@@ -32,10 +32,10 @@ function PendingCard({ task, onStart }: { task: Task; onStart: (task: Task) => v
   return (
     <motion.button
       layout
-      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      initial={{ opacity: 0, y: 24, scale: 0.86 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.18 }}
+      exit={{ opacity: 0, scale: 0.94 }}
+      transition={{ type: "spring", stiffness: 320, damping: 22 }}
       type="button"
       onClick={() => onStart(task)}
       className={cn(

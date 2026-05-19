@@ -3,10 +3,12 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
 
+use crate::ai::chat::{ChatMessage, ChatRole, ChatTurn, ToolCall};
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::prompts::DECOMPOSE_SYSTEM_PROMPT;
-use crate::ai::provider::{emit_decomposed, format_user_input, strip_code_fences, Provider};
+use crate::ai::provider::{emit_decomposed, format_user_input, parse_decompose, Provider};
+use crate::ai::tools::ToolSpec;
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 pub struct OpenAiCompatibleProvider {
@@ -45,16 +47,16 @@ impl OpenAiCompatibleProvider {
 }
 
 #[derive(Debug, Serialize)]
-struct ChatRequest<'a> {
+struct DecomposeRequestBody<'a> {
     model: &'a str,
-    messages: Vec<ChatMessage<'a>>,
+    messages: Vec<WireMessage<'a>>,
     temperature: f32,
     #[serde(skip_serializing_if = "Option::is_none")]
     response_format: Option<ResponseFormat>,
 }
 
 #[derive(Debug, Serialize)]
-struct ChatMessage<'a> {
+struct WireMessage<'a> {
     role: &'a str,
     content: &'a str,
 }
@@ -67,17 +69,17 @@ enum ResponseFormat {
 }
 
 #[derive(Debug, Deserialize)]
-struct ChatResponse {
-    choices: Vec<ChatChoice>,
+struct DecomposeResponseBody {
+    choices: Vec<DecomposeChoice>,
 }
 
 #[derive(Debug, Deserialize)]
-struct ChatChoice {
-    message: ChatChoiceMessage,
+struct DecomposeChoice {
+    message: DecomposeChoiceMessage,
 }
 
 #[derive(Debug, Deserialize)]
-struct ChatChoiceMessage {
+struct DecomposeChoiceMessage {
     content: String,
 }
 
@@ -102,14 +104,14 @@ impl Provider for OpenAiCompatibleProvider {
         let api_key = self.require_key()?;
         let user_content = format_user_input(&request);
 
-        let body = ChatRequest {
+        let body = DecomposeRequestBody {
             model: &self.model,
             messages: vec![
-                ChatMessage {
+                WireMessage {
                     role: "system",
                     content: DECOMPOSE_SYSTEM_PROMPT,
                 },
-                ChatMessage {
+                WireMessage {
                     role: "user",
                     content: &user_content,
                 },
@@ -142,7 +144,7 @@ impl Provider for OpenAiCompatibleProvider {
             )));
         }
 
-        let parsed: ChatResponse = resp.json().await?;
+        let parsed: DecomposeResponseBody = resp.json().await?;
         let content = parsed
             .choices
             .into_iter()
@@ -156,8 +158,7 @@ impl Provider for OpenAiCompatibleProvider {
             })
             .await;
 
-        let json = strip_code_fences(&content);
-        let response: DecomposeResponse = serde_json::from_str(json)?;
+        let response = parse_decompose(&content)?;
 
         emit_decomposed(&events, &response).await?;
         Ok(response)
@@ -189,4 +190,154 @@ impl Provider for OpenAiCompatibleProvider {
         }
         Ok(())
     }
+
+    async fn chat_turn(
+        &self,
+        messages: &[ChatMessage],
+        tools: &[ToolSpec],
+        system_prompt: &str,
+    ) -> ProviderResult<ChatTurn> {
+        let api_key = self.require_key()?;
+        let mut openai_messages = vec![serde_json::json!({
+            "role": "system",
+            "content": system_prompt,
+        })];
+        openai_messages.extend(to_openai_messages(messages));
+
+        let openai_tools: Vec<serde_json::Value> = tools
+            .iter()
+            .map(|t| {
+                serde_json::json!({
+                    "type": "function",
+                    "function": {
+                        "name": t.name,
+                        "description": t.description,
+                        "parameters": t.parameters,
+                    },
+                })
+            })
+            .collect();
+
+        let mut body = serde_json::json!({
+            "model": self.model,
+            "messages": openai_messages,
+            "temperature": 0.4,
+        });
+        if !openai_tools.is_empty() {
+            body["tools"] = serde_json::Value::Array(openai_tools);
+        }
+
+        let resp = self
+            .client
+            .post(&self.endpoint)
+            .bearer_auth(api_key)
+            .json(&body)
+            .send()
+            .await?;
+
+        let status = resp.status();
+        if status == reqwest::StatusCode::UNAUTHORIZED {
+            return Err(ProviderError::InvalidKey);
+        }
+        if !status.is_success() {
+            let text = resp.text().await.unwrap_or_default();
+            return Err(ProviderError::ProviderResponse(format!(
+                "HTTP {status}: {text}"
+            )));
+        }
+
+        let parsed: ChatTurnResponse = resp.json().await?;
+        let choice = parsed
+            .choices
+            .into_iter()
+            .next()
+            .ok_or_else(|| ProviderError::InvalidResponse("no choices in response".into()))?;
+
+        let text = choice.message.content.unwrap_or_default();
+        let tool_calls = choice
+            .message
+            .tool_calls
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|tc| {
+                let arguments = serde_json::from_str(&tc.function.arguments).ok()?;
+                Some(ToolCall {
+                    id: tc.id,
+                    name: tc.function.name,
+                    arguments,
+                })
+            })
+            .collect();
+
+        Ok(ChatTurn { text, tool_calls })
+    }
+}
+
+fn to_openai_messages(messages: &[ChatMessage]) -> Vec<serde_json::Value> {
+    messages
+        .iter()
+        .map(|msg| match msg.role {
+            ChatRole::System => serde_json::json!({ "role": "system", "content": msg.content }),
+            ChatRole::User => serde_json::json!({ "role": "user", "content": msg.content }),
+            ChatRole::Assistant => {
+                let mut value = serde_json::json!({
+                    "role": "assistant",
+                    "content": if msg.content.is_empty() { serde_json::Value::Null } else { serde_json::Value::String(msg.content.clone()) },
+                });
+                if !msg.tool_calls.is_empty() {
+                    let tool_calls: Vec<serde_json::Value> = msg
+                        .tool_calls
+                        .iter()
+                        .map(|tc| {
+                            serde_json::json!({
+                                "id": tc.id,
+                                "type": "function",
+                                "function": {
+                                    "name": tc.name,
+                                    "arguments": tc.arguments.to_string(),
+                                },
+                            })
+                        })
+                        .collect();
+                    value["tool_calls"] = serde_json::Value::Array(tool_calls);
+                }
+                value
+            }
+            ChatRole::Tool => serde_json::json!({
+                "role": "tool",
+                "tool_call_id": msg.tool_call_id.as_deref().unwrap_or(""),
+                "content": msg.content,
+            }),
+        })
+        .collect()
+}
+
+#[derive(Debug, Deserialize)]
+struct ChatTurnResponse {
+    choices: Vec<ChatTurnChoice>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ChatTurnChoice {
+    message: ChatTurnMessage,
+}
+
+#[derive(Debug, Deserialize)]
+struct ChatTurnMessage {
+    #[serde(default)]
+    content: Option<String>,
+    #[serde(default)]
+    tool_calls: Option<Vec<RawToolCall>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawToolCall {
+    id: String,
+    function: RawToolFunction,
+}
+
+#[derive(Debug, Deserialize)]
+struct RawToolFunction {
+    name: String,
+    arguments: String,
 }

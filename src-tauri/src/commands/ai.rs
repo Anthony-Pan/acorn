@@ -7,8 +7,8 @@ use crate::ai::error::ProviderResult;
 use crate::ai::metadata::find_metadata;
 use crate::ai::provider::{build_provider, ProviderInputs};
 use crate::ai::{
-    keychain, provider_catalog, transcribe, DecomposeEvent, DecomposeRequest, DecomposeResponse,
-    ProviderError, ProviderMetadata,
+    keychain, provider_catalog, DecomposeEvent, DecomposeRequest, DecomposeResponse, ProviderError,
+    ProviderMetadata,
 };
 use crate::db::models::ProviderConfig;
 use crate::db::Database;
@@ -16,6 +16,45 @@ use crate::db::Database;
 #[tauri::command(rename_all = "camelCase")]
 pub fn list_providers() -> Vec<ProviderMetadata> {
     provider_catalog()
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub async fn list_ollama_models(custom_endpoint: Option<String>) -> ProviderResult<Vec<String>> {
+    #[derive(serde::Deserialize)]
+    struct TagsResponse {
+        models: Vec<TagEntry>,
+    }
+    #[derive(serde::Deserialize)]
+    struct TagEntry {
+        name: String,
+    }
+
+    let endpoint = custom_endpoint
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or_else(|| "http://localhost:11434".to_string());
+    let url = format!("{}/api/tags", endpoint.trim_end_matches('/'));
+
+    let resp = reqwest::Client::new()
+        .get(&url)
+        .send()
+        .await
+        .map_err(|err| {
+            if err.is_connect() {
+                ProviderError::OllamaNotRunning(endpoint.clone())
+            } else {
+                ProviderError::Network(err.to_string())
+            }
+        })?;
+
+    if !resp.status().is_success() {
+        return Err(ProviderError::ProviderResponse(format!(
+            "ollama returned {}",
+            resp.status()
+        )));
+    }
+
+    let parsed: TagsResponse = resp.json().await?;
+    Ok(parsed.models.into_iter().map(|m| m.name).collect())
 }
 
 #[tauri::command(rename_all = "camelCase")]
@@ -67,17 +106,6 @@ pub async fn decompose(
         .await;
 
     Ok(response)
-}
-
-#[tauri::command(rename_all = "camelCase")]
-pub async fn transcribe_audio(
-    audio: Vec<u8>,
-    mime_type: String,
-    language: Option<String>,
-) -> ProviderResult<String> {
-    let api_key = keychain::load_api_key("openai")?
-        .ok_or_else(|| ProviderError::MissingCredentials("openai".into()))?;
-    transcribe::transcribe_audio(&api_key, audio, &mime_type, language.as_deref()).await
 }
 
 async fn resolve_provider(

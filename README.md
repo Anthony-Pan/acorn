@@ -20,9 +20,11 @@ It's a desktop app. Open it, work with it, close it. Data lives in a local SQLit
 
 ## Highlights
 
-- **Model-agnostic.** Ships with Anthropic, OpenAI, DeepSeek, OpenRouter, Ollama, plus seven more in the catalogue. Bring your own key — or run a local Qwen with Ollama for free.
+- **Model-agnostic.** Ships with Anthropic, OpenAI, DeepSeek, OpenRouter, Ollama, plus seven more in the catalogue. Bring your own key — or run a local Qwen with Ollama for free. Now also: reuse your existing **`claude` / `codex` / `gemini` / `hermes` CLI logins** as a provider (zero extra API keys).
 - **Native desktop.** Tauri 2 + React 19. ~10× smaller than the equivalent Electron app and feels like one.
-- **Voice in.** Hold the 🎙️ button, talk, drop. Whisper transcribes into the input box.
+- **Lives in the menu bar.** On macOS, Acorn is a Siri-style accessory app — no Dock icon, summoned with `⌘⇧A` or a click on the menu bar. Close the window and Acorn keeps running; `⌘Q` to actually quit.
+- **Shortcuts + Siri ready.** Acorn registers the `acorn://` URL scheme so Apple Shortcuts can stash text into it today via Open URL. Native App Intents (Siri + Spotlight dictation) and the Services menu ship the moment v1.1 lands codesign + notarisation — see [`apple-shortcuts/`](apple-shortcuts/).
+- **Voice in.** Hold the 🎙️ button, talk, drop. OpenAI Whisper transcribes today; OS-native on-device recognition (macOS Speech, Windows.Media.SpeechRecognition) lands in v1.1 — both go through the same pluggable `SpeechProvider` layer so switching is a settings click.
 - **Warm, not corporate.** Autumn palette designed around an actual aesthetic, not a default Tailwind theme.
 - **Your data, your machine.** SQLite on disk, API keys in macOS Keychain / Windows Credential Manager / Linux Secret Service.
 
@@ -41,6 +43,18 @@ Grab the latest from [Releases](https://github.com/onyxcraft/acorn/releases):
 ```sh
 curl -fsSL https://raw.githubusercontent.com/onyxcraft/acorn/main/scripts/install.sh | bash
 ```
+
+### Homebrew (macOS)
+
+```sh
+brew tap onyxcraft/acorn
+brew install --cask acorn
+```
+
+The tap cask handles Gatekeeper automatically because v1.0 ships without
+Apple code signing (signing + notarisation is on the v1.1 roadmap). See
+[`homebrew/README.md`](homebrew/README.md) for the full distribution
+story, including the path to the official `homebrew-cask` tap.
 
 ### Build from source
 
@@ -77,6 +91,8 @@ That's it.
 - macOS code signing + notarisation
 - Auto-update via Tauri updater
 - Gemini provider (different request shape, deferred from v1.0)
+- OS-native speech recognition (macOS `SFSpeechRecognizer`, Windows
+  `SpeechRecognizer`) wired into the existing `SpeechProvider` catalogue
 - True incremental JSON parsing during decompose for faster TTFB
 - Global hotkey to summon Acorn from anywhere
 - Past days view (history of stashes)

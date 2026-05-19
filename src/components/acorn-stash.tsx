@@ -1,20 +1,37 @@
 import { AnimatePresence } from "framer-motion";
-import { Plus, Settings as SettingsIcon, Sparkles } from "lucide-react";
+import {
+  CalendarDays,
+  MessageCircle,
+  Plus,
+  Settings as SettingsIcon,
+  Sparkles,
+} from "lucide-react";
 
 import { AcornCard } from "@/components/acorn-card";
 import { AcornLogo } from "@/components/acorn-logo";
 import { Button } from "@/components/ui/button";
+import { strings } from "@/lib/i18n";
 import { useSessionStore } from "@/stores/session";
+import { useSettingsStore } from "@/stores/settings";
 import type { Task, TaskStatus } from "@/types/db";
 
 interface AcornStashProps {
   onOpenSettings: () => void;
+  onOpenChat: () => void;
+  onOpenCalendar: () => void;
   onAddMore: () => void;
 }
 
-export function AcornStash({ onOpenSettings, onAddMore }: AcornStashProps) {
+export function AcornStash({
+  onOpenSettings,
+  onOpenChat,
+  onOpenCalendar,
+  onAddMore,
+}: AcornStashProps) {
   const current = useSessionStore((s) => s.current);
   const updateTaskStatus = useSessionStore((s) => s.updateTaskStatus);
+  const language = useSettingsStore((s) => s.language);
+  const t = strings(language);
 
   if (!current) return null;
   const tasks = [...current.tasks].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -36,10 +53,17 @@ export function AcornStash({ onOpenSettings, onAddMore }: AcornStashProps) {
         <header className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2.5">
             <AcornLogo size={28} />
-            <div className="text-[15px] font-medium text-foreground">Today's stash</div>
+            <div className="text-[15px] font-medium text-foreground">{t.todaysStash}</div>
           </div>
           <div className="flex items-center gap-3">
-            <CountsLine counts={counts} />
+            <CountsLine counts={counts} t={t} />
+            <Button variant="outline" size="sm" onClick={onOpenChat}>
+              <MessageCircle />
+              {t.chat}
+            </Button>
+            <Button variant="outline" size="icon-sm" onClick={onOpenCalendar} aria-label="Calendar">
+              <CalendarDays />
+            </Button>
             <Button variant="outline" size="icon-sm" onClick={onOpenSettings} aria-label="Settings">
               <SettingsIcon />
             </Button>
@@ -75,19 +99,27 @@ export function AcornStash({ onOpenSettings, onAddMore }: AcornStashProps) {
           className="mt-3.5 w-full inline-flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground rounded-md border border-dashed border-acorn-brown/25 hover:bg-muted/50 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
-          Add another acorn
+          {t.addAnother}
         </button>
       </div>
     </div>
   );
 }
 
-function CountsLine({ counts }: { counts: ReturnType<typeof tally> }) {
+function CountsLine({
+  counts,
+  t,
+}: {
+  counts: ReturnType<typeof tally>;
+  t: ReturnType<typeof strings>;
+}) {
   return (
     <div className="text-xs text-muted-foreground">
-      <span className="font-medium text-acorn-brown-deep">{counts.done}</span> done ·{" "}
-      <span className="font-medium text-acorn-orange">{counts.inProgress}</span> in progress ·{" "}
-      {counts.remaining} to go
+      <span className="font-medium text-acorn-brown-deep">{t.doneCount(counts.done)}</span>
+      <span className="mx-1.5">·</span>
+      <span className="font-medium text-acorn-orange">{t.inProgressCount(counts.inProgress)}</span>
+      <span className="mx-1.5">·</span>
+      {t.toGoCount(counts.remaining)}
     </div>
   );
 }

@@ -29,6 +29,7 @@ impl Database {
             .connect_with(options)
             .await?;
 
+        repair_migration_history(&pool).await?;
         sqlx::migrate!("./migrations").run(&pool).await?;
 
         Ok(Self { pool })
@@ -37,4 +38,24 @@ impl Database {
     pub fn pool(&self) -> &SqlitePool {
         &self.pool
     }
+}
+
+async fn repair_migration_history(pool: &SqlitePool) -> AppResult<()> {
+    let table_exists: Option<(String,)> = sqlx::query_as(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='_sqlx_migrations'",
+    )
+    .fetch_optional(pool)
+    .await?;
+    if table_exists.is_none() {
+        return Ok(());
+    }
+
+    sqlx::query(
+        "DELETE FROM _sqlx_migrations \
+         WHERE version = 2 AND description = 'speech_providers'",
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
