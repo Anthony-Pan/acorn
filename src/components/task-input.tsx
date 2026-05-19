@@ -43,7 +43,14 @@ function pickHint(error: string | null, t: ReturnType<typeof strings>): string {
 }
 
 export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(() => {
+    const pending = typeof window !== "undefined" ? sessionStorage.getItem("acorn:prefill") : null;
+    if (pending) {
+      sessionStorage.removeItem("acorn:prefill");
+      return pending;
+    }
+    return "";
+  });
   const [voiceError, setVoiceError] = useState<string | null>(null);
 
   const isStashing = useSessionStore((s) => s.isStashing);

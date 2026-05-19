@@ -178,20 +178,25 @@ fn wire_main_window_close_to_hide(app: &tauri::AppHandle) {
 fn wire_deep_link(app: &tauri::AppHandle) {
     let handle = app.clone();
     app.deep_link().on_open_url(move |event| {
-        for url in event.urls() {
-            let _ = handle.emit("deep-link", url.to_string());
-
-            match url.host_str() {
-                Some("summon") => toggle_quick_window(&handle),
-                Some("show") | Some("main") => {
-                    if let Some(window) = handle.get_webview_window("main") {
-                        let _ = window.show();
-                        let _ = window.set_focus();
-                    }
-                }
-                _ => {}
+        let handle = handle.clone();
+        let parsed: Vec<(String, Option<String>)> = event
+            .urls()
+            .iter()
+            .map(|u| (u.to_string(), u.host_str().map(|s| s.to_string())))
+            .collect();
+        tauri::async_runtime::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+            if let Some(window) = handle.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
             }
-        }
+            for (raw, host) in parsed {
+                if matches!(host.as_deref(), Some("summon")) {
+                    toggle_quick_window(&handle);
+                }
+                let _ = handle.emit("deep-link", raw);
+            }
+        });
     });
 }
 

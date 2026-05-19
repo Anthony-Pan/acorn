@@ -2,7 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 
 import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
@@ -58,16 +58,12 @@ function App() {
       await main.show();
       await main.setFocus();
       if (url.host === "stash" && url.text) {
-        const { activeProviderId, language } = useSettingsStore.getState();
-        if (!activeProviderId) {
-          setView("settings");
-          return;
-        }
-        try {
-          await useSessionStore.getState().stash(url.text, activeProviderId, language);
-        } catch (err) {
-          console.error("deep-link stash failed", err);
-        }
+        sessionStorage.setItem("acorn:prefill", url.text);
+        setView("input");
+        toast.message("Imported from link", {
+          description: "Review the text and tap Stash it 🌰",
+          id: "deep-link-prefill",
+        });
       } else if (url.host === "settings") {
         setView("settings");
       } else if (url.host === "calendar") {
