@@ -23,7 +23,7 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
-        "visible": false
+        "visible": true
       },
       {
         "label": "quick",

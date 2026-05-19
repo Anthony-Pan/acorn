@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod chat;
 pub mod conversation;
+pub mod mcp;
 pub mod provider_config;
 pub mod session;
 pub mod settings;
