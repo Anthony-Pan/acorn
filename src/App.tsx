@@ -51,9 +51,36 @@ function App() {
       if (event.payload === "settings") setView("settings");
     });
 
+    const unlistenDeepLink = listen<string>("deep-link", async (event) => {
+      const url = parseDeepLink(event.payload);
+      if (!url) return;
+      const main = getCurrentWindow();
+      await main.show();
+      await main.setFocus();
+      if (url.host === "stash" && url.text) {
+        const { activeProviderId, language } = useSettingsStore.getState();
+        if (!activeProviderId) {
+          setView("settings");
+          return;
+        }
+        try {
+          await useSessionStore.getState().stash(url.text, activeProviderId, language);
+        } catch (err) {
+          console.error("deep-link stash failed", err);
+        }
+      } else if (url.host === "settings") {
+        setView("settings");
+      } else if (url.host === "calendar") {
+        setView("calendar");
+      } else if (url.host === "chat") {
+        setView("chat");
+      }
+    });
+
     return () => {
       void unlistenSubmit.then((fn) => fn());
       void unlistenNavigate.then((fn) => fn());
+      void unlistenDeepLink.then((fn) => fn());
     };
   }, []);
 
@@ -119,3 +146,19 @@ function App() {
 }
 
 export default App;
+
+interface ParsedDeepLink {
+  host: string;
+  text: string | null;
+}
+
+function parseDeepLink(raw: string): ParsedDeepLink | null {
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "acorn:") return null;
+    const host = url.hostname || url.pathname.replace(/^\/+/, "").split("/")[0] || "";
+    return { host, text: url.searchParams.get("text") };
+  } catch {
+    return null;
+  }
+}
