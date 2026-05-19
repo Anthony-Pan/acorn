@@ -49,6 +49,8 @@ This is a Tauri 2 desktop app. The Rust side owns persistence, AI, and the OS ke
 | `src-tauri/src/commands/` | Tauri commands, one file per domain |
 | `src-tauri/src/ai/` | Provider trait + concrete provider impls |
 | `src-tauri/src/ai/providers/` | Anthropic / OpenAI-compatible / Ollama / Acorn Cloud stub |
+| `src-tauri/src/speech/` | SpeechProvider trait + catalogue (parallel to `ai/`) |
+| `src-tauri/src/speech/providers/` | Whisper Cloud (in 1.0); macOS + Windows native land in v1.1 |
 | `src-tauri/migrations/` | sqlx migration SQL |
 
 ## Data layer
@@ -61,7 +63,8 @@ Five tables:
 - `tasks` — one row per task. CHECK-constrained `priority` ∈ {high, medium, low} and `status` ∈ {pending, in_progress, completed, skipped}.
 - `subtasks` — nested checklist items per task (rarely used yet; LLMs sometimes emit them).
 - `provider_configs` — non-secret per-provider settings: `enabled`, `custom_endpoint`, `selected_model`, `last_used_at`.
-- `settings` — generic key/value bag (`active_provider`, `theme`, `language`).
+- `speech_provider_configs` — same shape as `provider_configs` but for speech-to-text providers (`enabled`, `selected_language`, `last_used_at`).
+- `settings` — generic key/value bag (`active_provider`, `active_speech_provider`, `theme`, `language`).
 
 **API keys never live here.** They go to the OS keychain via `keyring`, namespaced by the bundle identifier `app.acorn.desktop`.
 
@@ -104,6 +107,42 @@ Three Zustand stores hydrate on app boot:
 - `useSessionStore` — today's most recent session. During `stash()`, it shows optimistic preview tasks driven by the stream events, then swaps for the persisted rows once `decompose` returns.
 
 `App.tsx` routes between three views — `input`, `stash`, `settings` — with framer-motion crossfades.
+
+## Speech layer
+
+`src-tauri/src/speech/` is the deliberate twin of `src-tauri/src/ai/`. Same shape:
+trait + metadata catalogue + factory + concrete provider impls.
+
+```rust
+#[async_trait]
+pub trait SpeechProvider: Send + Sync {
+    fn metadata(&self) -> &SpeechProviderMetadata;
+    async fn transcribe(
+        &self,
+        audio: Vec<u8>,
+        mime_type: &str,
+        language: Option<&str>,
+    ) -> SpeechResult<TranscribeResponse>;
+    async fn validate_availability(&self) -> SpeechResult<()>;
+}
+```
+
+`speech::metadata::speech_provider_catalog()` lists the choices and their
+`SpeechProviderStatus` (`Available` | `ComingSoon`). v1.0 ships
+`whisper_openai` (Available) and `system` (ComingSoon — `SFSpeechRecognizer`
+on macOS, `Windows.Media.SpeechRecognition` on Windows; both land in v1.1).
+
+The `commands::speech::transcribe_audio` Tauri command reads
+`settings.active_speech_provider`, falls back to
+`default_speech_provider_id()` (currently `whisper_openai` everywhere
+because `system` is ComingSoon), loads any required API key from keychain
+via `SpeechProviderMetadata::api_key_provider_id` (Whisper reuses the
+`openai` keychain entry), builds a provider with `build_speech_provider`,
+and returns `{ text, providerId }` so the frontend can show which backend
+actually transcribed.
+
+When v1.1 flips `system` to `Available`, macOS and Windows will pick it
+up automatically — no command, schema, or frontend changes required.
 
 ## Security boundaries
 

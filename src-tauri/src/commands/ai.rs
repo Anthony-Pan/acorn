@@ -7,8 +7,8 @@ use crate::ai::error::ProviderResult;
 use crate::ai::metadata::find_metadata;
 use crate::ai::provider::{build_provider, ProviderInputs};
 use crate::ai::{
-    keychain, provider_catalog, transcribe, DecomposeEvent, DecomposeRequest, DecomposeResponse,
-    ProviderError, ProviderMetadata,
+    keychain, provider_catalog, DecomposeEvent, DecomposeRequest, DecomposeResponse, ProviderError,
+    ProviderMetadata,
 };
 use crate::db::models::ProviderConfig;
 use crate::db::Database;
@@ -102,17 +102,6 @@ pub async fn decompose(
         .await;
 
     Ok(response)
-}
-
-#[tauri::command(rename_all = "camelCase")]
-pub async fn transcribe_audio(
-    audio: Vec<u8>,
-    mime_type: String,
-    language: Option<String>,
-) -> ProviderResult<String> {
-    let api_key = keychain::load_api_key("openai")?
-        .ok_or_else(|| ProviderError::MissingCredentials("openai".into()))?;
-    transcribe::transcribe_audio(&api_key, audio, &mime_type, language.as_deref()).await
 }
 
 async fn resolve_provider(

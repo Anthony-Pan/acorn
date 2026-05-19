@@ -2,6 +2,7 @@ mod ai;
 mod commands;
 mod db;
 mod error;
+mod speech;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
@@ -94,7 +95,6 @@ pub fn run() {
             commands::ai::has_provider_credentials,
             commands::ai::test_provider_connection,
             commands::ai::decompose,
-            commands::ai::transcribe_audio,
             commands::conversation::create_conversation,
             commands::conversation::list_conversations,
             commands::conversation::get_conversation,
@@ -108,6 +108,12 @@ pub fn run() {
             commands::shortcut::get_summon_shortcut,
             commands::shortcut::set_summon_shortcut,
             commands::shortcut::reset_summon_shortcut,
+            commands::speech::list_speech_providers,
+            commands::speech::list_speech_provider_configs,
+            commands::speech::save_speech_provider_config,
+            commands::speech::get_active_speech_provider,
+            commands::speech::set_active_speech_provider,
+            commands::speech::transcribe_audio,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
