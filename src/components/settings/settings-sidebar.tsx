@@ -1,14 +1,23 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Keyboard, Settings as SettingsIcon, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { ProviderCategory, ProviderMetadata } from "@/types/ai";
 
-interface ProviderSidebarProps {
+export type SettingsSection =
+  | { kind: "general" }
+  | { kind: "shortcuts" }
+  | { kind: "provider"; providerId: string };
+
+export function sectionKey(section: SettingsSection): string {
+  return section.kind === "provider" ? `provider:${section.providerId}` : section.kind;
+}
+
+interface SettingsSidebarProps {
   providers: ProviderMetadata[];
-  selectedId: string | null;
+  selected: SettingsSection;
   activeId: string | null;
   hasCredentials: Record<string, boolean>;
-  onSelect: (id: string) => void;
+  onSelect: (section: SettingsSection) => void;
 }
 
 const CATEGORY_LABEL: Record<ProviderCategory, string> = {
@@ -20,34 +29,50 @@ const CATEGORY_LABEL: Record<ProviderCategory, string> = {
 
 const CATEGORY_ORDER: ProviderCategory[] = ["recommended", "local", "advanced", "coming_soon"];
 
-export function ProviderSidebar({
+export function SettingsSidebar({
   providers,
-  selectedId,
+  selected,
   activeId,
   hasCredentials,
   onSelect,
-}: ProviderSidebarProps) {
+}: SettingsSidebarProps) {
   const grouped = group(providers);
+  const selectedKey = sectionKey(selected);
 
   return (
     <nav className="w-56 flex-shrink-0 border-r-[0.5px] border-border overflow-y-auto py-4">
+      <div className="mb-4">
+        <GroupLabel>Settings</GroupLabel>
+        <SectionRow
+          icon={<SettingsIcon className="w-3.5 h-3.5" />}
+          label="General"
+          selected={selectedKey === "general"}
+          onClick={() => onSelect({ kind: "general" })}
+        />
+        <SectionRow
+          icon={<Keyboard className="w-3.5 h-3.5" />}
+          label="Shortcuts"
+          selected={selectedKey === "shortcuts"}
+          onClick={() => onSelect({ kind: "shortcuts" })}
+        />
+      </div>
+
+      <GroupLabel>Models</GroupLabel>
       {CATEGORY_ORDER.map((category) => {
         const items = grouped[category];
         if (!items || items.length === 0) return null;
         return (
           <div key={category} className="mb-4">
-            <div className="px-4 mb-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-              {CATEGORY_LABEL[category]}
-            </div>
+            <SubGroupLabel>{CATEGORY_LABEL[category]}</SubGroupLabel>
             <div>
               {items.map((p) => (
                 <ProviderRow
                   key={p.id}
                   provider={p}
-                  selected={selectedId === p.id}
+                  selected={selectedKey === `provider:${p.id}`}
                   active={activeId === p.id}
                   hasKey={hasCredentials[p.id] ?? !p.requiresApiKey}
-                  onSelect={onSelect}
+                  onSelect={(id) => onSelect({ kind: "provider", providerId: id })}
                 />
               ))}
             </div>
@@ -55,6 +80,45 @@ export function ProviderSidebar({
         );
       })}
     </nav>
+  );
+}
+
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-4 mb-1.5 text-[10px] uppercase tracking-wider text-acorn-brown-deep font-semibold">
+      {children}
+    </div>
+  );
+}
+
+function SubGroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-4 mb-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+      {children}
+    </div>
+  );
+}
+
+interface SectionRowProps {
+  icon: React.ReactNode;
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}
+
+function SectionRow({ icon, label, selected, onClick }: SectionRowProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "w-full text-left px-4 py-2 text-[13px] flex items-center gap-2 transition-colors",
+        selected ? "bg-acorn-orange/12 text-foreground" : "text-foreground/85 hover:bg-muted",
+      )}
+    >
+      <span className="text-acorn-orange/80 flex-shrink-0">{icon}</span>
+      <span className="flex-1 truncate">{label}</span>
+    </button>
   );
 }
 
