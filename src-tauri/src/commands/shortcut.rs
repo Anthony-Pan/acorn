@@ -11,7 +11,9 @@ pub const DEFAULT_SHORTCUT: &str = "CmdOrCtrl+Shift+KeyA";
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn get_summon_shortcut(db: State<'_, Database>) -> AppResult<String> {
-    Ok(load_shortcut(&db).await?.unwrap_or_else(|| DEFAULT_SHORTCUT.to_string()))
+    Ok(load_shortcut(&db)
+        .await?
+        .unwrap_or_else(|| DEFAULT_SHORTCUT.to_string()))
 }
 
 #[tauri::command(rename_all = "camelCase")]
