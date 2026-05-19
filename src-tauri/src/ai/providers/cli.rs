@@ -18,10 +18,12 @@ use tokio::process::Command;
 use tokio::sync::mpsc;
 use tokio::time::timeout;
 
+use crate::ai::chat::{ChatMessage, ChatRole, ChatTurn};
 use crate::ai::error::{ProviderError, ProviderResult};
 use crate::ai::metadata::ProviderMetadata;
 use crate::ai::prompts::DECOMPOSE_SYSTEM_PROMPT;
 use crate::ai::provider::{emit_decomposed, format_user_input, strip_code_fences, Provider};
+use crate::ai::tools::ToolSpec;
 use crate::ai::types::{DecomposeEvent, DecomposeRequest, DecomposeResponse};
 
 #[derive(Debug, Clone, Copy)]
@@ -120,6 +122,51 @@ impl Provider for CliProvider {
             )));
         }
         Ok(())
+    }
+
+    /// CLI agents (claude, codex, gemini, hermes) speak natural-language prompts,
+    /// not OpenAI-style tool-call protocols. We concatenate the conversation into
+    /// a single prompt, run the CLI once, and return its stdout as plain text.
+    /// Tools are ignored — `supports_tools()` returns false so the chat loop
+    /// won't ask us to handle them.
+    async fn chat_turn(
+        &self,
+        messages: &[ChatMessage],
+        _tools: &[ToolSpec],
+        system_prompt: &str,
+    ) -> ProviderResult<ChatTurn> {
+        let mut prompt = String::with_capacity(system_prompt.len() + messages.len() * 64);
+        if !system_prompt.is_empty() {
+            prompt.push_str(system_prompt);
+            prompt.push_str("\n\n");
+        }
+        for msg in messages {
+            let label = match msg.role {
+                ChatRole::System | ChatRole::Tool => continue,
+                ChatRole::User => "User",
+                ChatRole::Assistant => "Assistant",
+            };
+            prompt.push_str(label);
+            prompt.push_str(": ");
+            prompt.push_str(&msg.content);
+            prompt.push('\n');
+        }
+        prompt.push_str("Assistant: ");
+
+        let stdout = run_cli(&self.invocation, &prompt).await?;
+        let text = match self.invocation.output_parser {
+            OutputParser::PlainText => stdout,
+            OutputParser::JsonField(field) => extract_json_field(&stdout, field)?,
+        };
+
+        Ok(ChatTurn {
+            text: text.trim().to_string(),
+            tool_calls: Vec::new(),
+        })
+    }
+
+    fn supports_tools(&self) -> bool {
+        false
     }
 }
 
