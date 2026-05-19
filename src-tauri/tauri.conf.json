@@ -22,7 +22,8 @@
         "center": true,
         "resizable": true,
         "fullscreen": false,
-        "decorations": true
+        "decorations": true,
+        "visible": false
       },
       {
         "label": "quick",
@@ -61,5 +62,12 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["acorn"]
+      }
+    }
   }
 }
