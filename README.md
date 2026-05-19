@@ -22,6 +22,8 @@ It's a desktop app. Open it, work with it, close it. Data lives in a local SQLit
 
 - **Model-agnostic.** Ships with Anthropic, OpenAI, DeepSeek, OpenRouter, Ollama, plus seven more in the catalogue. Bring your own key — or run a local Qwen with Ollama for free.
 - **Native desktop.** Tauri 2 + React 19. ~10× smaller than the equivalent Electron app and feels like one.
+- **Lives in the menu bar.** On macOS, Acorn is a Siri-style accessory app — no Dock icon, summoned with `⌘⇧A` or a click on the menu bar. Close the window and Acorn keeps running; `⌘Q` to actually quit.
+- **Shortcuts + Siri ready.** Acorn registers the `acorn://` URL scheme so Apple Shortcuts can stash text into it today via Open URL. Native App Intents (Siri + Spotlight dictation) and the Services menu ship the moment v1.1 lands codesign + notarisation — see [`apple-shortcuts/`](apple-shortcuts/).
 - **Voice in.** Hold the 🎙️ button, talk, drop. Whisper transcribes into the input box.
 - **Warm, not corporate.** Autumn palette designed around an actual aesthetic, not a default Tailwind theme.
 - **Your data, your machine.** SQLite on disk, API keys in macOS Keychain / Windows Credential Manager / Linux Secret Service.

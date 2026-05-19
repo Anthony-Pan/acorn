@@ -6,6 +6,7 @@ mod error;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{Emitter, Manager, WindowEvent};
+use tauri_plugin_deep_link::DeepLinkExt;
 
 #[cfg(desktop)]
 use std::str::FromStr;
@@ -18,6 +19,8 @@ use commands::window::toggle_quick_window;
 pub fn run() {
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
@@ -44,6 +47,11 @@ pub fn run() {
 
             app.manage(database);
 
+            #[cfg(target_os = "macos")]
+            {
+                let _ = app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+            }
+
             #[cfg(desktop)]
             {
                 let stored = tauri::async_runtime::block_on(async {
@@ -55,6 +63,8 @@ pub fn run() {
                 register_global_shortcuts(app.handle(), &stored)?;
                 build_tray(app.handle())?;
                 wire_quick_window_blur(app.handle());
+                wire_main_window_close_to_hide(app.handle());
+                wire_deep_link(app.handle());
             }
 
             Ok(())
@@ -144,6 +154,40 @@ fn wire_quick_window_blur(app: &tauri::AppHandle) {
             }
         });
     }
+}
+
+#[cfg(desktop)]
+fn wire_main_window_close_to_hide(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let window_for_handler = window.clone();
+        window.on_window_event(move |event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window_for_handler.hide();
+            }
+        });
+    }
+}
+
+#[cfg(desktop)]
+fn wire_deep_link(app: &tauri::AppHandle) {
+    let handle = app.clone();
+    app.deep_link().on_open_url(move |event| {
+        for url in event.urls() {
+            let _ = handle.emit("deep-link", url.to_string());
+
+            match url.host_str() {
+                Some("summon") => toggle_quick_window(&handle),
+                Some("show") | Some("main") => {
+                    if let Some(window) = handle.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+                _ => {}
+            }
+        }
+    });
 }
 
 fn handle_tray_menu(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {
