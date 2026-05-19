@@ -19,6 +19,41 @@ pub fn list_providers() -> Vec<ProviderMetadata> {
 }
 
 #[tauri::command(rename_all = "camelCase")]
+pub async fn list_ollama_models(custom_endpoint: Option<String>) -> ProviderResult<Vec<String>> {
+    #[derive(serde::Deserialize)]
+    struct TagsResponse {
+        models: Vec<TagEntry>,
+    }
+    #[derive(serde::Deserialize)]
+    struct TagEntry {
+        name: String,
+    }
+
+    let endpoint = custom_endpoint
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or_else(|| "http://localhost:11434".to_string());
+    let url = format!("{}/api/tags", endpoint.trim_end_matches('/'));
+
+    let resp = reqwest::Client::new().get(&url).send().await.map_err(|err| {
+        if err.is_connect() {
+            ProviderError::OllamaNotRunning(endpoint.clone())
+        } else {
+            ProviderError::Network(err.to_string())
+        }
+    })?;
+
+    if !resp.status().is_success() {
+        return Err(ProviderError::ProviderResponse(format!(
+            "ollama returned {}",
+            resp.status()
+        )));
+    }
+
+    let parsed: TagsResponse = resp.json().await?;
+    Ok(parsed.models.into_iter().map(|m| m.name).collect())
+}
+
+#[tauri::command(rename_all = "camelCase")]
 pub async fn save_provider_credentials(provider_id: String, api_key: String) -> ProviderResult<()> {
     keychain::save_api_key(&provider_id, &api_key)
 }

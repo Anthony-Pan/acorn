@@ -1,5 +1,6 @@
-import { Check, ExternalLink, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { Check, ExternalLink, Eye, EyeOff, Loader2, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,29 @@ export function ProviderConfigPanel({ provider }: ProviderConfigPanelProps) {
   );
   const [endpoint, setEndpoint] = useState(config?.customEndpoint ?? "");
   const [test, setTest] = useState<TestState>({ status: "idle" });
+  const [ollamaModels, setOllamaModels] = useState<string[] | null>(null);
+  const [ollamaError, setOllamaError] = useState<string | null>(null);
+  const [refreshingOllama, setRefreshingOllama] = useState(false);
+
+  const refreshOllamaModels = useCallback(
+    async (customEndpoint: string | null) => {
+      if (provider.id !== "ollama") return;
+      setRefreshingOllama(true);
+      setOllamaError(null);
+      try {
+        const models = await invoke<string[]>("list_ollama_models", {
+          customEndpoint: customEndpoint || null,
+        });
+        setOllamaModels(models);
+      } catch (err) {
+        setOllamaModels([]);
+        setOllamaError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setRefreshingOllama(false);
+      }
+    },
+    [provider.id],
+  );
 
   useEffect(() => {
     setApiKey("");
@@ -42,7 +66,12 @@ export function ProviderConfigPanel({ provider }: ProviderConfigPanelProps) {
     setSelectedModel(config?.selectedModel ?? provider.defaultModel);
     setEndpoint(config?.customEndpoint ?? "");
     setTest({ status: "idle" });
-  }, [provider, config]);
+    setOllamaModels(null);
+    setOllamaError(null);
+    if (provider.id === "ollama") {
+      void refreshOllamaModels(config?.customEndpoint ?? null);
+    }
+  }, [provider, config, refreshOllamaModels]);
 
   const isActive = activeId === provider.id;
   const isComingSoon = provider.status === "coming_soon";
@@ -161,19 +190,51 @@ export function ProviderConfigPanel({ provider }: ProviderConfigPanelProps) {
       ) : null}
 
       <div className="mb-5">
-        <Label className="text-xs text-muted-foreground mb-1.5 block">Model</Label>
+        <div className="flex items-center justify-between mb-1.5">
+          <Label className="text-xs text-muted-foreground">Model</Label>
+          {provider.id === "ollama" ? (
+            <button
+              type="button"
+              onClick={() => void refreshOllamaModels(endpoint || null)}
+              disabled={refreshingOllama}
+              className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
+            >
+              {refreshingOllama ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <RotateCcw className="w-3 h-3" />
+              )}
+              Refresh
+            </button>
+          ) : null}
+        </div>
         <select
           value={selectedModel}
           onChange={(e) => setSelectedModel(e.target.value)}
           onBlur={handlePersistConfig}
           className="w-full bg-card border-[0.5px] border-border rounded-md px-3 py-2 text-sm"
         >
-          {provider.availableModels.map((m) => (
+          {(provider.id === "ollama" && ollamaModels !== null
+            ? ollamaModels.length > 0
+              ? ollamaModels
+              : provider.availableModels
+            : provider.availableModels
+          ).map((m) => (
             <option key={m} value={m}>
               {m}
             </option>
           ))}
         </select>
+        {provider.id === "ollama" && ollamaModels !== null && ollamaModels.length === 0 ? (
+          <div className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed">
+            No models pulled yet. In a terminal, run:{" "}
+            <code className="font-mono bg-muted px-1 rounded">ollama pull qwen2.5:7b</code> and
+            click Refresh.
+          </div>
+        ) : null}
+        {provider.id === "ollama" && ollamaError ? (
+          <div className="mt-1.5 text-[11px] text-acorn-red leading-relaxed">{ollamaError}</div>
+        ) : null}
       </div>
 
       {provider.allowCustomEndpoint ? (

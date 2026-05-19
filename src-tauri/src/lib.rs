@@ -78,6 +78,7 @@ pub fn run() {
             commands::provider_config::get_active_provider,
             commands::provider_config::set_active_provider,
             commands::ai::list_providers,
+            commands::ai::list_ollama_models,
             commands::ai::save_provider_credentials,
             commands::ai::delete_provider_credentials,
             commands::ai::has_provider_credentials,
