@@ -12,13 +12,11 @@ export function GeneralPanel() {
 
   return (
     <section className="flex-1 px-8 py-7">
-      <h2 className="text-[20px] font-medium text-foreground mb-1">General</h2>
-      <p className="text-[13px] text-muted-foreground mb-6">
-        Appearance and language preferences for the app.
-      </p>
+      <h2 className="text-[20px] font-medium text-foreground mb-1">{t.generalPanelTitle}</h2>
+      <p className="text-[13px] text-muted-foreground mb-6">{t.generalPanelSubtitle}</p>
 
       <div className="space-y-5 max-w-xl">
-        <Row label={t.themeLabel} caption="Light or dark Acorn." htmlFor="theme-toggle">
+        <Row label={t.themeLabel} caption={t.themeCaption} htmlFor="theme-toggle">
           <Switch
             id="theme-toggle"
             checked={theme === "dark"}
@@ -26,11 +24,7 @@ export function GeneralPanel() {
           />
         </Row>
 
-        <Row
-          label={t.languageLabel}
-          caption="UI copy, prompts, and AI replies."
-          htmlFor="lang-select"
-        >
+        <Row label={t.languageLabel} caption={t.languageCaption} htmlFor="lang-select">
           <select
             id="lang-select"
             value={language}

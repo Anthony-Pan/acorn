@@ -34,6 +34,21 @@ interface UiStrings {
   languageLabel: string;
   themeLabel: string;
   taskAddedToast: (title: string) => string;
+  settingsGroup: string;
+  modelsGroup: string;
+  generalSection: string;
+  shortcutsSection: string;
+  categoryRecommended: string;
+  categoryLocal: string;
+  categoryAdvanced: string;
+  categoryComingSoon: string;
+  activeBadge: string;
+  generalPanelTitle: string;
+  generalPanelSubtitle: string;
+  themeCaption: string;
+  languageCaption: string;
+  shortcutsPanelTitle: string;
+  shortcutsPanelSubtitle: string;
 }
 
 const EN: UiStrings = {
@@ -76,6 +91,22 @@ const EN: UiStrings = {
   languageLabel: "Language",
   themeLabel: "Dark mode",
   taskAddedToast: (title) => `Added "${title}" to today's stash`,
+  settingsGroup: "Settings",
+  modelsGroup: "Models",
+  generalSection: "General",
+  shortcutsSection: "Shortcuts",
+  categoryRecommended: "Recommended",
+  categoryLocal: "Local",
+  categoryAdvanced: "Advanced",
+  categoryComingSoon: "Coming soon",
+  activeBadge: "ACTIVE",
+  generalPanelTitle: "General",
+  generalPanelSubtitle: "Appearance and language preferences for the app.",
+  themeCaption: "Light or dark Acorn.",
+  languageCaption: "UI copy, prompts, and AI replies.",
+  shortcutsPanelTitle: "Shortcuts",
+  shortcutsPanelSubtitle:
+    "Global keyboard shortcuts that work even when Acorn is in the background.",
 };
 
 const ZH: UiStrings = {
@@ -116,6 +147,21 @@ const ZH: UiStrings = {
   languageLabel: "语言",
   themeLabel: "深色模式",
   taskAddedToast: (title) => `已加入今天的树洞:"${title}"`,
+  settingsGroup: "设置",
+  modelsGroup: "模型",
+  generalSection: "通用",
+  shortcutsSection: "快捷键",
+  categoryRecommended: "推荐",
+  categoryLocal: "本地",
+  categoryAdvanced: "进阶",
+  categoryComingSoon: "即将上线",
+  activeBadge: "使用中",
+  generalPanelTitle: "通用",
+  generalPanelSubtitle: "外观和语言偏好。",
+  themeCaption: "切换浅色 / 深色 Acorn。",
+  languageCaption: "界面文案、提示词、AI 回复都会跟着切。",
+  shortcutsPanelTitle: "快捷键",
+  shortcutsPanelSubtitle: "全局快捷键,Acorn 在后台时也能响应。",
 };
 
 export function strings(language: string): UiStrings {

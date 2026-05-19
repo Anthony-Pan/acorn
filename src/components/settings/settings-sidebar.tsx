@@ -1,6 +1,8 @@
 import { Check, Keyboard, Settings as SettingsIcon, Sparkles } from "lucide-react";
 
+import { strings } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useSettingsStore } from "@/stores/settings";
 import type { ProviderCategory, ProviderMetadata } from "@/types/ai";
 
 export type SettingsSection =
@@ -20,13 +22,6 @@ interface SettingsSidebarProps {
   onSelect: (section: SettingsSection) => void;
 }
 
-const CATEGORY_LABEL: Record<ProviderCategory, string> = {
-  recommended: "Recommended",
-  local: "Local",
-  advanced: "Advanced",
-  coming_soon: "Coming soon",
-};
-
 const CATEGORY_ORDER: ProviderCategory[] = ["recommended", "local", "advanced", "coming_soon"];
 
 export function SettingsSidebar({
@@ -36,34 +31,42 @@ export function SettingsSidebar({
   hasCredentials,
   onSelect,
 }: SettingsSidebarProps) {
+  const language = useSettingsStore((s) => s.language);
+  const t = strings(language);
+  const categoryLabel: Record<ProviderCategory, string> = {
+    recommended: t.categoryRecommended,
+    local: t.categoryLocal,
+    advanced: t.categoryAdvanced,
+    coming_soon: t.categoryComingSoon,
+  };
   const grouped = group(providers);
   const selectedKey = sectionKey(selected);
 
   return (
     <nav className="w-56 flex-shrink-0 border-r-[0.5px] border-border overflow-y-auto py-4">
       <div className="mb-4">
-        <GroupLabel>Settings</GroupLabel>
+        <GroupLabel>{t.settingsGroup}</GroupLabel>
         <SectionRow
           icon={<SettingsIcon className="w-3.5 h-3.5" />}
-          label="General"
+          label={t.generalSection}
           selected={selectedKey === "general"}
           onClick={() => onSelect({ kind: "general" })}
         />
         <SectionRow
           icon={<Keyboard className="w-3.5 h-3.5" />}
-          label="Shortcuts"
+          label={t.shortcutsSection}
           selected={selectedKey === "shortcuts"}
           onClick={() => onSelect({ kind: "shortcuts" })}
         />
       </div>
 
-      <GroupLabel>Models</GroupLabel>
+      <GroupLabel>{t.modelsGroup}</GroupLabel>
       {CATEGORY_ORDER.map((category) => {
         const items = grouped[category];
         if (!items || items.length === 0) return null;
         return (
           <div key={category} className="mb-4">
-            <SubGroupLabel>{CATEGORY_LABEL[category]}</SubGroupLabel>
+            <SubGroupLabel>{categoryLabel[category]}</SubGroupLabel>
             <div>
               {items.map((p) => (
                 <ProviderRow
@@ -131,6 +134,8 @@ interface ProviderRowProps {
 }
 
 function ProviderRow({ provider, selected, active, hasKey, onSelect }: ProviderRowProps) {
+  const language = useSettingsStore((s) => s.language);
+  const t = strings(language);
   const comingSoon = provider.status === "coming_soon";
   return (
     <button
@@ -150,7 +155,7 @@ function ProviderRow({ provider, selected, active, hasKey, onSelect }: ProviderR
       )}
       <span className="flex-1 truncate">{provider.displayName}</span>
       {!comingSoon && active ? (
-        <span className="text-[10px] text-acorn-orange font-medium">ACTIVE</span>
+        <span className="text-[10px] text-acorn-orange font-medium">{t.activeBadge}</span>
       ) : null}
       {!comingSoon && hasKey && !active ? <Check className="w-3 h-3 text-acorn-olive" /> : null}
     </button>
