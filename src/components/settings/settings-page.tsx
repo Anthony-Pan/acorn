@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AcornLogo } from "@/components/acorn-logo";
 import { AboutPanel } from "@/components/settings/about-panel";
 import { GeneralPanel } from "@/components/settings/general-panel";
+import { MemoryPanel } from "@/components/settings/memory-panel";
 import { PlaceholderPanel } from "@/components/settings/placeholder-panel";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
@@ -128,18 +129,7 @@ function SettingsContent({ section }: { section: SettingsSection }) {
     );
   }
 
-  if (section.kind === "memory") {
-    return (
-      <PlaceholderPanel
-        title={t.memorySection}
-        description={
-          language.startsWith("zh")
-            ? "Acorn 跨 provider 共享的长期记忆,完全在本地。"
-            : "Acorn's long-term memory shared across providers — entirely local."
-        }
-      />
-    );
-  }
+  if (section.kind === "memory") return <MemoryPanel />;
 
   const provider = catalog.find((p) => p.id === section.providerId);
   if (!provider) {

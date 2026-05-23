@@ -52,6 +52,14 @@ interface UiStrings {
   aboutRepoLabel: string;
   aboutLicenseLabel: string;
   aboutLicenseValue: string;
+  memoryPanelTitle: string;
+  memoryPanelSubtitle: string;
+  memoryPlaceholder: string;
+  memorySaveButton: string;
+  memoryClearButton: string;
+  memoryHint: string;
+  memorySavedToast: string;
+  memoryClearedToast: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -123,6 +131,16 @@ const EN: UiStrings = {
   aboutRepoLabel: "Repository",
   aboutLicenseLabel: "License",
   aboutLicenseValue: "MIT",
+  memoryPanelTitle: "Shared memory",
+  memoryPanelSubtitle:
+    "Notes Acorn carries across every provider and every chat. Lives on your machine; never sent anywhere except into the next AI request.",
+  memoryPlaceholder:
+    "Anything you want every Acorn provider to remember about you — preferred working hours, recurring projects, the name of your dog, the cadence of your week.",
+  memorySaveButton: "Save",
+  memoryClearButton: "Clear",
+  memoryHint: "Stored locally only.",
+  memorySavedToast: "Memory saved",
+  memoryClearedToast: "Memory cleared",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -193,6 +211,16 @@ const ZH: UiStrings = {
   aboutRepoLabel: "仓库",
   aboutLicenseLabel: "协议",
   aboutLicenseValue: "MIT",
+  memoryPanelTitle: "共享记忆",
+  memoryPanelSubtitle:
+    "Acorn 在所有 provider 和所有对话之间共享的笔记。只存本地,不会送到第三方,只会拼进下一次 AI 请求里。",
+  memoryPlaceholder:
+    "你希望每个 provider 都记住的事:工作时段、长期项目、宠物名字、一周节奏 ——任意一段文字。",
+  memorySaveButton: "保存",
+  memoryClearButton: "清空",
+  memoryHint: "仅存本地。",
+  memorySavedToast: "记忆已保存",
+  memoryClearedToast: "记忆已清空",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",

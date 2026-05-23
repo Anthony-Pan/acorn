@@ -108,7 +108,6 @@ export function SettingsSidebar({
           label={t.memorySection}
           selected={selectedKey === "memory"}
           onClick={() => onSelect({ kind: "memory" })}
-          comingSoonLabel={t.comingSoonBadge}
         />
         <SectionRow
           icon={<Info className="w-3.5 h-3.5" />}
