@@ -28,6 +28,8 @@ pub async fn chat(
         return Err(ProviderError::InvalidResponse("empty message".into()));
     }
 
+    enforce_provider_lock(db.pool(), &conversation_id, &provider_id).await?;
+
     insert_message(
         db.pool(),
         &conversation_id,
@@ -186,6 +188,34 @@ async fn load_messages(
     .map_err(Into::into)
 }
 
+async fn conversation_provider_lock(
+    pool: &sqlx::SqlitePool,
+    conversation_id: &str,
+) -> ProviderResult<Option<String>> {
+    let locked: Option<Option<String>> =
+        sqlx::query_scalar("SELECT provider_id FROM conversations WHERE id = ?")
+            .bind(conversation_id)
+            .fetch_optional(pool)
+            .await?;
+    Ok(locked.flatten())
+}
+
+async fn enforce_provider_lock(
+    pool: &sqlx::SqlitePool,
+    conversation_id: &str,
+    attempted_provider: &str,
+) -> ProviderResult<()> {
+    if let Some(locked_to) = conversation_provider_lock(pool, conversation_id).await? {
+        if locked_to != attempted_provider {
+            return Err(ProviderError::ConversationLocked {
+                locked_to,
+                attempted: attempted_provider.to_string(),
+            });
+        }
+    }
+    Ok(())
+}
+
 async fn bump_conversation_timestamp(
     pool: &sqlx::SqlitePool,
     conversation_id: &str,
@@ -194,7 +224,11 @@ async fn bump_conversation_timestamp(
 ) {
     let now = Utc::now();
     let _ = sqlx::query(
-        "UPDATE conversations SET last_message_at = ?, provider_id = ?, model = ? WHERE id = ?",
+        "UPDATE conversations
+         SET last_message_at = ?,
+             provider_id = COALESCE(provider_id, ?),
+             model = COALESCE(model, ?)
+         WHERE id = ?",
     )
     .bind(now)
     .bind(provider_id)

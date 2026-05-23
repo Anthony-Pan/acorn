@@ -29,6 +29,12 @@ pub enum ProviderError {
     #[error("missing credentials for {0}")]
     MissingCredentials(String),
 
+    #[error("conversation locked to provider '{locked_to}', cannot send via '{attempted}'")]
+    ConversationLocked {
+        locked_to: String,
+        attempted: String,
+    },
+
     #[error("channel closed")]
     ChannelClosed,
 }
