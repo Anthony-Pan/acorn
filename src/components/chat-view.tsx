@@ -60,6 +60,57 @@ export function ChatView({ onBack }: ChatViewProps) {
     }
   };
 
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      const mod = event.metaKey || event.ctrlKey;
+      if (!mod) return;
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      const isEditing = tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable === true;
+
+      if (event.key.toLowerCase() === "n" && !event.shiftKey) {
+        event.preventDefault();
+        void startNew();
+        return;
+      }
+
+      if (event.key === "[") {
+        event.preventDefault();
+        const idx = conversations.findIndex((c) => c.id === current?.id);
+        const prev = idx > 0 ? conversations[idx - 1] : undefined;
+        if (prev) void open(prev.id);
+        return;
+      }
+
+      if (event.key === "]") {
+        event.preventDefault();
+        const idx = conversations.findIndex((c) => c.id === current?.id);
+        const next =
+          idx >= 0 && idx < conversations.length - 1 ? conversations[idx + 1] : undefined;
+        if (next) void open(next.id);
+        return;
+      }
+
+      if (event.key === "Backspace" && !isEditing && current) {
+        event.preventDefault();
+        void handleDeleteConversation(current.id);
+        return;
+      }
+
+      const numeric = Number.parseInt(event.key, 10);
+      if (!Number.isNaN(numeric) && numeric >= 1 && numeric <= 8) {
+        const targetConv = conversations[numeric - 1];
+        if (targetConv) {
+          event.preventDefault();
+          void open(targetConv.id);
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [conversations, current, open, startNew, hydrate]);
+
   const canSend = draft.trim().length > 0 && phase === "idle" && !!activeProviderId;
 
   const handleSend = async () => {
