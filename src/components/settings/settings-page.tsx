@@ -2,11 +2,14 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AcornLogo } from "@/components/acorn-logo";
+import { AboutPanel } from "@/components/settings/about-panel";
 import { GeneralPanel } from "@/components/settings/general-panel";
+import { PlaceholderPanel } from "@/components/settings/placeholder-panel";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
 import { ShortcutsPanel } from "@/components/settings/shortcuts-panel";
 import { Button } from "@/components/ui/button";
+import { strings } from "@/lib/i18n";
 import { useProvidersStore } from "@/stores/providers";
 import { useSettingsStore } from "@/stores/settings";
 
@@ -66,9 +69,77 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
 
 function SettingsContent({ section }: { section: SettingsSection }) {
   const catalog = useProvidersStore((s) => s.catalog);
+  const language = useSettingsStore((s) => s.language);
+  const t = strings(language);
 
   if (section.kind === "general") return <GeneralPanel />;
   if (section.kind === "shortcuts") return <ShortcutsPanel />;
+  if (section.kind === "about") return <AboutPanel />;
+
+  if (section.kind === "mascot") {
+    return (
+      <PlaceholderPanel
+        title={t.mascotSection}
+        description={
+          language.startsWith("zh")
+            ? "选一只桌面小伴侣,它会在你工作时陪着你。"
+            : "Pick a small desktop companion that keeps you company while you work."
+        }
+      />
+    );
+  }
+
+  if (section.kind === "display") {
+    return (
+      <PlaceholderPanel
+        title={t.displaySection}
+        description={
+          language.startsWith("zh")
+            ? "窗口形态 / 顶栏胶囊 / Dock 图标可见性。"
+            : "Window shape, top-bar capsule, and Dock icon visibility."
+        }
+      />
+    );
+  }
+
+  if (section.kind === "sounds") {
+    return (
+      <PlaceholderPanel
+        title={t.soundsSection}
+        description={
+          language.startsWith("zh")
+            ? "为每个事件挑一个声音,或者干脆静音。"
+            : "Pick a sound for each event, or mute the whole thing."
+        }
+      />
+    );
+  }
+
+  if (section.kind === "privacy") {
+    return (
+      <PlaceholderPanel
+        title={t.privacySection}
+        description={
+          language.startsWith("zh")
+            ? "活动采集 · 黑名单 · 一键导出 / 清空。"
+            : "Activity capture, blocklists, and one-tap export or wipe."
+        }
+      />
+    );
+  }
+
+  if (section.kind === "memory") {
+    return (
+      <PlaceholderPanel
+        title={t.memorySection}
+        description={
+          language.startsWith("zh")
+            ? "Acorn 跨 provider 共享的长期记忆,完全在本地。"
+            : "Acorn's long-term memory shared across providers — entirely local."
+        }
+      />
+    );
+  }
 
   const provider = catalog.find((p) => p.id === section.providerId);
   if (!provider) {
