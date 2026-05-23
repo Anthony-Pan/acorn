@@ -24,6 +24,7 @@ interface ChatState {
   open: (conversationId: string) => Promise<void>;
   startNew: () => Promise<void>;
   rename: (title: string) => Promise<void>;
+  switchProvider: (providerId: string) => Promise<void>;
   send: (text: string, providerId: string) => Promise<void>;
 }
 
@@ -65,6 +66,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
         c.id === renamed.id ? { ...c, title: renamed.title } : c,
       ),
     }));
+  },
+
+  switchProvider: async (providerId) => {
+    const current = get().current;
+    if (!current) return;
+    const updated = await conversationsApi.setProvider(current.id, providerId, null);
+    set((s) => ({
+      current: s.current
+        ? { ...s.current, providerId: updated.providerId, model: updated.model }
+        : s.current,
+      conversations: s.conversations.map((c) =>
+        c.id === updated.id ? { ...c, providerId: updated.providerId, model: updated.model } : c,
+      ),
+    }));
+    toast.success("Provider switched", {
+      description: `Future replies in this chat will use ${providerId}.`,
+    });
   },
 
   send: async (text, providerId) => {

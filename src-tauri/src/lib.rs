@@ -99,6 +99,7 @@ pub fn run() {
             commands::conversation::get_conversation,
             commands::conversation::delete_conversation,
             commands::conversation::rename_conversation,
+            commands::conversation::set_conversation_provider,
             commands::chat::chat,
             commands::window::show_main,
             commands::window::toggle_quick,

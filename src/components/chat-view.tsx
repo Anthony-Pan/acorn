@@ -18,6 +18,7 @@ import { VoiceButton } from "@/components/voice-button";
 import { conversations as conversationsApi } from "@/lib/chat";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/stores/chat";
+import { useProvidersStore } from "@/stores/providers";
 import { useSettingsStore } from "@/stores/settings";
 import type { Conversation, Message } from "@/types/chat";
 
@@ -35,7 +36,10 @@ export function ChatView({ onBack }: ChatViewProps) {
   const startNew = useChatStore((s) => s.startNew);
   const open = useChatStore((s) => s.open);
   const hydrate = useChatStore((s) => s.hydrate);
+  const switchProvider = useChatStore((s) => s.switchProvider);
   const activeProviderId = useSettingsStore((s) => s.activeProviderId);
+  const catalog = useProvidersStore((s) => s.catalog);
+  const hasCredentials = useProvidersStore((s) => s.hasCredentials);
 
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -133,12 +137,33 @@ export function ChatView({ onBack }: ChatViewProps) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center justify-between px-7 py-4 border-b-[0.5px] border-border">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <AcornLogo size={22} />
             <div className="text-sm font-medium text-foreground truncate">
               {current?.title ?? "Chatting with Acorn"}
             </div>
           </div>
+          {current ? (
+            <select
+              aria-label="Conversation provider"
+              value={current.providerId ?? activeProviderId ?? ""}
+              onChange={(e) => {
+                const next = e.target.value;
+                if (next && next !== current.providerId) void switchProvider(next);
+              }}
+              className="text-xs bg-transparent border-[0.5px] border-border rounded px-2 py-1 text-muted-foreground hover:text-foreground focus:outline-none focus:border-acorn-orange"
+            >
+              {catalog
+                .filter(
+                  (p) => p.status === "available" && (!p.requiresApiKey || hasCredentials[p.id]),
+                )
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.displayName}
+                  </option>
+                ))}
+            </select>
+          ) : null}
         </header>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-7 py-5">
