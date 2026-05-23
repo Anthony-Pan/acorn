@@ -53,3 +53,20 @@ jobs:
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
       - name: cargo check
         run: cargo check --manifest-path src-tauri/Cargo.toml
+
+  ios:
+    name: iOS
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+      - name: swift build (AcornCore + AcornUI + AcornApp)
+        run: swift build
+      - name: swift test (AcornCoreTests)
+        run: swift test
