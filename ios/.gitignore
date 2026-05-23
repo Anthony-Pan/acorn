@@ -1,0 +1,30 @@
+# Swift Package Manager build output
+.build/
+.swiftpm/
+Packages/
+Package.pins
+*.xcodeproj/
+*.xcworkspace/
+
+# Xcode user state (only commit shared schemes, never per-user state)
+xcuserdata/
+*.xcuserdatad/
+DerivedData/
+*.moved-aside
+
+# Apple platform artifacts
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+
+# Local fastlane / signing / TestFlight scratch
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Coverage
+*.profraw
+*.profdata
