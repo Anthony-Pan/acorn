@@ -246,8 +246,17 @@ function ConversationRow({
         <MessageSquare className="w-3.5 h-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="text-sm text-foreground truncate">{conversation.title}</div>
-          <div className="text-[10px] text-muted-foreground">
-            {formatDistanceToNowStrict(new Date(conversation.lastMessageAt), { addSuffix: true })}
+          <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+            <span className="truncate">
+              {formatDistanceToNowStrict(new Date(conversation.lastMessageAt), {
+                addSuffix: true,
+              })}
+            </span>
+            {conversation.providerId ? (
+              <span className="px-1 py-px rounded bg-acorn-orange/15 text-acorn-orange font-mono text-[9px] uppercase tracking-wider">
+                {conversation.providerId}
+              </span>
+            ) : null}
           </div>
         </div>
       </button>

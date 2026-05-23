@@ -143,7 +143,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       set({ phase: "idle", error: message });
-      toast.error("Chat failed", { description: message });
+      if (message.includes("conversation locked to provider")) {
+        toast.error("Provider locked", {
+          description:
+            "This conversation is bound to its original provider. Start a new chat to use a different one.",
+        });
+      } else {
+        toast.error("Chat failed", { description: message });
+      }
     }
   },
 }));
