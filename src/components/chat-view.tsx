@@ -39,6 +39,14 @@ export function ChatView({ onBack }: ChatViewProps) {
 
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [fontScale, setFontScale] = useState<number>(() => {
+    try {
+      const stored = Number.parseFloat(localStorage.getItem("acorn:chat-font-scale") ?? "");
+      return Number.isFinite(stored) && stored > 0 ? stored : 1;
+    } catch {
+      return 1;
+    }
+  });
 
   useEffect(() => {
     if (!current && conversations.length === 0) {
@@ -51,6 +59,31 @@ export function ChatView({ onBack }: ChatViewProps) {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [current?.messages.length, activeTools.length, phase]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("acorn:chat-font-scale", String(fontScale));
+    } catch {}
+  }, [fontScale]);
+
+  useEffect(() => {
+    function handleFontKey(event: KeyboardEvent) {
+      const mod = event.metaKey || event.ctrlKey;
+      if (!mod) return;
+      if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        setFontScale((s) => Math.min(1.6, Number((s + 0.1).toFixed(2))));
+      } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        setFontScale((s) => Math.max(0.75, Number((s - 0.1).toFixed(2))));
+      } else if (event.key === "0") {
+        event.preventDefault();
+        setFontScale(1);
+      }
+    }
+    window.addEventListener("keydown", handleFontKey);
+    return () => window.removeEventListener("keydown", handleFontKey);
+  }, []);
 
   const handleDeleteConversation = async (conversationId: string) => {
     await conversationsApi.delete(conversationId);
@@ -90,7 +123,11 @@ export function ChatView({ onBack }: ChatViewProps) {
           </div>
         </header>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-7 py-5">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto px-7 py-5"
+          style={{ fontSize: `${fontScale}rem` }}
+        >
           <div className="max-w-2xl mx-auto space-y-4">
             {current?.messages
               .filter(
