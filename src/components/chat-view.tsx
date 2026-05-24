@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AcornLogo } from "@/components/acorn-logo";
+import { TaskActionCards } from "@/components/task-action-cards";
 import { Button } from "@/components/ui/button";
 import { VoiceButton } from "@/components/voice-button";
 import { conversations as conversationsApi } from "@/lib/chat";
@@ -365,7 +366,23 @@ function Bubble({ message }: { message: Message }) {
     return (
       <div className="flex justify-start">
         <div className={cn("max-w-[80%] text-sm leading-relaxed prose prose-sm prose-stone")}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code({ className, children, ...rest }) {
+                if (className === "language-tasks") {
+                  return <TaskActionCards json={String(children).trim()} />;
+                }
+                return (
+                  <code className={className} {...rest}>
+                    {children}
+                  </code>
+                );
+              },
+            }}
+          >
+            {message.content}
+          </ReactMarkdown>
         </div>
       </div>
     );
