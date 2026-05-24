@@ -87,7 +87,6 @@ export function SettingsSidebar({
           label={t.displaySection}
           selected={selectedKey === "display"}
           onClick={() => onSelect({ kind: "display" })}
-          comingSoonLabel={t.comingSoonBadge}
         />
         <SectionRow
           icon={<Bell className="w-3.5 h-3.5" />}
