@@ -63,7 +63,7 @@ export function CornieMascot({ size = 48 }: CornieMascotProps) {
             }}
           />
           <div
-            className="absolute bg-acorn-paper"
+            className="absolute bg-acorn-paper cornie-eye"
             style={{
               left: `calc(50% - ${eyeXOffset}px - ${eyeSize / 2}px)`,
               top: eyeY,
@@ -73,7 +73,7 @@ export function CornieMascot({ size = 48 }: CornieMascotProps) {
             }}
           />
           <div
-            className="absolute bg-acorn-paper"
+            className="absolute bg-acorn-paper cornie-eye"
             style={{
               left: `calc(50% + ${eyeXOffset}px - ${eyeSize / 2}px)`,
               top: eyeY,
@@ -105,7 +105,15 @@ const cornieKeyframes = `
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-4px); }
 }
+@keyframes cornie-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96%           { transform: scaleY(0.1); }
+}
 .cornie-bounce {
   animation: cornie-bounce 2.4s ease-in-out infinite;
+}
+.cornie-eye {
+  animation: cornie-blink 5.2s ease-in-out infinite;
+  transform-origin: center;
 }
 `;
