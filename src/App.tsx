@@ -20,6 +20,7 @@ import { CanvasView } from "@/components/canvas-view";
 import { ChatView } from "@/components/chat-view";
 import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
+import { StatusCapsule } from "@/components/status-capsule";
 import { TaskInput } from "@/components/task-input";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
@@ -259,6 +260,7 @@ function App() {
         </motion.div>
       </AnimatePresence>
       <CornieMascot />
+      <StatusCapsule />
       <Toaster
         position="top-center"
         toastOptions={{
