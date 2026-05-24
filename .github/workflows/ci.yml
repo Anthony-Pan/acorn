@@ -57,16 +57,33 @@ jobs:
   ios:
     name: iOS
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: ios
     steps:
       - uses: actions/checkout@v4
       - name: Show toolchain
         run: |
           swift --version
           xcodebuild -version
-      - name: swift build (AcornCore + AcornUI + AcornApp)
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: swift build (AcornCore + AcornUI + AcornApp libraries)
+        working-directory: ios
         run: swift build
       - name: swift test (AcornCoreTests)
+        working-directory: ios
         run: swift test
+      - name: Generate Xcode project for AcornIOS app target
+        working-directory: ios/App
+        run: xcodegen generate
+      - name: xcodebuild for iPhone Simulator (iOS 26)
+        working-directory: ios/App
+        run: |
+          # Use a generic iOS Simulator destination — no specific sim needs to boot.
+          xcodebuild build \
+            -project AcornIOS.xcodeproj \
+            -scheme AcornIOS \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+          | xcpretty || exit ${PIPESTATUS[0]}

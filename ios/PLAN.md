@@ -119,10 +119,12 @@ Each PR is **scope-bounded** — the "out of scope" line on each is
 load-bearing. No PR mixes concerns.
 
 ### Phase 0 — Foundation
-- **PR #1** *(this PR)* `feat(ios): scaffold ios/ project with empty AcornApp`
+- **PR #1** *(this PR)* `feat(ios): scaffold ios/ project with launchable AcornApp`
   Directory structure, `Package.swift`, README, this PLAN, smoke tests,
-  CI job that runs `swift build` + `swift test`. No Xcode App target, no
-  business logic.
+  CI job (` swift build ` + ` swift test `), **plus** an Xcode App target
+  managed by xcodegen (`App/project.yml`) so the scaffold actually
+  launches on iPhone Simulator with a placeholder ` 🌰 Acorn ` screen.
+  No business logic, no real screens.
 - **PR #2** `feat(ios): GRDB schema + migrations + Codable models`
   Migrations copied verbatim from `src-tauri/migrations/`; CI gate that
   fails on schema drift between macOS and iOS.

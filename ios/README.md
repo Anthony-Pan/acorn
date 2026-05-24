@@ -6,45 +6,62 @@ into focused task cards" core loop — re-built in SwiftUI with iOS-native
 superpowers (Siri, Widgets, Live Activity, on-device LLM via Apple
 FoundationModels) that the desktop app cannot have.
 
-> **Status: scaffold (PR #1 of ~20).** This directory currently contains
-> only the package manifest and module skeleton. There is no runnable app
-> yet. See [`PLAN.md`](PLAN.md) for the full delivery roadmap.
+> **Status: scaffold (PR #1 of ~20).** Launchable on iPhone Simulator but
+> contains only placeholder UI — real screens, DB, and providers land in
+> PRs #2–#9. See [`PLAN.md`](PLAN.md) for the full roadmap.
 
 ## Layout
 
 ```
 ios/
 ├── PLAN.md                  Multi-PR roadmap (this is the spec)
-├── Package.swift            Pure SPM manifest — 3 libraries, no .xcodeproj
+├── Package.swift            SPM manifest — 3 libraries
 ├── Sources/
 │   ├── AcornCore/           Pure-Swift business logic (models, DB, providers)
 │   ├── AcornUI/             SwiftUI views, design system, animations
 │   └── AcornApp/            App-level wiring (RootView, bootstrap)
-└── Tests/
-    └── AcornCoreTests/      Swift Testing
+├── Tests/
+│   └── AcornCoreTests/      Swift Testing
+└── App/                     Xcode iOS App target (xcodegen-managed)
+    ├── project.yml          Source of truth — regenerate .xcodeproj from this
+    └── AcornIOS/            @main, Info.plist props, AppIcon, AccentColor
 ```
 
 `AcornCore` is intentionally **UI-free** so the future Widget, Share
 Extension, and App Intents targets can all link it without dragging in the
 SwiftUI runtime.
 
-## Develop
+## Requirements
 
-Requirements: macOS 14+, Xcode 26+, Swift 6+.
+- macOS 14+, Xcode 26+, Swift 6+
+- [xcodegen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`) — generates the `.xcodeproj` from `App/project.yml`
+- An iOS 18 or iOS 26 simulator (Xcode → Settings → Platforms)
+
+## Quick start — launch on iPhone Simulator
+
+```sh
+cd ios/App
+xcodegen generate                 # produces AcornIOS.xcodeproj (gitignored)
+open AcornIOS.xcodeproj           # opens in Xcode
+# In Xcode: pick "iPhone 17 Pro" (or any iOS 18+ simulator) → ⌘R
+```
+
+You should see a placeholder `🌰 Acorn` screen. That confirms the
+module link graph (`AcornApp → AcornUI → AcornCore`) works end-to-end.
+
+## Library-only workflow (no Xcode App target)
+
+For PRs that touch only `AcornCore` / `AcornUI` / `AcornApp` libraries,
+the App target isn't needed — `swift build` on macOS suffices:
 
 ```sh
 cd ios
 swift build           # builds all three libraries against the macOS toolchain
-swift test            # runs the smoke tests
-open Package.swift    # opens the package in Xcode (use Xcode 26+)
+swift test            # runs the Swift Testing smoke tests
+open Package.swift    # opens the package in Xcode for preview / debug
 ```
 
-When the iOS App target lands (future PR) you will additionally need:
-
-- An Apple Developer account
-- An iOS 18 / iOS 26 simulator (or device) for `xcodebuild`
-- Provisioning profile for the bundle identifier `app.acorn.ios`
-  (matching the macOS app's `app.acorn.desktop` keychain service prefix)
+This is also exactly what CI does — see `.github/workflows/ci.yml` `iOS` job.
 
 ## Schema parity with macOS
 
@@ -58,21 +75,23 @@ API keys live in the iOS Keychain under the service name
 `app.acorn.desktop` (matching the macOS app), so a future iCloud Keychain
 sync would Just Work.
 
-## Why pure SPM in PR #1?
+## Why xcodegen (not a committed .xcodeproj)?
 
-Two reasons:
+The `.xcodeproj` is **not committed** — it's generated from
+[`App/project.yml`](App/project.yml) every time you run `xcodegen`. This
+trade is deliberate:
 
-1. **Reviewability.** A 12-line `Package.swift` plus a handful of source
-   files is reviewable in a single pass. An `.xcodeproj` is a directory of
-   plist/XML that generates merge conflicts on every PR.
-2. **CI runs anywhere.** `swift build` works on a macOS GitHub Actions
-   runner with no simulator boot. The App target (which does need
-   `xcodebuild` + a simulator) lands in a later PR when there is actual
-   app code to launch.
+- ✅ The 70-line `project.yml` is readable and reviewable; a committed
+  `.pbxproj` would be hundreds of lines of plist with UUIDs that change
+  on every Xcode setting tweak, generating noisy diffs.
+- ✅ Two devs on different Xcode versions produce identical projects
+  because they regenerate from the same spec.
+- ✅ The `Info.plist` is also generated from inline properties in
+  `project.yml`, so bundle metadata stays in one place.
+- ⚠️ Cost: contributors must `brew install xcodegen` once. Documented above.
 
-A future PR (~PR #2 or #3) adds either an Xcode `.xcodeproj` (committed)
-or an XcodeGen / Tuist spec (preferred). Either path is fine — that
-decision is captured in `PLAN.md` §1.1.
+This matches the pattern used by mature multi-target Swift codebases
+(e.g. Kickstarter iOS, ProtonMail, several Apple sample apps).
 
 ## Relationship to the macOS app
 
