@@ -44,13 +44,14 @@ public struct InputView: View {
                     }
                     .accessibilityLabel("Settings")
                 }
-                if session.currentSession != nil {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Today") {
-                            router.navigate(.stash)
-                        }
-                        .font(.acornButton)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        router.navigate(.history)
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.title3)
                     }
+                    .accessibilityLabel("History")
                 }
             }
             .background(Color.warmCream.opacity(0.4).ignoresSafeArea())

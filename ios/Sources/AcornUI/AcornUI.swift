@@ -3,17 +3,17 @@ import AcornCore
 
 public struct AcornRootContainer: View {
     @Environment(AppRouter.self) private var router
-    let speechService: SpeechService
+    let services: Services
 
-    public init(speechService: SpeechService) {
-        self.speechService = speechService
+    public init(services: Services) {
+        self.services = services
     }
 
     public var body: some View {
         ZStack {
             switch router.route {
             case .input:
-                InputView(speechService: speechService)
+                InputView(speechService: services.speech)
                     .transition(.asymmetric(
                         insertion: .opacity.combined(with: .scale(scale: 1.02)),
                         removal: .opacity
@@ -28,6 +28,12 @@ public struct AcornRootContainer: View {
                 SettingsView()
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            case .history:
+                HistoryView(services: services)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
                         removal: .opacity
                     ))
             }

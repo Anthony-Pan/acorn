@@ -23,7 +23,7 @@ public struct RootView: View {
     }
 
     public var body: some View {
-        AcornRootContainer(speechService: services.speech)
+        AcornRootContainer(services: services)
             .environment(router)
             .environment(settings)
             .environment(providers)

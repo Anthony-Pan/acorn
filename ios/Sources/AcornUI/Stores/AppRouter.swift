@@ -8,6 +8,7 @@ public final class AppRouter {
         case input
         case stash
         case settings
+        case history
     }
 
     public var route: Route = .input
