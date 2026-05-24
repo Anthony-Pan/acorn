@@ -9,6 +9,8 @@ public final class AppRouter {
         case stash
         case settings
         case history
+        case canvas
+        case search
     }
 
     public var route: Route = .input

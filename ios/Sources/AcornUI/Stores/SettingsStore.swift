@@ -36,6 +36,7 @@ public final class SettingsStore {
         sharedMemory = (try? await memoryService.read()) ?? ""
         if let muted = try? await service.get(.soundsMuted) {
             soundsMuted = muted == "1"
+            Sounds.muted = soundsMuted
         }
     }
 
@@ -70,6 +71,7 @@ public final class SettingsStore {
 
     public func setSoundsMuted(_ muted: Bool) async {
         soundsMuted = muted
+        Sounds.muted = muted
         try? await service.set(.soundsMuted, value: muted ? "1" : "0")
     }
 

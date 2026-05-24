@@ -36,13 +36,33 @@ public struct InputView: View {
             .padding(20)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        router.navigate(.settings)
+                    Menu {
+                        Button {
+                            router.navigate(.history)
+                        } label: {
+                            Label("History", systemImage: "clock.arrow.circlepath")
+                        }
+                        Button {
+                            router.navigate(.canvas)
+                        } label: {
+                            Label("Notebook", systemImage: "doc.text")
+                        }
+                        Button {
+                            router.navigate(.search)
+                        } label: {
+                            Label("Search", systemImage: "magnifyingglass")
+                        }
+                        Divider()
+                        Button {
+                            router.navigate(.settings)
+                        } label: {
+                            Label("Settings", systemImage: "gearshape")
+                        }
                     } label: {
-                        Image(systemName: "gearshape")
+                        Image(systemName: "line.3.horizontal")
                             .font(.title3)
                     }
-                    .accessibilityLabel("Settings")
+                    .accessibilityLabel("Menu")
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button {

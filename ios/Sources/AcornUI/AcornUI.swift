@@ -36,6 +36,18 @@ public struct AcornRootContainer: View {
                         insertion: .move(edge: .leading).combined(with: .opacity),
                         removal: .opacity
                     ))
+            case .canvas:
+                CanvasView(services: services)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+            case .search:
+                SearchView(services: services)
+                    .transition(.asymmetric(
+                        insertion: .opacity,
+                        removal: .opacity
+                    ))
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.82), value: router.route)

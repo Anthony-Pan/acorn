@@ -59,10 +59,12 @@ public final class SessionStore {
                 case .done:
                     stashState = .done
                     refreshWidget()
+                    Sounds.play(.chime)
                 }
             }
         } catch {
             stashState = .failed(error.localizedDescription)
+            Sounds.play(.error)
         }
     }
 
