@@ -264,11 +264,20 @@ function ConversationRow({
 }
 
 function Bubble({ message }: { message: Message }) {
+  const tooltip = new Date(message.createdAt).toLocaleString();
+  const relative = formatDistanceToNowStrict(new Date(message.createdAt), { addSuffix: true });
+
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[80%] bg-card border-[0.5px] border-border rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed">
+      <div className="group flex justify-end">
+        <div
+          title={tooltip}
+          className="max-w-[80%] bg-card border-[0.5px] border-border rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed"
+        >
           {message.content}
+          <div className="text-[9px] text-muted-foreground/60 mt-1 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+            {relative}
+          </div>
         </div>
       </div>
     );
@@ -278,9 +287,15 @@ function Bubble({ message }: { message: Message }) {
     const hasToolHint = message.toolCalls !== null;
     if (!message.content.trim() && !hasToolHint) return null;
     return (
-      <div className="flex justify-start">
-        <div className={cn("max-w-[80%] text-sm leading-relaxed prose prose-sm prose-stone")}>
+      <div className="group flex justify-start flex-col items-start">
+        <div
+          title={tooltip}
+          className={cn("max-w-[80%] text-sm leading-relaxed prose prose-sm prose-stone")}
+        >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+        </div>
+        <div className="text-[9px] text-muted-foreground/60 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          {relative}
         </div>
       </div>
     );
