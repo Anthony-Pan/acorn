@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -8,6 +10,8 @@ interface CornieMascotProps {
 
 const STORAGE_KEY = "acorn:cornie-hidden";
 
+type DragDropEvent = { type: string; paths?: string[] };
+
 export function CornieMascot({ size = 48 }: CornieMascotProps) {
   const [hidden, setHidden] = useState(() => {
     try {
@@ -16,6 +20,42 @@ export function CornieMascot({ size = 48 }: CornieMascotProps) {
       return false;
     }
   });
+  const [chewing, setChewing] = useState(false);
+
+  useEffect(() => {
+    if (hidden) return;
+    const appWindow = getCurrentWindow();
+    const unlisten = appWindow.onDragDropEvent((event) => {
+      const payload = event.payload as DragDropEvent;
+      if (payload.type !== "drop") return;
+      const paths = payload.paths ?? [];
+      if (paths.length === 0) return;
+      setChewing(true);
+      setTimeout(() => setChewing(false), 600);
+      void navigator.clipboard
+        .writeText(paths.join("\n"))
+        .then(() => {
+          const first = paths[0]?.split("/").pop() ?? paths[0];
+          const summary =
+            paths.length === 1
+              ? `Cornie ate ${first}`
+              : `Cornie ate ${paths.length} files (${first} + ${paths.length - 1} more)`;
+          toast.success(summary, {
+            description: "Paths copied to clipboard — paste into chat to share with Acorn.",
+            id: "cornie-eats",
+            duration: 6000,
+          });
+        })
+        .catch((err: unknown) => {
+          toast.error("Cornie spilled it", {
+            description: err instanceof Error ? err.message : String(err),
+          });
+        });
+    });
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, [hidden]);
 
   if (hidden) return null;
 
@@ -40,7 +80,8 @@ export function CornieMascot({ size = 48 }: CornieMascotProps) {
       aria-label="Hide Cornie"
       title="Click to hide Cornie"
       className={cn(
-        "fixed bottom-5 right-5 z-30 cornie-bounce",
+        "fixed bottom-5 right-5 z-30",
+        chewing ? "cornie-chew" : "cornie-bounce",
         "transition-transform duration-150 active:scale-90 hover:scale-105",
         "focus:outline-none",
       )}
@@ -105,7 +146,16 @@ const cornieKeyframes = `
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-4px); }
 }
+@keyframes cornie-chew {
+  0%, 100% { transform: scale(1, 1)    translateY(0); }
+  25%      { transform: scale(1.08, 0.92) translateY(2px); }
+  50%      { transform: scale(0.92, 1.08) translateY(-3px); }
+  75%      { transform: scale(1.05, 0.95) translateY(1px); }
+}
 .cornie-bounce {
   animation: cornie-bounce 2.4s ease-in-out infinite;
+}
+.cornie-chew {
+  animation: cornie-chew 0.55s ease-in-out;
 }
 `;
