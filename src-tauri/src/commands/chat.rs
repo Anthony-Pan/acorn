@@ -55,13 +55,16 @@ pub async fn chat(
         Vec::new()
     };
 
+    let shared_memory = load_shared_memory(db.pool()).await;
+    let system_prompt = compose_system_prompt(shared_memory.as_deref());
+
     let _ = on_event.send(ChatEvent::Thinking);
 
     let mut final_text = String::new();
 
     for _ in 0..MAX_TOOL_ITERATIONS {
         let turn = provider
-            .chat_turn(&chat_messages, &tools, CHAT_SYSTEM_PROMPT)
+            .chat_turn(&chat_messages, &tools, &system_prompt)
             .await?;
 
         let ChatTurn { text, tool_calls } = turn;
@@ -202,6 +205,8 @@ pub async fn chat(
     Ok(assistant)
 }
 
+const SHARED_MEMORY_KEY: &str = "shared_memory";
+
 async fn load_setting_value(pool: &sqlx::SqlitePool, key: &str) -> Option<String> {
     let row: Option<(String,)> = sqlx::query_as("SELECT value FROM settings WHERE key = ?")
         .bind(key)
@@ -212,6 +217,22 @@ async fn load_setting_value(pool: &sqlx::SqlitePool, key: &str) -> Option<String
     row.map(|(v,)| v)
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
+}
+
+async fn load_shared_memory(pool: &sqlx::SqlitePool) -> Option<String> {
+    load_setting_value(pool, SHARED_MEMORY_KEY).await
+}
+
+fn compose_system_prompt(shared_memory: Option<&str>) -> String {
+    let mut out = CHAT_SYSTEM_PROMPT.to_string();
+    if let Some(memory) = shared_memory {
+        out.push_str(
+            "\n\nLong-term notes about your friend (user-editable, stored locally, opt-out via Settings → Memory):\n",
+        );
+        out.push_str(memory);
+        out.push('\n');
+    }
+    out
 }
 
 async fn insert_message(
