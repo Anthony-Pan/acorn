@@ -35,7 +35,10 @@ export function ChatView({ onBack }: ChatViewProps) {
   const startNew = useChatStore((s) => s.startNew);
   const open = useChatStore((s) => s.open);
   const hydrate = useChatStore((s) => s.hydrate);
+  const rename = useChatStore((s) => s.rename);
   const activeProviderId = useSettingsStore((s) => s.activeProviderId);
+  const [titleDraft, setTitleDraft] = useState<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -51,6 +54,13 @@ export function ChatView({ onBack }: ChatViewProps) {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [current?.messages.length, activeTools.length, phase]);
+
+  useEffect(() => {
+    if (titleDraft !== null) {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    }
+  }, [titleDraft]);
 
   const handleDeleteConversation = async (conversationId: string) => {
     await conversationsApi.delete(conversationId);
@@ -82,11 +92,43 @@ export function ChatView({ onBack }: ChatViewProps) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center justify-between px-7 py-4 border-b-[0.5px] border-border">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <AcornLogo size={22} />
-            <div className="text-sm font-medium text-foreground truncate">
-              {current?.title ?? "Chatting with Acorn"}
-            </div>
+            {titleDraft !== null && current ? (
+              <input
+                ref={titleInputRef}
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={async () => {
+                  const next = titleDraft.trim();
+                  setTitleDraft(null);
+                  if (next && next !== current.title) {
+                    await rename(next);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    (e.currentTarget as HTMLInputElement).blur();
+                  }
+                  if (e.key === "Escape") {
+                    setTitleDraft(null);
+                  }
+                }}
+                className="text-sm font-medium text-foreground bg-transparent border-b border-acorn-orange/40 focus:outline-none focus:border-acorn-orange px-0.5"
+              />
+            ) : (
+              <button
+                type="button"
+                onDoubleClick={() => {
+                  if (current) setTitleDraft(current.title);
+                }}
+                title="Double-click to rename"
+                className="text-sm font-medium text-foreground truncate hover:text-acorn-orange transition-colors"
+              >
+                {current?.title ?? "Chatting with Acorn"}
+              </button>
+            )}
           </div>
         </header>
 
