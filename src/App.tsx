@@ -125,13 +125,33 @@ function App() {
     });
 
     const unlistenPinShortcut = listen("shortcut:pin-response", async () => {
-      const main = getCurrentWindow();
-      await main.show();
-      await main.setFocus();
-      toast.message("Pin to desktop", {
-        description: "Pinning replies to the desktop lands in an upcoming Acorn release.",
-        id: "shortcut-pin",
-      });
+      const conversation = useChatStore.getState().current;
+      const lastReply = conversation?.messages
+        .filter((m) => m.role === "assistant" && m.content.trim().length > 0)
+        .at(-1);
+      if (!lastReply) {
+        toast.message("Nothing to pin yet", {
+          description: "Send a message first, then pin the reply.",
+          id: "shortcut-pin-empty",
+        });
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(lastReply.content);
+        const preview =
+          lastReply.content.length > 80
+            ? `${lastReply.content.slice(0, 80).trim()}…`
+            : lastReply.content.trim();
+        toast.success("Reply copied", {
+          description: preview,
+          id: "shortcut-pin",
+        });
+      } catch (err) {
+        toast.error("Could not copy", {
+          description: err instanceof Error ? err.message : String(err),
+          id: "shortcut-pin-error",
+        });
+      }
     });
 
     const unlistenScreenshotShortcut = listen("shortcut:screenshot", async () => {
