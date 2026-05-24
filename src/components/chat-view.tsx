@@ -2,6 +2,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import {
   ArrowLeft,
   Copy,
+  Download,
   Loader2,
   MessageSquare,
   Plus,
@@ -179,27 +180,51 @@ export function ChatView({ onBack }: ChatViewProps) {
               {current?.title ?? "Chatting with Acorn"}
             </div>
           </div>
-          {current ? (
-            <select
-              aria-label="Conversation provider"
-              value={current.providerId ?? activeProviderId ?? ""}
-              onChange={(e) => {
-                const next = e.target.value;
-                if (next && next !== current.providerId) void switchProvider(next);
-              }}
-              className="text-xs bg-transparent border-[0.5px] border-border rounded px-2 py-1 text-muted-foreground hover:text-foreground focus:outline-none focus:border-acorn-orange"
-            >
-              {catalog
-                .filter(
-                  (p) => p.status === "available" && (!p.requiresApiKey || hasCredentials[p.id]),
-                )
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.displayName}
-                  </option>
-                ))}
-            </select>
-          ) : null}
+          <div className="flex items-center gap-2">
+            {current ? (
+              <select
+                aria-label="Conversation provider"
+                value={current.providerId ?? activeProviderId ?? ""}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  if (next && next !== current.providerId) void switchProvider(next);
+                }}
+                className="text-xs bg-transparent border-[0.5px] border-border rounded px-2 py-1 text-muted-foreground hover:text-foreground focus:outline-none focus:border-acorn-orange"
+              >
+                {catalog
+                  .filter(
+                    (p) => p.status === "available" && (!p.requiresApiKey || hasCredentials[p.id]),
+                  )
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.displayName}
+                    </option>
+                  ))}
+              </select>
+            ) : null}
+            {current && current.messages.length > 0 ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  const markdown = conversationToMarkdown(current);
+                  try {
+                    await navigator.clipboard.writeText(markdown);
+                    toast.success("Conversation copied as markdown", {
+                      description: `${current.messages.length} messages.`,
+                    });
+                  } catch (err) {
+                    toast.error("Could not copy", {
+                      description: err instanceof Error ? err.message : String(err),
+                    });
+                  }
+                }}
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export
+              </Button>
+            ) : null}
+          </div>
         </header>
 
         <div
@@ -386,6 +411,19 @@ function ConversationRow({
       </button>
     </div>
   );
+}
+
+function conversationToMarkdown(
+  conv: NonNullable<ReturnType<typeof useChatStore.getState>["current"]>,
+): string {
+  const lines: string[] = [`# ${conv.title}`, ""];
+  for (const msg of conv.messages) {
+    if (msg.role === "tool") continue;
+    if (!msg.content.trim()) continue;
+    const label = msg.role === "user" ? "## You" : "## Acorn";
+    lines.push(label, "", msg.content.trim(), "");
+  }
+  return lines.join("\n");
 }
 
 function Bubble({ message }: { message: Message }) {
