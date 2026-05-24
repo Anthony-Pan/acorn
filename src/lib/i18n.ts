@@ -73,6 +73,13 @@ interface UiStrings {
   privacyEntryCount: (n: number) => string;
   privacyEmptyState: string;
   privacyClearedToast: string;
+  soundsPanelTitle: string;
+  soundsPanelSubtitle: string;
+  soundsMutedLabel: string;
+  soundsOnLabel: string;
+  soundsClickToMute: string;
+  soundsClickToUnmute: string;
+  soundsPreviewButton: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -170,6 +177,14 @@ const EN: UiStrings = {
   privacyEntryCount: (n) => (n === 1 ? "1 entry" : `${n} entries`),
   privacyEmptyState: "Nothing logged yet. Once you start chatting, entries show up here.",
   privacyClearedToast: "Activity log cleared",
+  soundsPanelTitle: "Sounds",
+  soundsPanelSubtitle:
+    "Acorn's three small synthesized tones, all generated in-browser via Web Audio — no assets shipped, nothing leaves your machine.",
+  soundsMutedLabel: "Sounds are muted",
+  soundsOnLabel: "Sounds are on",
+  soundsClickToMute: "Click to mute",
+  soundsClickToUnmute: "Click to unmute",
+  soundsPreviewButton: "Preview",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -243,7 +258,8 @@ const ZH: UiStrings = {
   memoryPanelTitle: "共享记忆",
   memoryPanelSubtitle:
     "Acorn 在所有 provider 和所有对话之间共享的笔记。只存本地,不会送到第三方,只会拼进下一次 AI 请求里。",
-  memoryPlaceholder: "你希望每个 provider 都记住的事:工作时段、长期项目、宠物名字、一周节奏 ——任意一段文字。",
+  memoryPlaceholder:
+    "你希望每个 provider 都记住的事:工作时段、长期项目、宠物名字、一周节奏 ——任意一段文字。",
   memorySaveButton: "保存",
   memoryClearButton: "清空",
   memoryHint: "仅存本地。",
@@ -263,6 +279,14 @@ const ZH: UiStrings = {
   privacyEntryCount: (n) => `共 ${n} 条`,
   privacyEmptyState: "暂时还没有记录。开始聊几句就有了。",
   privacyClearedToast: "记录已清空",
+  soundsPanelTitle: "音效",
+  soundsPanelSubtitle:
+    "Acorn 的三个简单合成音,全部由 Web Audio 现场生成 —— 不内嵌任何音频文件,也不上传到任何地方。",
+  soundsMutedLabel: "已静音",
+  soundsOnLabel: "已开启",
+  soundsClickToMute: "点击静音",
+  soundsClickToUnmute: "点击开启",
+  soundsPreviewButton: "试听",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",

@@ -11,6 +11,7 @@ import { PrivacyPanel } from "@/components/settings/privacy-panel";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
 import { ShortcutsPanel } from "@/components/settings/shortcuts-panel";
+import { SoundsPanel } from "@/components/settings/sounds-panel";
 import { Button } from "@/components/ui/button";
 import { strings } from "@/lib/i18n";
 import { useProvidersStore } from "@/stores/providers";
@@ -94,18 +95,7 @@ function SettingsContent({ section }: { section: SettingsSection }) {
 
   if (section.kind === "display") return <DisplayPanel />;
 
-  if (section.kind === "sounds") {
-    return (
-      <PlaceholderPanel
-        title={t.soundsSection}
-        description={
-          language.startsWith("zh")
-            ? "为每个事件挑一个声音,或者干脆静音。"
-            : "Pick a sound for each event, or mute the whole thing."
-        }
-      />
-    );
-  }
+  if (section.kind === "sounds") return <SoundsPanel />;
 
   if (section.kind === "privacy") return <PrivacyPanel />;
 

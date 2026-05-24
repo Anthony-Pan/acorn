@@ -93,7 +93,6 @@ export function SettingsSidebar({
           label={t.soundsSection}
           selected={selectedKey === "sounds"}
           onClick={() => onSelect({ kind: "sounds" })}
-          comingSoonLabel={t.comingSoonBadge}
         />
         <SectionRow
           icon={<Cookie className="w-3.5 h-3.5" />}

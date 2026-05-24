@@ -647,10 +647,7 @@ function Bubble({ message }: { message: Message }) {
     return (
       <div className="group flex justify-start gap-1.5 items-start">
         <div className="max-w-[80%] flex flex-col items-start">
-          <div
-            title={tooltip}
-            className={cn("text-sm leading-relaxed prose prose-sm prose-stone")}
-          >
+          <div title={tooltip} className={cn("text-sm leading-relaxed prose prose-sm prose-stone")}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
