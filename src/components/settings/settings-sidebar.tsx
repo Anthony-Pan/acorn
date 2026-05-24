@@ -1,4 +1,15 @@
-import { Check, Keyboard, Settings as SettingsIcon, Sparkles } from "lucide-react";
+import {
+  Bell,
+  Check,
+  Cookie,
+  Info,
+  Keyboard,
+  Monitor,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  Sparkles,
+  Sprout,
+} from "lucide-react";
 
 import { strings } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -8,6 +19,12 @@ import type { ProviderCategory, ProviderMetadata } from "@/types/ai";
 export type SettingsSection =
   | { kind: "general" }
   | { kind: "shortcuts" }
+  | { kind: "mascot" }
+  | { kind: "display" }
+  | { kind: "sounds" }
+  | { kind: "privacy" }
+  | { kind: "memory" }
+  | { kind: "about" }
   | { kind: "provider"; providerId: string };
 
 export function sectionKey(section: SettingsSection): string {
@@ -58,6 +75,47 @@ export function SettingsSidebar({
           selected={selectedKey === "shortcuts"}
           onClick={() => onSelect({ kind: "shortcuts" })}
         />
+        <SectionRow
+          icon={<Sprout className="w-3.5 h-3.5" />}
+          label={t.mascotSection}
+          selected={selectedKey === "mascot"}
+          onClick={() => onSelect({ kind: "mascot" })}
+          comingSoonLabel={t.comingSoonBadge}
+        />
+        <SectionRow
+          icon={<Monitor className="w-3.5 h-3.5" />}
+          label={t.displaySection}
+          selected={selectedKey === "display"}
+          onClick={() => onSelect({ kind: "display" })}
+          comingSoonLabel={t.comingSoonBadge}
+        />
+        <SectionRow
+          icon={<Bell className="w-3.5 h-3.5" />}
+          label={t.soundsSection}
+          selected={selectedKey === "sounds"}
+          onClick={() => onSelect({ kind: "sounds" })}
+          comingSoonLabel={t.comingSoonBadge}
+        />
+        <SectionRow
+          icon={<Cookie className="w-3.5 h-3.5" />}
+          label={t.privacySection}
+          selected={selectedKey === "privacy"}
+          onClick={() => onSelect({ kind: "privacy" })}
+          comingSoonLabel={t.comingSoonBadge}
+        />
+        <SectionRow
+          icon={<ShieldCheck className="w-3.5 h-3.5" />}
+          label={t.memorySection}
+          selected={selectedKey === "memory"}
+          onClick={() => onSelect({ kind: "memory" })}
+          comingSoonLabel={t.comingSoonBadge}
+        />
+        <SectionRow
+          icon={<Info className="w-3.5 h-3.5" />}
+          label={t.aboutSection}
+          selected={selectedKey === "about"}
+          onClick={() => onSelect({ kind: "about" })}
+        />
       </div>
 
       <GroupLabel>{t.modelsGroup}</GroupLabel>
@@ -107,9 +165,10 @@ interface SectionRowProps {
   label: string;
   selected: boolean;
   onClick: () => void;
+  comingSoonLabel?: string;
 }
 
-function SectionRow({ icon, label, selected, onClick }: SectionRowProps) {
+function SectionRow({ icon, label, selected, onClick, comingSoonLabel }: SectionRowProps) {
   return (
     <button
       type="button"
@@ -121,6 +180,11 @@ function SectionRow({ icon, label, selected, onClick }: SectionRowProps) {
     >
       <span className="text-acorn-orange/80 flex-shrink-0">{icon}</span>
       <span className="flex-1 truncate">{label}</span>
+      {comingSoonLabel ? (
+        <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70 px-1 py-px rounded bg-muted/60">
+          {comingSoonLabel}
+        </span>
+      ) : null}
     </button>
   );
 }

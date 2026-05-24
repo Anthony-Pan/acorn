@@ -38,6 +38,20 @@ interface UiStrings {
   modelsGroup: string;
   generalSection: string;
   shortcutsSection: string;
+  mascotSection: string;
+  displaySection: string;
+  soundsSection: string;
+  privacySection: string;
+  memorySection: string;
+  aboutSection: string;
+  comingSoonBadge: string;
+  aboutPanelTitle: string;
+  aboutPanelSubtitle: string;
+  aboutVersionLabel: string;
+  aboutBuildLabel: string;
+  aboutRepoLabel: string;
+  aboutLicenseLabel: string;
+  aboutLicenseValue: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -95,6 +109,20 @@ const EN: UiStrings = {
   modelsGroup: "Models",
   generalSection: "General",
   shortcutsSection: "Shortcuts",
+  mascotSection: "Mascot",
+  displaySection: "Display",
+  soundsSection: "Sounds",
+  privacySection: "Privacy",
+  memorySection: "Memory",
+  aboutSection: "About",
+  comingSoonBadge: "SOON",
+  aboutPanelTitle: "About Acorn",
+  aboutPanelSubtitle: "Build info, license, and a link back to the repo.",
+  aboutVersionLabel: "Version",
+  aboutBuildLabel: "Build",
+  aboutRepoLabel: "Repository",
+  aboutLicenseLabel: "License",
+  aboutLicenseValue: "MIT",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -151,6 +179,20 @@ const ZH: UiStrings = {
   modelsGroup: "模型",
   generalSection: "通用",
   shortcutsSection: "快捷键",
+  mascotSection: "桌面伴侣",
+  displaySection: "显示",
+  soundsSection: "音效",
+  privacySection: "隐私",
+  memorySection: "共享记忆",
+  aboutSection: "关于",
+  comingSoonBadge: "即将",
+  aboutPanelTitle: "关于 Acorn",
+  aboutPanelSubtitle: "版本信息、协议、以及仓库链接。",
+  aboutVersionLabel: "版本",
+  aboutBuildLabel: "构建",
+  aboutRepoLabel: "仓库",
+  aboutLicenseLabel: "协议",
+  aboutLicenseValue: "MIT",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",
