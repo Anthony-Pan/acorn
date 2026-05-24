@@ -1,6 +1,7 @@
 import { formatDistanceToNowStrict } from "date-fns";
 import {
   ArrowLeft,
+  Download,
   Loader2,
   MessageSquare,
   Plus,
@@ -12,6 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { toast } from "sonner";
 import { AcornLogo } from "@/components/acorn-logo";
 import { Button } from "@/components/ui/button";
 import { VoiceButton } from "@/components/voice-button";
@@ -82,12 +84,34 @@ export function ChatView({ onBack }: ChatViewProps) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="flex items-center justify-between px-7 py-4 border-b-[0.5px] border-border">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <AcornLogo size={22} />
             <div className="text-sm font-medium text-foreground truncate">
               {current?.title ?? "Chatting with Acorn"}
             </div>
           </div>
+          {current && current.messages.length > 0 ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const markdown = conversationToMarkdown(current);
+                try {
+                  await navigator.clipboard.writeText(markdown);
+                  toast.success("Conversation copied as markdown", {
+                    description: `${current.messages.length} messages.`,
+                  });
+                } catch (err) {
+                  toast.error("Could not copy", {
+                    description: err instanceof Error ? err.message : String(err),
+                  });
+                }
+              }}
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export
+            </Button>
+          ) : null}
         </header>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-7 py-5">
@@ -261,6 +285,19 @@ function ConversationRow({
       </button>
     </div>
   );
+}
+
+function conversationToMarkdown(
+  conv: NonNullable<ReturnType<typeof useChatStore.getState>["current"]>,
+): string {
+  const lines: string[] = [`# ${conv.title}`, ""];
+  for (const msg of conv.messages) {
+    if (msg.role === "tool") continue;
+    if (!msg.content.trim()) continue;
+    const label = msg.role === "user" ? "## You" : "## Acorn";
+    lines.push(label, "", msg.content.trim(), "");
+  }
+  return lines.join("\n");
 }
 
 function Bubble({ message }: { message: Message }) {
