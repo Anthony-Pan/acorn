@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { create } from "zustand";
 
 import { conversations as conversationsApi, chat as runChat } from "@/lib/chat";
+import { sounds } from "@/lib/sounds";
 import { useSessionStore } from "@/stores/session";
 import type { ChatEvent, Conversation, ConversationWithMessages, Message } from "@/types/chat";
 
@@ -140,10 +141,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const refreshed = await conversationsApi.get(conversation.id);
       set({ current: refreshed, phase: "idle", activeTools: [] });
       await useSessionStore.getState().hydrate();
+      sounds.chime();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       set({ phase: "idle", error: message });
       toast.error("Chat failed", { description: message });
+      sounds.error();
     }
   },
 }));
