@@ -58,6 +58,7 @@ export function ChatView({ onBack }: ChatViewProps) {
       return 1;
     }
   });
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
 
   useEffect(() => {
     if (!current && conversations.length === 0) {
@@ -102,6 +103,19 @@ export function ChatView({ onBack }: ChatViewProps) {
       titleInputRef.current?.select();
     }
   }, [titleDraft]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    function handleScroll() {
+      if (!el) return;
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShowScrollToBottom(distance > 120);
+    }
+    el.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [current?.id]);
 
   const handleDeleteConversation = async (conversationId: string) => {
     await conversationsApi.delete(conversationId);
@@ -182,7 +196,7 @@ export function ChatView({ onBack }: ChatViewProps) {
         onBack={onBack}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative">
         <header className="flex items-center justify-between px-7 py-4 border-b-[0.5px] border-border">
           <div className="flex items-center gap-2.5 min-w-0">
             <AcornLogo size={22} />
@@ -311,11 +325,31 @@ export function ChatView({ onBack }: ChatViewProps) {
           </div>
         </div>
 
+        {showScrollToBottom ? (
+          <button
+            type="button"
+            aria-label="Scroll to bottom"
+            onClick={() =>
+              scrollRef.current?.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: "smooth",
+              })
+            }
+            className="absolute bottom-32 right-7 z-20 bg-card border-[0.5px] border-border rounded-full shadow-sm hover:bg-muted/60 transition-colors w-9 h-9 inline-flex items-center justify-center text-muted-foreground hover:text-foreground"
+          >
+            ↓
+          </button>
+        ) : null}
         <footer className="border-t-[0.5px] border-border px-7 py-4">
           <div className="max-w-2xl mx-auto">
             {!activeProviderId ? (
               <div className="text-xs text-muted-foreground mb-2">
                 Configure a provider in Settings before you can chat.
+              </div>
+            ) : null}
+            {draft.length > 500 ? (
+              <div className="text-[10px] text-muted-foreground mb-1.5 text-right">
+                {draft.length.toLocaleString()} characters
               </div>
             ) : null}
             <div className="flex items-end gap-2">
