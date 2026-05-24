@@ -46,7 +46,7 @@ public struct AnthropicProvider: Provider {
         let body = AnthropicRequestBody(
             model: model,
             maxTokens: maxTokens,
-            system: DecomposePrompts.systemPrompt(language: request.language),
+            system: DecomposePrompts.systemPrompt(language: request.language, sharedMemory: request.userContext),
             messages: [
                 AnthropicMessage(role: "user", content: DecomposePrompts.userPrompt(request)),
             ],

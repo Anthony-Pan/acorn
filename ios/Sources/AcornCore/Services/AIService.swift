@@ -6,17 +6,23 @@ public actor AIService {
     private let providerConfigs: ProviderConfigService
     private let sessions: SessionService
     private let tasks: TaskService
+    private let memory: MemoryService
+    private let activity: ActivityService
 
     public init(
         database: AppDatabase,
         providerConfigs: ProviderConfigService,
         sessions: SessionService,
-        tasks: TaskService
+        tasks: TaskService,
+        memory: MemoryService,
+        activity: ActivityService
     ) {
         self.database = database
         self.providerConfigs = providerConfigs
         self.sessions = sessions
         self.tasks = tasks
+        self.memory = memory
+        self.activity = activity
     }
 
     public nonisolated func listProviders() -> [ProviderMetadata] {
@@ -74,11 +80,15 @@ public actor AIService {
                 do {
                     let session = try await sessions.create(rawInput: rawInput, language: language)
                     continuation.yield(.sessionCreated(session))
+                    try? await activity.record(kind: .stash, content: rawInput)
 
-                    let stream = decompose(
-                        providerId: providerId,
-                        request: DecomposeRequest(rawInput: rawInput, language: language)
+                    let sharedMemory = (try? await memory.read()) ?? ""
+                    let request = DecomposeRequest(
+                        rawInput: rawInput,
+                        language: language,
+                        userContext: sharedMemory.isEmpty ? nil : sharedMemory
                     )
+                    let stream = decompose(providerId: providerId, request: request)
 
                     var orderCounter: Int64 = 0
                     var capturedSummary = ""

@@ -42,7 +42,7 @@ public struct FoundationModelsProvider: Provider {
                     try await validateCredentials()
                     let session = LanguageModelSession(
                         instructions: Instructions(
-                            DecomposePrompts.systemPrompt(language: request.language)
+                            DecomposePrompts.systemPrompt(language: request.language, sharedMemory: request.userContext)
                         )
                     )
                     let stream = session.streamResponse(

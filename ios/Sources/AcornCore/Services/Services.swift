@@ -8,6 +8,10 @@ public struct Services: Sendable {
     public let settings: SettingsService
     public let ai: AIService
     public let speech: SpeechService
+    public let memory: MemoryService
+    public let activity: ActivityService
+    public let canvases: CanvasService
+    public let search: SearchService
 
     public init(database: AppDatabase) {
         self.database = database
@@ -15,15 +19,23 @@ public struct Services: Sendable {
         let tasks = TaskService(database: database)
         let providerConfigs = ProviderConfigService(database: database)
         let settings = SettingsService(database: database)
+        let memory = MemoryService(settings: settings)
+        let activity = ActivityService(database: database)
         self.sessions = sessions
         self.tasks = tasks
         self.providerConfigs = providerConfigs
         self.settings = settings
+        self.memory = memory
+        self.activity = activity
+        self.canvases = CanvasService(database: database)
+        self.search = SearchService(database: database)
         self.ai = AIService(
             database: database,
             providerConfigs: providerConfigs,
             sessions: sessions,
-            tasks: tasks
+            tasks: tasks,
+            memory: memory,
+            activity: activity
         )
         self.speech = SpeechService(providerConfigs: providerConfigs, settings: settings)
     }

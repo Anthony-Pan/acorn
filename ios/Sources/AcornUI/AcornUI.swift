@@ -25,7 +25,7 @@ public struct AcornRootContainer: View {
                         removal: .opacity
                     ))
             case .settings:
-                SettingsView()
+                SettingsView(services: services)
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),
                         removal: .opacity

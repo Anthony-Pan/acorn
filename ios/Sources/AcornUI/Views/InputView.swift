@@ -147,7 +147,7 @@ public struct InputView: View {
 
             VoiceButton(
                 speech: speechService,
-                language: settings.language
+                language: settings.speechLanguage ?? settings.language
             ) { transcript in
                 if text.isEmpty {
                     text = transcript

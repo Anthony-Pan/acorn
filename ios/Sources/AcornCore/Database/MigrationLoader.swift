@@ -16,6 +16,8 @@ public enum MigrationLoader {
         File(identifier: "0002_chat", resourceName: "0002_chat"),
         File(identifier: "0003_search", resourceName: "0003_search"),
         File(identifier: "0004_speech_providers", resourceName: "0004_speech_providers"),
+        File(identifier: "0005_activity_log", resourceName: "0005_activity_log"),
+        File(identifier: "0006_canvases", resourceName: "0006_canvases"),
     ]
 
     public enum LoadError: Error, CustomStringConvertible {

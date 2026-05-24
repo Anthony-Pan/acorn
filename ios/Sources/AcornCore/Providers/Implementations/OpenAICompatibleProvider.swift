@@ -47,7 +47,7 @@ public struct OpenAICompatibleProvider: Provider {
         let body = OpenAIRequestBody(
             model: model,
             messages: [
-                .init(role: "system", content: DecomposePrompts.systemPrompt(language: request.language)),
+                .init(role: "system", content: DecomposePrompts.systemPrompt(language: request.language, sharedMemory: request.userContext)),
                 .init(role: "user", content: DecomposePrompts.userPrompt(request)),
             ],
             temperature: temperature,

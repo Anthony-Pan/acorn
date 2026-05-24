@@ -16,7 +16,10 @@ public struct SettingRow: Codable, Sendable, FetchableRecord, MutablePersistable
 public enum SettingKey: String, Sendable, CaseIterable {
     case activeProvider = "active_provider"
     case activeSpeechProvider = "active_speech_provider"
+    case activeSpeechLanguage = "active_speech_language"
     case theme
     case language
     case summonShortcut = "summon_shortcut"
+    case sharedMemory = "shared_memory"
+    case soundsMuted = "sounds_muted"
 }

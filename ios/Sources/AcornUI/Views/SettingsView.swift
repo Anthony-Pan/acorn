@@ -5,57 +5,21 @@ public struct SettingsView: View {
     @Environment(SettingsStore.self) private var settings
     @Environment(ProvidersStore.self) private var providers
     @Environment(AppRouter.self) private var router
+    let services: Services
 
-    public init() {}
+    public init(services: Services) {
+        self.services = services
+    }
 
     public var body: some View {
         NavigationStack {
             List {
-                Section("Active provider") {
-                    ForEach(providers.catalog.filter { $0.status == .available || $0.status == .platformUnsupported }) { metadata in
-                        ProviderRow(
-                            metadata: metadata,
-                            isActive: settings.activeProviderId == metadata.id,
-                            hasCredentials: providers.hasCredentials[metadata.id] ?? !metadata.requiresApiKey,
-                            requiresKey: metadata.requiresApiKey,
-                            unsupported: metadata.status == .platformUnsupported,
-                            select: { _Concurrency.Task { await settings.setActiveProvider(metadata.id) } }
-                        )
-                    }
-                }
-
-                Section {
-                    if let activeMetadata = providers.metadata(for: settings.activeProviderId),
-                       activeMetadata.requiresApiKey {
-                        NavigationLink {
-                            CredentialsView(metadata: activeMetadata)
-                        } label: {
-                            Label(
-                                providers.hasCredentials[activeMetadata.id] == true
-                                    ? "Update API key for \(activeMetadata.displayName)"
-                                    : "Set API key for \(activeMetadata.displayName)",
-                                systemImage: "key.fill"
-                            )
-                        }
-                    }
-                }
-
-                Section("Acorn iOS") {
-                    LabeledContent("Version") {
-                        Text(AcornVersion.current).foregroundStyle(.secondary)
-                    }
-                    LabeledContent("macOS parity") {
-                        Text(AcornVersion.macOSEquivalent).foregroundStyle(.secondary)
-                    }
-                }
-
-                if let err = providers.lastError {
-                    Section {
-                        Text(err)
-                            .font(.acornCaption)
-                            .foregroundStyle(Color.dustyRose)
-                    }
-                }
+                generalSection
+                providersSection
+                credentialsSection
+                deviceSection
+                aboutSection
+                errorSection
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -67,6 +31,129 @@ public struct SettingsView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var generalSection: some View {
+        Section("General") {
+            NavigationLink {
+                AILanguagePicker()
+            } label: {
+                LabeledContent("AI language") {
+                    Text(currentAILanguageDisplay).foregroundStyle(.secondary)
+                }
+            }
+            NavigationLink {
+                SpeechLanguagePicker()
+            } label: {
+                LabeledContent("Voice language") {
+                    Text(currentSpeechLanguageDisplay).foregroundStyle(.secondary)
+                }
+            }
+            NavigationLink {
+                MemoryPanel()
+            } label: {
+                Label("Memory", systemImage: "brain")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var providersSection: some View {
+        Section("Providers") {
+            ForEach(visibleProviders) { metadata in
+                ProviderRow(
+                    metadata: metadata,
+                    isActive: settings.activeProviderId == metadata.id,
+                    hasCredentials: providers.hasCredentials[metadata.id] ?? !metadata.requiresApiKey,
+                    requiresKey: metadata.requiresApiKey,
+                    unsupported: metadata.status == .platformUnsupported,
+                    select: { selectProvider(metadata.id) }
+                )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var credentialsSection: some View {
+        if let activeMetadata = providers.metadata(for: settings.activeProviderId),
+           activeMetadata.requiresApiKey {
+            Section {
+                NavigationLink {
+                    CredentialsView(metadata: activeMetadata)
+                } label: {
+                    Label(
+                        providers.hasCredentials[activeMetadata.id] == true
+                            ? "Update API key for \(activeMetadata.displayName)"
+                            : "Set API key for \(activeMetadata.displayName)",
+                        systemImage: "key.fill"
+                    )
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var deviceSection: some View {
+        Section("Device") {
+            NavigationLink {
+                PrivacyPanel(services: services)
+            } label: {
+                Label("Privacy & activity log", systemImage: "lock.shield")
+            }
+            Toggle(isOn: soundsMutedBinding) {
+                Label("Mute sounds", systemImage: "speaker.slash")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var aboutSection: some View {
+        Section {
+            NavigationLink {
+                AboutPanel()
+            } label: {
+                Label("About Acorn", systemImage: "info.circle")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var errorSection: some View {
+        if let err = providers.lastError {
+            Section {
+                Text(err)
+                    .font(.acornCaption)
+                    .foregroundStyle(Color.dustyRose)
+            }
+        }
+    }
+
+    private var visibleProviders: [ProviderMetadata] {
+        providers.catalog.filter { $0.status == .available || $0.status == .platformUnsupported }
+    }
+
+    private var soundsMutedBinding: Binding<Bool> {
+        Binding(
+            get: { settings.soundsMuted },
+            set: { value in _Concurrency.Task { await settings.setSoundsMuted(value) } }
+        )
+    }
+
+    private func selectProvider(_ id: String) {
+        _Concurrency.Task { await settings.setActiveProvider(id) }
+    }
+
+    private var currentAILanguageDisplay: String {
+        SettingsStore.availableAILanguages()
+            .first(where: { $0.code == settings.language })?
+            .displayName
+            ?? settings.language
+    }
+
+    private var currentSpeechLanguageDisplay: String {
+        guard let id = settings.speechLanguage else { return "Auto" }
+        return Locale.current.localizedString(forIdentifier: id) ?? id
     }
 }
 

@@ -28,7 +28,25 @@ public actor SpeechService {
     ) async throws -> TranscribeOutcome {
         let metadata = await resolveActive()
         let provider = try await makeProvider(metadata: metadata)
-        return try await provider.transcribe(audio: audio, mimeType: mimeType, language: language)
+        let effectiveLanguage: String?
+        if let language, !language.isEmpty {
+            effectiveLanguage = language
+        } else {
+            effectiveLanguage = try? await settings.get(.activeSpeechLanguage)
+        }
+        return try await provider.transcribe(audio: audio, mimeType: mimeType, language: effectiveLanguage)
+    }
+
+    public func activeSpeechLanguage() async -> String? {
+        try? await settings.get(.activeSpeechLanguage)
+    }
+
+    public func setActiveSpeechLanguage(_ identifier: String?) async throws {
+        if let id = identifier, !id.isEmpty {
+            try await settings.set(.activeSpeechLanguage, value: id)
+        } else {
+            try await settings.remove(.activeSpeechLanguage)
+        }
     }
 
     private func makeProvider(metadata: SpeechProviderMetadata) async throws -> any SpeechProvider {
