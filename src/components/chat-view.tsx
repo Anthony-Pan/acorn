@@ -328,6 +328,12 @@ function ConversationSidebar({
   onDelete,
   onBack,
 }: ConversationSidebarProps) {
+  const [filter, setFilter] = useState("");
+  const normalized = filter.trim().toLowerCase();
+  const visible = normalized
+    ? conversations.filter((c) => c.title.toLowerCase().includes(normalized))
+    : conversations;
+
   return (
     <aside className="w-60 flex-shrink-0 border-r-[0.5px] border-border flex flex-col">
       <div className="px-3 py-3 border-b-[0.5px] border-border flex items-center gap-2">
@@ -340,13 +346,29 @@ function ConversationSidebar({
         </Button>
       </div>
 
+      {conversations.length > 4 ? (
+        <div className="px-3 pt-2">
+          <input
+            type="search"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Filter chats"
+            className="w-full text-xs bg-card border-[0.5px] border-border rounded-md px-2 py-1.5 focus:outline-none focus:border-acorn-orange placeholder:text-muted-foreground/70"
+          />
+        </div>
+      ) : null}
+
       <div className="flex-1 overflow-y-auto py-2">
         {conversations.length === 0 ? (
           <div className="px-4 py-6 text-xs text-muted-foreground">
             No chats yet. Start one above.
           </div>
+        ) : visible.length === 0 ? (
+          <div className="px-4 py-6 text-xs text-muted-foreground">
+            No chats match "{filter.trim()}".
+          </div>
         ) : (
-          conversations.map((conv) => (
+          visible.map((conv) => (
             <ConversationRow
               key={conv.id}
               conversation={conv}
