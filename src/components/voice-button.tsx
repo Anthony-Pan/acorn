@@ -1,4 +1,7 @@
+import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Loader2, Mic, Square } from "lucide-react";
+import { useEffect } from "react";
 
 import { VoiceHalo } from "@/components/voice-halo";
 import { useRecorder } from "@/hooks/use-recorder";
@@ -27,6 +30,28 @@ export function VoiceButton({ onTranscript, onError }: VoiceButtonProps) {
       onError?.(err instanceof Error ? err : new Error(String(err)));
     }
   };
+
+  useEffect(() => {
+    const unlisten = listen("shortcut:push-to-talk", async () => {
+      try {
+        const win = getCurrentWindow();
+        await win.show();
+        await win.setFocus();
+        if (state === "idle") {
+          await start();
+        } else if (state === "recording") {
+          const text = await stopAndTranscribe();
+          if (text.trim()) onTranscript(text.trim());
+        }
+      } catch (err) {
+        cancel();
+        onError?.(err instanceof Error ? err : new Error(String(err)));
+      }
+    });
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, [state, start, stopAndTranscribe, cancel, onTranscript, onError]);
 
   const label =
     state === "recording" ? "Stop" : state === "transcribing" ? "Transcribing" : "Voice";
