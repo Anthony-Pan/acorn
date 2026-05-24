@@ -145,7 +145,7 @@ public enum ProviderCatalog {
             defaultEndpoint: "on-device",
             requiresApiKey: false,
             featured: true,
-            status: .comingSoon
+            status: .available
         ),
         ProviderMetadata(
             id: "gemini",

@@ -7,12 +7,16 @@ public struct InputView: View {
     @Environment(ProvidersStore.self) private var providers
     @Environment(AppRouter.self) private var router
 
+    let speechService: SpeechService
+
     @State private var text: String = ""
     @State private var isWorking = false
     @State private var errorMessage: String?
     @FocusState private var editorFocused: Bool
 
-    public init() {}
+    public init(speechService: SpeechService) {
+        self.speechService = speechService
+    }
 
     public var body: some View {
         NavigationStack {
@@ -115,29 +119,42 @@ public struct InputView: View {
     }
 
     private var stashButton: some View {
-        Button {
-            stash()
-        } label: {
-            HStack {
-                Spacer()
-                if isWorking {
-                    ProgressView().tint(.white)
-                } else {
-                    Text("Stash it 🌰")
-                        .font(.acornButton)
+        HStack(spacing: 12) {
+            Button {
+                stash()
+            } label: {
+                HStack {
+                    Spacer()
+                    if isWorking {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text("Stash it 🌰")
+                            .font(.acornButton)
+                    }
+                    Spacer()
                 }
-                Spacer()
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.acornAccent.gradient)
+                )
+                .foregroundStyle(.white)
+                .shadow(color: Color.acornAccent.opacity(0.45), radius: 12, x: 0, y: 5)
             }
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.acornAccent.gradient)
-            )
-            .foregroundStyle(.white)
-            .shadow(color: Color.acornAccent.opacity(0.45), radius: 12, x: 0, y: 5)
+            .buttonStyle(.plain)
+            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isWorking)
+
+            VoiceButton(
+                speech: speechService,
+                language: settings.language
+            ) { transcript in
+                if text.isEmpty {
+                    text = transcript
+                } else {
+                    text += "\n" + transcript
+                }
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isWorking)
     }
 
     private func stash() {

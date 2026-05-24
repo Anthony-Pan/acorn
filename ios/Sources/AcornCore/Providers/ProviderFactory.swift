@@ -57,7 +57,19 @@ public enum ProviderFactory {
         case .acornCloud:
             throw ProviderError.notImplemented("Acorn Cloud lands in v2.")
         case .foundationModels:
-            throw ProviderError.notImplemented("Apple FoundationModels integration lands in a later PR.")
+            #if canImport(FoundationModels)
+            if #available(iOS 26.0, macOS 26.0, visionOS 26.0, *) {
+                return FoundationModelsProvider(metadata: inputs.metadata)
+            } else {
+                throw ProviderError.platformUnsupported(
+                    "Apple Intelligence requires iOS 26 or later. Pick a cloud provider in Settings."
+                )
+            }
+            #else
+            throw ProviderError.notImplemented(
+                "FoundationModels framework not available in this toolchain."
+            )
+            #endif
         }
     }
 }
