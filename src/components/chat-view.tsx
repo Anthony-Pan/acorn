@@ -20,6 +20,7 @@ import { TaskActionCards } from "@/components/task-action-cards";
 import { Button } from "@/components/ui/button";
 import { VoiceButton } from "@/components/voice-button";
 import { conversations as conversationsApi } from "@/lib/chat";
+import { type SearchHit, search } from "@/lib/search";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
@@ -405,10 +406,49 @@ function ConversationSidebar({
   onBack,
 }: ConversationSidebarProps) {
   const [filter, setFilter] = useState("");
+  const [hits, setHits] = useState<SearchHit[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const query = filter.trim();
+    if (query.length < 3) {
+      setHits([]);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const handle = window.setTimeout(async () => {
+      try {
+        const results = await search.query(query, 25);
+        setHits(results);
+      } finally {
+        setSearching(false);
+      }
+    }, 250);
+    return () => window.clearTimeout(handle);
+  }, [filter]);
+
   const normalized = filter.trim().toLowerCase();
-  const visible = normalized
+  const titleMatches = normalized
     ? conversations.filter((c) => c.title.toLowerCase().includes(normalized))
     : conversations;
+  const hitsByConversation = new Map<string, SearchHit>();
+  for (const hit of hits) {
+    if (hit.source === "message" && hit.conversationId) {
+      const existing = hitsByConversation.get(hit.conversationId);
+      if (!existing) hitsByConversation.set(hit.conversationId, hit);
+    }
+  }
+  const contentMatches = Array.from(hitsByConversation.entries())
+    .map(([conversationId, hit]) => ({
+      conversation: conversations.find((c) => c.id === conversationId),
+      hit,
+    }))
+    .filter(
+      (entry): entry is { conversation: Conversation; hit: SearchHit } =>
+        entry.conversation !== undefined &&
+        !titleMatches.some((c) => c.id === entry.conversation?.id),
+    );
 
   return (
     <aside className="w-60 flex-shrink-0 border-r-[0.5px] border-border flex flex-col">
@@ -428,7 +468,7 @@ function ConversationSidebar({
             type="search"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="Filter chats"
+            placeholder="Filter chats / search content"
             className="w-full text-xs bg-card border-[0.5px] border-border rounded-md px-2 py-1.5 focus:outline-none focus:border-acorn-orange placeholder:text-muted-foreground/70"
           />
         </div>
@@ -439,23 +479,78 @@ function ConversationSidebar({
           <div className="px-4 py-6 text-xs text-muted-foreground">
             No chats yet. Start one above.
           </div>
-        ) : visible.length === 0 ? (
+        ) : titleMatches.length === 0 && contentMatches.length === 0 ? (
           <div className="px-4 py-6 text-xs text-muted-foreground">
-            No chats match "{filter.trim()}".
+            {searching ? "Searching…" : `No chats match "${filter.trim()}".`}
           </div>
         ) : (
-          visible.map((conv) => (
-            <ConversationRow
-              key={conv.id}
-              conversation={conv}
-              active={conv.id === activeId}
-              onSelect={() => onSelect(conv.id)}
-              onDelete={() => onDelete(conv.id)}
-            />
-          ))
+          <>
+            {titleMatches.map((conv) => (
+              <ConversationRow
+                key={conv.id}
+                conversation={conv}
+                active={conv.id === activeId}
+                onSelect={() => onSelect(conv.id)}
+                onDelete={() => onDelete(conv.id)}
+              />
+            ))}
+            {contentMatches.length > 0 ? (
+              <div className="mt-3">
+                <div className="px-4 mb-1 text-[9px] uppercase tracking-wider text-muted-foreground/70">
+                  In messages
+                </div>
+                {contentMatches.map(({ conversation, hit }) => (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => onSelect(conversation.id)}
+                    className="w-full text-left px-3 py-1.5 hover:bg-muted/60 text-xs"
+                  >
+                    <div className="text-foreground truncate">{conversation.title}</div>
+                    <div className="text-[10px] text-muted-foreground/80 truncate">
+                      <SnippetWithMarks raw={hit.snippet} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </>
         )}
       </div>
     </aside>
+  );
+}
+
+function SnippetWithMarks({ raw }: { raw: string }) {
+  const parts: { text: string; mark: boolean }[] = [];
+  let cursor = 0;
+  while (cursor < raw.length) {
+    const open = raw.indexOf("<<", cursor);
+    if (open === -1) {
+      parts.push({ text: raw.slice(cursor), mark: false });
+      break;
+    }
+    if (open > cursor) parts.push({ text: raw.slice(cursor, open), mark: false });
+    const close = raw.indexOf(">>", open + 2);
+    if (close === -1) {
+      parts.push({ text: raw.slice(open + 2), mark: true });
+      break;
+    }
+    parts.push({ text: raw.slice(open + 2, close), mark: true });
+    cursor = close + 2;
+  }
+  return (
+    <>
+      {parts.map((part, idx) =>
+        part.mark ? (
+          <mark key={`${idx}-m`} className="bg-acorn-orange/20 text-foreground rounded px-0.5">
+            {part.text}
+          </mark>
+        ) : (
+          <span key={`${idx}-t`}>{part.text}</span>
+        ),
+      )}
+    </>
   );
 }
 
