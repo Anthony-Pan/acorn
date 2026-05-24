@@ -134,6 +134,7 @@ pub fn run() {
             commands::activity::record_activity,
             commands::activity::list_recent_activity,
             commands::activity::clear_activity,
+            commands::updater::check_for_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
