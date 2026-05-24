@@ -9,6 +9,16 @@ use crate::error::{AppError, AppResult};
 pub const SHORTCUT_SETTING_KEY: &str = "summon_shortcut";
 pub const DEFAULT_SHORTCUT: &str = "CmdOrCtrl+Shift+KeyA";
 
+pub const PIN_SHORTCUT: &str = "CmdOrCtrl+Shift+KeyP";
+pub const SCREENSHOT_SHORTCUT: &str = "CmdOrCtrl+Shift+KeyJ";
+pub const PUSH_TO_TALK_SHORTCUT: &str = "CmdOrCtrl+Shift+KeyV";
+pub const QUICK_ASK_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
+
+pub const SHORTCUT_PIN_EVENT: &str = "shortcut:pin-response";
+pub const SHORTCUT_SCREENSHOT_EVENT: &str = "shortcut:screenshot";
+pub const SHORTCUT_PUSH_TO_TALK_EVENT: &str = "shortcut:push-to-talk";
+pub const SHORTCUT_QUICK_ASK_EVENT: &str = "shortcut:quick-ask";
+
 #[tauri::command(rename_all = "camelCase")]
 pub async fn get_summon_shortcut(db: State<'_, Database>) -> AppResult<String> {
     Ok(load_shortcut(&db)

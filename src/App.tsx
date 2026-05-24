@@ -51,6 +51,46 @@ function App() {
       if (event.payload === "settings") setView("settings");
     });
 
+    const unlistenPinShortcut = listen("shortcut:pin-response", async () => {
+      const main = getCurrentWindow();
+      await main.show();
+      await main.setFocus();
+      toast.message("Pin to desktop", {
+        description: "Pinning replies to the desktop lands in an upcoming Acorn release.",
+        id: "shortcut-pin",
+      });
+    });
+
+    const unlistenScreenshotShortcut = listen("shortcut:screenshot", async () => {
+      const main = getCurrentWindow();
+      await main.show();
+      await main.setFocus();
+      toast.message("Screenshot to chat", {
+        description: "Screen capture is on the roadmap and will attach images straight to chat.",
+        id: "shortcut-screenshot",
+      });
+    });
+
+    const unlistenPushToTalkShortcut = listen("shortcut:push-to-talk", async () => {
+      const main = getCurrentWindow();
+      await main.show();
+      await main.setFocus();
+      toast.message("Push to talk", {
+        description: "Hold-to-talk voice input ships with the next voice overhaul.",
+        id: "shortcut-ptt",
+      });
+    });
+
+    const unlistenQuickAskShortcut = listen("shortcut:quick-ask", async () => {
+      const window = getCurrentWindow();
+      await window.show();
+      await window.setFocus();
+      toast.message("Quick ask", {
+        description: "A Spotlight-style ask overlay is coming in a future release.",
+        id: "shortcut-quick-ask",
+      });
+    });
+
     const unlistenDeepLink = listen<string>("deep-link", async (event) => {
       const url = parseDeepLink(event.payload);
       if (!url) return;
@@ -77,6 +117,10 @@ function App() {
       void unlistenSubmit.then((fn) => fn());
       void unlistenNavigate.then((fn) => fn());
       void unlistenDeepLink.then((fn) => fn());
+      void unlistenPinShortcut.then((fn) => fn());
+      void unlistenScreenshotShortcut.then((fn) => fn());
+      void unlistenPushToTalkShortcut.then((fn) => fn());
+      void unlistenQuickAskShortcut.then((fn) => fn());
     };
   }, []);
 
