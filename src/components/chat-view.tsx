@@ -14,6 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AcornLogo } from "@/components/acorn-logo";
 import { NoteCards } from "@/components/note-cards";
+import { PinCards } from "@/components/pin-cards";
 import { TaskActionCards } from "@/components/task-action-cards";
 import { Button } from "@/components/ui/button";
 import { VoiceButton } from "@/components/voice-button";
@@ -291,6 +292,9 @@ function Bubble({ message }: { message: Message }) {
                 }
                 if (className === "language-note" || className === "language-notes") {
                   return <NoteCards raw={String(children).trim()} />;
+                }
+                if (className === "language-pin" || className === "language-pins") {
+                  return <PinCards raw={String(children).trim()} />;
                 }
                 return (
                   <code className={className} {...rest}>
