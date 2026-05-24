@@ -60,6 +60,12 @@ interface UiStrings {
   memoryHint: string;
   memorySavedToast: string;
   memoryClearedToast: string;
+  displayPanelTitle: string;
+  displayPanelSubtitle: string;
+  displayCornieLabel: string;
+  displayCornieCaption: string;
+  displaySoundsLabel: string;
+  displaySoundsCaption: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -141,6 +147,14 @@ const EN: UiStrings = {
   memoryHint: "Stored locally only.",
   memorySavedToast: "Memory saved",
   memoryClearedToast: "Memory cleared",
+  displayPanelTitle: "Display",
+  displayPanelSubtitle:
+    "Window companions and per-event feedback that live on top of every Acorn view.",
+  displayCornieLabel: "Show Cornie, the desktop mascot",
+  displayCornieCaption:
+    "A small bouncing acorn in the bottom-right corner. Click Cornie to dismiss it inline; bring it back here.",
+  displaySoundsLabel: "Play event sounds",
+  displaySoundsCaption: "A soft chime when a chat reply lands, a low tone when something fails.",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -214,13 +228,18 @@ const ZH: UiStrings = {
   memoryPanelTitle: "共享记忆",
   memoryPanelSubtitle:
     "Acorn 在所有 provider 和所有对话之间共享的笔记。只存本地,不会送到第三方,只会拼进下一次 AI 请求里。",
-  memoryPlaceholder:
-    "你希望每个 provider 都记住的事:工作时段、长期项目、宠物名字、一周节奏 ——任意一段文字。",
+  memoryPlaceholder: "你希望每个 provider 都记住的事:工作时段、长期项目、宠物名字、一周节奏 ——任意一段文字。",
   memorySaveButton: "保存",
   memoryClearButton: "清空",
   memoryHint: "仅存本地。",
   memorySavedToast: "记忆已保存",
   memoryClearedToast: "记忆已清空",
+  displayPanelTitle: "显示",
+  displayPanelSubtitle: "桌面陪伴和事件反馈,覆盖在所有 Acorn 视图之上。",
+  displayCornieLabel: "显示桌宠 Cornie",
+  displayCornieCaption: "右下角一只轻轻弹跳的小橡子。点 Cornie 可以暂时收起,在这里能再请回来。",
+  displaySoundsLabel: "播放事件提示音",
+  displaySoundsCaption: "AI 回复落地时有一声轻轻的叮,出错时是一个低音。",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",

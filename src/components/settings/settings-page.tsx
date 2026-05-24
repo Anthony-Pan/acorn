@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { AcornLogo } from "@/components/acorn-logo";
 import { AboutPanel } from "@/components/settings/about-panel";
+import { DisplayPanel } from "@/components/settings/display-panel";
 import { GeneralPanel } from "@/components/settings/general-panel";
 import { MemoryPanel } from "@/components/settings/memory-panel";
 import { PlaceholderPanel } from "@/components/settings/placeholder-panel";
@@ -90,18 +91,7 @@ function SettingsContent({ section }: { section: SettingsSection }) {
     );
   }
 
-  if (section.kind === "display") {
-    return (
-      <PlaceholderPanel
-        title={t.displaySection}
-        description={
-          language.startsWith("zh")
-            ? "窗口形态 / 顶栏胶囊 / Dock 图标可见性。"
-            : "Window shape, top-bar capsule, and Dock icon visibility."
-        }
-      />
-    );
-  }
+  if (section.kind === "display") return <DisplayPanel />;
 
   if (section.kind === "sounds") {
     return (
