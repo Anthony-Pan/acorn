@@ -1,6 +1,7 @@
 import { AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
+  FileText,
   MessageCircle,
   Plus,
   Settings as SettingsIcon,
@@ -19,6 +20,7 @@ interface AcornStashProps {
   onOpenSettings: () => void;
   onOpenChat: () => void;
   onOpenCalendar: () => void;
+  onOpenCanvas: () => void;
   onAddMore: () => void;
 }
 
@@ -26,6 +28,7 @@ export function AcornStash({
   onOpenSettings,
   onOpenChat,
   onOpenCalendar,
+  onOpenCanvas,
   onAddMore,
 }: AcornStashProps) {
   const current = useSessionStore((s) => s.current);
@@ -60,6 +63,9 @@ export function AcornStash({
             <Button variant="outline" size="sm" onClick={onOpenChat}>
               <MessageCircle />
               {t.chat}
+            </Button>
+            <Button variant="outline" size="icon-sm" onClick={onOpenCanvas} aria-label="Canvas">
+              <FileText className="w-3.5 h-3.5" />
             </Button>
             <Button variant="outline" size="icon-sm" onClick={onOpenCalendar} aria-label="Calendar">
               <CalendarDays />

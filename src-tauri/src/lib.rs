@@ -113,6 +113,11 @@ pub fn run() {
             commands::speech::get_active_speech_provider,
             commands::speech::set_active_speech_provider,
             commands::speech::transcribe_audio,
+            commands::canvas::list_canvases,
+            commands::canvas::get_canvas,
+            commands::canvas::create_canvas,
+            commands::canvas::update_canvas,
+            commands::canvas::delete_canvas,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

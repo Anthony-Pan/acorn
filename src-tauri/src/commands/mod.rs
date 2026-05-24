@@ -1,4 +1,5 @@
 pub mod ai;
+pub mod canvas;
 pub mod chat;
 pub mod conversation;
 pub mod provider_config;
