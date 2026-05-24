@@ -32,18 +32,36 @@ function App() {
 
   useEffect(() => {
     const LAST_BRIEF_KEY = "acorn:last-brief";
-    const MIN_INTERVAL_MS = 18 * 60 * 60 * 1000;
+    const LAST_RECAP_KEY = "acorn:last-recap";
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const briefIntervalMs = 18 * 60 * 60 * 1000;
+    const recapIntervalMs = 7 * DAY_MS;
+
     const timer = window.setTimeout(async () => {
       try {
         const lastBrief = Number.parseInt(localStorage.getItem(LAST_BRIEF_KEY) ?? "0", 10);
-        if (Number.isFinite(lastBrief) && Date.now() - lastBrief < MIN_INTERVAL_MS) return;
-        const brief = await activity.dailyBrief(24);
-        if (brief.totalEntries === 0) return;
-        localStorage.setItem(LAST_BRIEF_KEY, String(Date.now()));
-        toast.message("Yesterday at a glance", {
-          description: brief.summary,
-          duration: 10000,
-        });
+        if (!Number.isFinite(lastBrief) || Date.now() - lastBrief >= briefIntervalMs) {
+          const brief = await activity.dailyBrief(24);
+          if (brief.totalEntries > 0) {
+            localStorage.setItem(LAST_BRIEF_KEY, String(Date.now()));
+            toast.message("Yesterday at a glance", {
+              description: brief.summary,
+              duration: 10000,
+            });
+          }
+        }
+
+        const lastRecap = Number.parseInt(localStorage.getItem(LAST_RECAP_KEY) ?? "0", 10);
+        if (!Number.isFinite(lastRecap) || Date.now() - lastRecap >= recapIntervalMs) {
+          const recap = await activity.dailyBrief(24 * 7);
+          if (recap.totalEntries > 0) {
+            localStorage.setItem(LAST_RECAP_KEY, String(Date.now()));
+            toast.message("This week with Acorn", {
+              description: recap.summary,
+              duration: 12000,
+            });
+          }
+        }
       } catch {}
     }, 6_000);
     return () => window.clearTimeout(timer);
