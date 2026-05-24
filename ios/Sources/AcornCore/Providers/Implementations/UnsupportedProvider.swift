@@ -19,4 +19,8 @@ public struct UnsupportedProvider: Provider {
             continuation.finish(throwing: ProviderError.platformUnsupported(reason))
         }
     }
+
+    public func chat(turns: [ChatTurn], systemPrompt: String, temperature: Double) async throws -> String {
+        throw ProviderError.platformUnsupported(reason)
+    }
 }

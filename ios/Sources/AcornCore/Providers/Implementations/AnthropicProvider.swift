@@ -28,6 +28,38 @@ public struct AnthropicProvider: Provider {
         _ = try await callOnce(probe, maxTokens: 16, temperature: 0.0)
     }
 
+    public func chat(turns: [ChatTurn], systemPrompt: String, temperature: Double) async throws -> String {
+        let messages = turns.map { AnthropicMessage(role: $0.role, content: $0.content) }
+        let body = AnthropicRequestBody(
+            model: model,
+            maxTokens: 2048,
+            system: systemPrompt,
+            messages: messages,
+            temperature: temperature
+        )
+        var req = URLRequest(url: endpoint)
+        req.httpMethod = "POST"
+        req.addValue("application/json", forHTTPHeaderField: "content-type")
+        req.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+        req.addValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        req.httpBody = try JSONEncoder().encode(body)
+        let (data, response) = try await session.data(for: req)
+        guard let http = response as? HTTPURLResponse else {
+            throw ProviderError.network("No HTTP response from Anthropic.")
+        }
+        if http.statusCode == 401 { throw ProviderError.invalidKey }
+        if http.statusCode == 429 { throw ProviderError.rateLimited }
+        if !(200..<300).contains(http.statusCode) {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            throw ProviderError.providerResponse("Anthropic HTTP \(http.statusCode): \(body)")
+        }
+        let decoded = try JSONDecoder().decode(AnthropicResponse.self, from: data)
+        return decoded.content.compactMap { block -> String? in
+            if case .text(let t) = block { return t }
+            return nil
+        }.joined(separator: "\n")
+    }
+
     public func decompose(_ request: DecomposeRequest) -> AsyncThrowingStream<DecomposeEvent, Error> {
         AsyncThrowingStream { continuation in
             _Concurrency.Task {

@@ -12,6 +12,8 @@ public struct Services: Sendable {
     public let activity: ActivityService
     public let canvases: CanvasService
     public let search: SearchService
+    public let conversations: ConversationService
+    public let chat: ChatService
 
     public init(database: AppDatabase) {
         self.database = database
@@ -29,6 +31,15 @@ public struct Services: Sendable {
         self.activity = activity
         self.canvases = CanvasService(database: database)
         self.search = SearchService(database: database)
+        let conversations = ConversationService(database: database)
+        self.conversations = conversations
+        self.chat = ChatService(
+            conversations: conversations,
+            providerConfigs: providerConfigs,
+            memory: memory,
+            settings: settings,
+            activity: activity
+        )
         self.ai = AIService(
             database: database,
             providerConfigs: providerConfigs,

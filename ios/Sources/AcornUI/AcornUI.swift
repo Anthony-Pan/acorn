@@ -48,6 +48,12 @@ public struct AcornRootContainer: View {
                         insertion: .opacity,
                         removal: .opacity
                     ))
+            case .chat:
+                ChatView(services: services)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .opacity
+                    ))
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.82), value: router.route)

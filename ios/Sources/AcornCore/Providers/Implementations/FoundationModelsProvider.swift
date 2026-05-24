@@ -12,6 +12,17 @@ public struct FoundationModelsProvider: Provider {
         self.metadata = metadata
     }
 
+    public func chat(turns: [ChatTurn], systemPrompt: String, temperature: Double) async throws -> String {
+        try await validateCredentials()
+        let session = LanguageModelSession(instructions: Instructions(systemPrompt))
+        let userPrompt = turns.last(where: { $0.role == "user" })?.content ?? ""
+        let response = try await session.respond(
+            to: Prompt(userPrompt),
+            options: GenerationOptions(temperature: temperature)
+        )
+        return response.content
+    }
+
     public func validateCredentials() async throws {
         switch SystemLanguageModel.default.availability {
         case .available:

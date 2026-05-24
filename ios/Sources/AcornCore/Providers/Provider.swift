@@ -52,6 +52,7 @@ public protocol Provider: Sendable {
     var supportsTools: Bool { get }
     func decompose(_ request: DecomposeRequest) -> AsyncThrowingStream<DecomposeEvent, Error>
     func validateCredentials() async throws
+    func chat(turns: [ChatTurn], systemPrompt: String, temperature: Double) async throws -> String
 }
 
 public extension Provider {

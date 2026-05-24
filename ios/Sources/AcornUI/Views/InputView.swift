@@ -38,6 +38,11 @@ public struct InputView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Button {
+                            router.navigate(.chat)
+                        } label: {
+                            Label("Chat", systemImage: "bubble.left.and.bubble.right")
+                        }
+                        Button {
                             router.navigate(.history)
                         } label: {
                             Label("History", systemImage: "clock.arrow.circlepath")

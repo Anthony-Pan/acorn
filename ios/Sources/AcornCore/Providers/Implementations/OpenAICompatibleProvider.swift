@@ -28,6 +28,38 @@ public struct OpenAICompatibleProvider: Provider {
         _ = try await callOnce(probe, temperature: 0.0, maxTokens: 16)
     }
 
+    public func chat(turns: [ChatTurn], systemPrompt: String, temperature: Double) async throws -> String {
+        var messages: [OpenAIMessage] = [.init(role: "system", content: systemPrompt)]
+        messages.append(contentsOf: turns.map { OpenAIMessage(role: $0.role, content: $0.content) })
+        let body = OpenAIRequestBody(
+            model: model,
+            messages: messages,
+            temperature: temperature,
+            maxTokens: 2048,
+            responseFormat: nil
+        )
+        var req = URLRequest(url: endpoint)
+        req.httpMethod = "POST"
+        req.addValue("application/json", forHTTPHeaderField: "content-type")
+        req.addValue("Bearer \(apiKey)", forHTTPHeaderField: "authorization")
+        req.httpBody = try JSONEncoder().encode(body)
+        let (data, response) = try await session.data(for: req)
+        guard let http = response as? HTTPURLResponse else {
+            throw ProviderError.network("No HTTP response.")
+        }
+        if http.statusCode == 401 { throw ProviderError.invalidKey }
+        if http.statusCode == 429 { throw ProviderError.rateLimited }
+        if !(200..<300).contains(http.statusCode) {
+            let body = String(data: data, encoding: .utf8) ?? ""
+            throw ProviderError.providerResponse("HTTP \(http.statusCode) from \(metadata.displayName): \(body)")
+        }
+        let decoded = try JSONDecoder().decode(OpenAIResponseBody.self, from: data)
+        guard let content = decoded.choices.first?.message.content, !content.isEmpty else {
+            throw ProviderError.invalidResponse("Empty response from \(metadata.displayName).")
+        }
+        return content
+    }
+
     public func decompose(_ request: DecomposeRequest) -> AsyncThrowingStream<DecomposeEvent, Error> {
         AsyncThrowingStream { continuation in
             _Concurrency.Task {

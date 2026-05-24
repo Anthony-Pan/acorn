@@ -11,6 +11,7 @@ public final class AppRouter {
         case history
         case canvas
         case search
+        case chat
     }
 
     public var route: Route = .input
