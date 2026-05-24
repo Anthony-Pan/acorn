@@ -1,27 +1,37 @@
-// AcornApp — the application-level wiring layer.
-//
-// Once a sibling Xcode App target lands (future PR), its `@main` entry
-// point will instantiate `RootView` from this module and inject the
-// observable stores from `AcornCore`. Until then, this library compiles
-// standalone via SPM so CI can build it.
-
 import SwiftUI
 import AcornCore
 import AcornUI
 
-/// Top-level Acorn iOS view.
-///
-/// Currently just hosts `AcornPlaceholderView`. In PR #2+ this becomes the
-/// router root that switches between `InputView`, `StashView`, and
-/// `SettingsView` (see ../../PLAN.md §2.5).
 public struct RootView: View {
-    public init() {}
+    private let services: Services
+
+    @State private var router: AppRouter
+    @State private var settings: SettingsStore
+    @State private var providers: ProvidersStore
+    @State private var session: SessionStore
+
+    public init(services: Services) {
+        self.services = services
+        let router = AppRouter()
+        let settings = SettingsStore(service: services.settings)
+        let providers = ProvidersStore(service: services.providerConfigs)
+        let session = SessionStore(services: services)
+        _router = State(initialValue: router)
+        _settings = State(initialValue: settings)
+        _providers = State(initialValue: providers)
+        _session = State(initialValue: session)
+    }
 
     public var body: some View {
-        AcornPlaceholderView()
+        AcornRootContainer()
+            .environment(router)
+            .environment(settings)
+            .environment(providers)
+            .environment(session)
+            .task {
+                await settings.hydrate()
+                await providers.hydrate()
+                await session.hydrateLatestSession()
+            }
     }
-}
-
-#Preview("Root") {
-    RootView()
 }
