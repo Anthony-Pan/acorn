@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
@@ -62,13 +63,36 @@ function App() {
     });
 
     const unlistenScreenshotShortcut = listen("shortcut:screenshot", async () => {
-      const main = getCurrentWindow();
-      await main.show();
-      await main.setFocus();
-      toast.message("Screenshot to chat", {
-        description: "Screen capture is on the roadmap and will attach images straight to chat.",
-        id: "shortcut-screenshot",
-      });
+      try {
+        const savedPath = await invoke<string>("capture_primary_screen");
+        const main = getCurrentWindow();
+        await main.show();
+        await main.setFocus();
+        try {
+          await navigator.clipboard.writeText(savedPath);
+        } catch {}
+        const filename = savedPath.split("/").pop() ?? savedPath;
+        toast.success("Screenshot saved", {
+          description: `${filename} — path copied to clipboard.`,
+          id: "shortcut-screenshot",
+          duration: 8000,
+          action: {
+            label: "Reveal",
+            onClick: async () => {
+              try {
+                await invoke("plugin:opener|reveal_item_in_dir", { path: savedPath });
+              } catch (err) {
+                console.error("reveal failed", err);
+              }
+            },
+          },
+        });
+      } catch (err) {
+        toast.error("Screenshot failed", {
+          description: err instanceof Error ? err.message : String(err),
+          id: "shortcut-screenshot-error",
+        });
+      }
     });
 
     const unlistenPushToTalkShortcut = listen("shortcut:push-to-talk", async () => {
