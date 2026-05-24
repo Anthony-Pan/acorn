@@ -1,6 +1,9 @@
 import Foundation
 import Observation
 import AcornCore
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 @MainActor
 @Observable
@@ -55,11 +58,20 @@ public final class SessionStore {
                     summary = s
                 case .done:
                     stashState = .done
+                    refreshWidget()
                 }
             }
         } catch {
             stashState = .failed(error.localizedDescription)
         }
+    }
+
+    private func refreshWidget() {
+        let snapshot = WidgetCache.fromTasks(tasks, summary: summary)
+        WidgetCache.write(snapshot)
+        #if canImport(WidgetKit) && os(iOS)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
     }
 
     public func hydrateLatestSession() async {
@@ -88,6 +100,7 @@ public final class SessionStore {
         }
         if let updated = try? await services.tasks.updateStatus(taskId: taskId, status: nextStatus) {
             tasks[idx] = updated
+            refreshWidget()
         }
     }
 
@@ -95,6 +108,7 @@ public final class SessionStore {
         if let updated = try? await services.tasks.updateStatus(taskId: taskId, status: .skipped) {
             if let idx = tasks.firstIndex(where: { $0.id == taskId }) {
                 tasks[idx] = updated
+                refreshWidget()
             }
         }
     }
