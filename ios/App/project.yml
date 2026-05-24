@@ -55,6 +55,8 @@ targets:
         NSMicrophoneUsageDescription: Acorn uses the microphone to capture your voice when you tap the record button. Audio is transcribed and immediately discarded.
         NSSpeechRecognitionUsageDescription: Acorn uses on-device speech recognition to turn your spoken thoughts into text without uploading them.
         NSAppleEventsUsageDescription: Acorn uses App Intents so Siri and Shortcuts can stash text into your day without opening the app.
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: true
     entitlements:
       path: AcornIOS/AcornIOS.entitlements
     settings:
@@ -97,6 +99,7 @@ targets:
         CFBundleVersion: "1"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSSupportsLiveActivities: true
     entitlements:
       path: AcornWidget/AcornWidget.entitlements
     settings:

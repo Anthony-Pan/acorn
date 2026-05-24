@@ -101,6 +101,7 @@ public final class SessionStore {
         if let updated = try? await services.tasks.updateStatus(taskId: taskId, status: nextStatus) {
             tasks[idx] = updated
             refreshWidget()
+            await syncLiveActivity(for: updated)
         }
     }
 
@@ -109,7 +110,23 @@ public final class SessionStore {
             if let idx = tasks.firstIndex(where: { $0.id == taskId }) {
                 tasks[idx] = updated
                 refreshWidget()
+                await syncLiveActivity(for: updated)
             }
         }
+    }
+
+    private func syncLiveActivity(for task: Task) async {
+        #if canImport(ActivityKit) && os(iOS)
+        guard #available(iOS 16.2, *) else { return }
+        switch task.status {
+        case .inProgress:
+            await TaskActivityController.start(for: task)
+            await TaskActivityController.update(for: task)
+        case .pending:
+            await TaskActivityController.end(for: task)
+        case .completed, .skipped:
+            await TaskActivityController.end(for: task)
+        }
+        #endif
     }
 }
