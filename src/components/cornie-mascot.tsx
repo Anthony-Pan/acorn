@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/stores/chat";
 
 interface CornieMascotProps {
   size?: number;
@@ -21,6 +22,8 @@ export function CornieMascot({ size = 48 }: CornieMascotProps) {
     }
   });
   const [chewing, setChewing] = useState(false);
+  const chatPhase = useChatStore((s) => s.phase);
+  const thinking = chatPhase === "thinking" || chatPhase === "tool" || chatPhase === "responding";
 
   useEffect(() => {
     if (hidden) return;
@@ -81,7 +84,7 @@ export function CornieMascot({ size = 48 }: CornieMascotProps) {
       title="Click to hide Cornie"
       className={cn(
         "fixed bottom-5 right-5 z-30",
-        chewing ? "cornie-chew" : "cornie-bounce",
+        chewing ? "cornie-chew" : thinking ? "cornie-think" : "cornie-bounce",
         "transition-transform duration-150 active:scale-90 hover:scale-105",
         "focus:outline-none",
       )}
@@ -152,10 +155,17 @@ const cornieKeyframes = `
   50%      { transform: scale(0.92, 1.08) translateY(-3px); }
   75%      { transform: scale(1.05, 0.95) translateY(1px); }
 }
+@keyframes cornie-think {
+  0%, 100% { transform: rotate(-3deg) translateY(0); }
+  50%      { transform: rotate(3deg)  translateY(-2px); }
+}
 .cornie-bounce {
   animation: cornie-bounce 2.4s ease-in-out infinite;
 }
 .cornie-chew {
   animation: cornie-chew 0.55s ease-in-out;
+}
+.cornie-think {
+  animation: cornie-think 1.1s ease-in-out infinite;
 }
 `;
