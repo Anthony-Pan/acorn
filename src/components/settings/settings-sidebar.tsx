@@ -100,7 +100,6 @@ export function SettingsSidebar({
           label={t.privacySection}
           selected={selectedKey === "privacy"}
           onClick={() => onSelect({ kind: "privacy" })}
-          comingSoonLabel={t.comingSoonBadge}
         />
         <SectionRow
           icon={<ShieldCheck className="w-3.5 h-3.5" />}

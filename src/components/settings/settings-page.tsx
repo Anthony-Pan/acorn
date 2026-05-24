@@ -7,6 +7,7 @@ import { DisplayPanel } from "@/components/settings/display-panel";
 import { GeneralPanel } from "@/components/settings/general-panel";
 import { MemoryPanel } from "@/components/settings/memory-panel";
 import { PlaceholderPanel } from "@/components/settings/placeholder-panel";
+import { PrivacyPanel } from "@/components/settings/privacy-panel";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
 import { ShortcutsPanel } from "@/components/settings/shortcuts-panel";
@@ -106,18 +107,7 @@ function SettingsContent({ section }: { section: SettingsSection }) {
     );
   }
 
-  if (section.kind === "privacy") {
-    return (
-      <PlaceholderPanel
-        title={t.privacySection}
-        description={
-          language.startsWith("zh")
-            ? "活动采集 · 黑名单 · 一键导出 / 清空。"
-            : "Activity capture, blocklists, and one-tap export or wipe."
-        }
-      />
-    );
-  }
+  if (section.kind === "privacy") return <PrivacyPanel />;
 
   if (section.kind === "memory") return <MemoryPanel />;
 
