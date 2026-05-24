@@ -10,14 +10,19 @@ use crate::ai::prompts::CHAT_SYSTEM_PROMPT;
 use crate::ai::provider::{build_provider, ProviderInputs};
 use crate::ai::tools::{execute_tool, tool_catalog};
 use crate::ai::{keychain, Provider};
+use crate::commands::tool_approval::ApprovalBroker;
 use crate::db::models::{Message, MessageRole, ProviderConfig};
 use crate::db::Database;
+
+const TOOL_CONFIRM_KEY: &str = "require_tool_confirm";
+const TOOL_APPROVAL_TIMEOUT_SECS: u64 = 30;
 
 const MAX_TOOL_ITERATIONS: usize = 5;
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn chat(
     db: State<'_, Database>,
+    broker: State<'_, ApprovalBroker>,
     provider_id: String,
     conversation_id: String,
     user_message: String,
@@ -82,8 +87,61 @@ pub async fn chat(
         )
         .await?;
 
+        let require_confirm = load_setting_value(db.pool(), TOOL_CONFIRM_KEY)
+            .await
+            .map(|v| v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false);
+
         for call in tool_calls {
             let _ = on_event.send(ChatEvent::ToolCall { call: call.clone() });
+
+            if require_confirm {
+                let request_id = Uuid::new_v4().to_string();
+                let receiver = broker.register(request_id.clone());
+                let _ = on_event.send(ChatEvent::ToolApprovalRequest {
+                    request_id: request_id.clone(),
+                    call: call.clone(),
+                });
+                let approved = match tokio::time::timeout(
+                    std::time::Duration::from_secs(TOOL_APPROVAL_TIMEOUT_SECS),
+                    receiver,
+                )
+                .await
+                {
+                    Ok(Ok(decision)) => decision,
+                    _ => {
+                        broker.forget(&request_id);
+                        false
+                    }
+                };
+                if !approved {
+                    let denied_payload =
+                        format!(r#"{{"error": "user denied tool '{}'"}}"#, call.name);
+                    let _ = on_event.send(ChatEvent::ToolDenied { call: call.clone() });
+                    let _ = on_event.send(ChatEvent::ToolResult {
+                        result: ToolResult {
+                            tool_call_id: call.id.clone(),
+                            content: denied_payload.clone(),
+                        },
+                    });
+                    chat_messages.push(ChatMessage {
+                        role: ChatRole::Tool,
+                        content: denied_payload.clone(),
+                        tool_calls: Vec::new(),
+                        tool_call_id: Some(call.id.clone()),
+                    });
+                    insert_message(
+                        db.pool(),
+                        &conversation_id,
+                        MessageRole::Tool,
+                        &denied_payload,
+                        None,
+                        Some(&call.id),
+                    )
+                    .await?;
+                    continue;
+                }
+            }
 
             let result_content = match execute_tool(db.pool(), &call.name, &call.arguments).await {
                 Ok(s) => s,
@@ -140,6 +198,18 @@ pub async fn chat(
     let _ = on_event.send(ChatEvent::Done);
 
     Ok(assistant)
+}
+
+async fn load_setting_value(pool: &sqlx::SqlitePool, key: &str) -> Option<String> {
+    let row: Option<(String,)> = sqlx::query_as("SELECT value FROM settings WHERE key = ?")
+        .bind(key)
+        .fetch_optional(pool)
+        .await
+        .ok()
+        .flatten();
+    row.map(|(v,)| v)
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
 }
 
 async fn insert_message(

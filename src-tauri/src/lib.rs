@@ -46,6 +46,7 @@ pub fn run() {
                 tauri::async_runtime::block_on(async { db::Database::initialize(&db_path).await })?;
 
             app.manage(database);
+            app.manage(commands::tool_approval::ApprovalBroker::default());
 
             #[cfg(target_os = "macos")]
             {
@@ -113,6 +114,7 @@ pub fn run() {
             commands::speech::get_active_speech_provider,
             commands::speech::set_active_speech_provider,
             commands::speech::transcribe_audio,
+            commands::tool_approval::respond_tool_approval,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

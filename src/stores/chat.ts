@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 import { create } from "zustand";
 
@@ -107,6 +108,35 @@ export const useChatStore = create<ChatState>((set, get) => ({
           phase: "tool",
           activeTools: [...s.activeTools, { id: event.call.id, name: event.call.name }],
         }));
+        return;
+      }
+      if (event.kind === "toolApprovalRequest") {
+        const requestId = event.requestId;
+        const toolName = event.call.name;
+        const argsPreview = JSON.stringify(event.call.arguments).slice(0, 80);
+        toast.message(`Confirm tool: ${toolName}`, {
+          description: argsPreview,
+          duration: 28000,
+          id: `tool-approval-${requestId}`,
+          action: {
+            label: "Allow",
+            onClick: () => {
+              void invoke("respond_tool_approval", { requestId, allow: true });
+            },
+          },
+          cancel: {
+            label: "Deny",
+            onClick: () => {
+              void invoke("respond_tool_approval", { requestId, allow: false });
+            },
+          },
+        });
+        return;
+      }
+      if (event.kind === "toolDenied") {
+        toast.warning(`${event.call.name} denied`, {
+          description: "Acorn will tell the model it was blocked.",
+        });
         return;
       }
       if (event.kind === "toolResult") {
