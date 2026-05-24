@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { create } from "zustand";
 
+import { activity } from "@/lib/activity";
 import { conversations as conversationsApi, chat as runChat } from "@/lib/chat";
 import { sounds } from "@/lib/sounds";
 import { useSessionStore } from "@/stores/session";
@@ -115,6 +116,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       activeTools: [],
       error: null,
     }));
+
+    void activity.record("chat:user-message", text).catch(() => {});
 
     const handleEvent = (event: ChatEvent) => {
       if (event.kind === "thinking") {

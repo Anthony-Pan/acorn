@@ -131,6 +131,9 @@ pub fn run() {
             commands::speech::get_active_speech_provider,
             commands::speech::set_active_speech_provider,
             commands::speech::transcribe_audio,
+            commands::activity::record_activity,
+            commands::activity::list_recent_activity,
+            commands::activity::clear_activity,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
