@@ -1,6 +1,7 @@
 import { formatDistanceToNowStrict } from "date-fns";
 import {
   ArrowLeft,
+  Copy,
   Loader2,
   MessageSquare,
   Plus,
@@ -12,6 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { toast } from "sonner";
 import { AcornLogo } from "@/components/acorn-logo";
 import { TaskActionCards } from "@/components/task-action-cards";
 import { Button } from "@/components/ui/button";
@@ -364,7 +366,7 @@ function Bubble({ message }: { message: Message }) {
     const hasToolHint = message.toolCalls !== null;
     if (!message.content.trim() && !hasToolHint) return null;
     return (
-      <div className="flex justify-start">
+      <div className="group flex justify-start gap-1.5 items-start">
         <div className={cn("max-w-[80%] text-sm leading-relaxed prose prose-sm prose-stone")}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -384,6 +386,25 @@ function Bubble({ message }: { message: Message }) {
             {message.content}
           </ReactMarkdown>
         </div>
+        {message.content.trim() ? (
+          <button
+            type="button"
+            aria-label="Copy reply"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(message.content);
+                toast.success("Copied");
+              } catch (err) {
+                toast.error("Could not copy", {
+                  description: err instanceof Error ? err.message : String(err),
+                });
+              }
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/60 mt-1 flex-shrink-0"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
+        ) : null}
       </div>
     );
   }
