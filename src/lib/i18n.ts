@@ -52,6 +52,13 @@ interface UiStrings {
   aboutRepoLabel: string;
   aboutLicenseLabel: string;
   aboutLicenseValue: string;
+  privacyPanelTitle: string;
+  privacyPanelSubtitle: string;
+  privacyRefreshButton: string;
+  privacyClearButton: string;
+  privacyEntryCount: (n: number) => string;
+  privacyEmptyState: string;
+  privacyClearedToast: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -123,6 +130,14 @@ const EN: UiStrings = {
   aboutRepoLabel: "Repository",
   aboutLicenseLabel: "License",
   aboutLicenseValue: "MIT",
+  privacyPanelTitle: "Privacy",
+  privacyPanelSubtitle:
+    "Everything Acorn has noticed about your day. Lives in a local SQLite file, never sent anywhere, and filtered through a sensitive-content blocklist before it's even written.",
+  privacyRefreshButton: "Refresh",
+  privacyClearButton: "Clear all",
+  privacyEntryCount: (n) => (n === 1 ? "1 entry" : `${n} entries`),
+  privacyEmptyState: "Nothing logged yet. Once you start chatting, entries show up here.",
+  privacyClearedToast: "Activity log cleared",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -193,6 +208,14 @@ const ZH: UiStrings = {
   aboutRepoLabel: "仓库",
   aboutLicenseLabel: "协议",
   aboutLicenseValue: "MIT",
+  privacyPanelTitle: "隐私",
+  privacyPanelSubtitle:
+    "Acorn 注意到的所有事:全部存在本地 SQLite 里,不会发到任何地方,写入前还过一遍敏感内容黑名单。",
+  privacyRefreshButton: "刷新",
+  privacyClearButton: "全部清空",
+  privacyEntryCount: (n) => `共 ${n} 条`,
+  privacyEmptyState: "暂时还没有记录。开始聊几句就有了。",
+  privacyClearedToast: "记录已清空",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",
