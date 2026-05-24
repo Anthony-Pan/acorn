@@ -8,6 +8,7 @@ import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
 import { ChatView } from "@/components/chat-view";
 import { SettingsPage } from "@/components/settings/settings-page";
+import { StatusCapsule } from "@/components/status-capsule";
 import { TaskInput } from "@/components/task-input";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
@@ -126,6 +127,7 @@ function App() {
           )}
         </motion.div>
       </AnimatePresence>
+      <StatusCapsule />
       <Toaster
         position="top-center"
         toastOptions={{
