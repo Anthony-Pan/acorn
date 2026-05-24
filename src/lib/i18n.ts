@@ -52,6 +52,13 @@ interface UiStrings {
   aboutRepoLabel: string;
   aboutLicenseLabel: string;
   aboutLicenseValue: string;
+  soundsPanelTitle: string;
+  soundsPanelSubtitle: string;
+  soundsMutedLabel: string;
+  soundsOnLabel: string;
+  soundsClickToMute: string;
+  soundsClickToUnmute: string;
+  soundsPreviewButton: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -123,6 +130,14 @@ const EN: UiStrings = {
   aboutRepoLabel: "Repository",
   aboutLicenseLabel: "License",
   aboutLicenseValue: "MIT",
+  soundsPanelTitle: "Sounds",
+  soundsPanelSubtitle:
+    "Acorn's three small synthesized tones, all generated in-browser via Web Audio — no assets shipped, nothing leaves your machine.",
+  soundsMutedLabel: "Sounds are muted",
+  soundsOnLabel: "Sounds are on",
+  soundsClickToMute: "Click to mute",
+  soundsClickToUnmute: "Click to unmute",
+  soundsPreviewButton: "Preview",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -193,6 +208,14 @@ const ZH: UiStrings = {
   aboutRepoLabel: "仓库",
   aboutLicenseLabel: "协议",
   aboutLicenseValue: "MIT",
+  soundsPanelTitle: "音效",
+  soundsPanelSubtitle:
+    "Acorn 的三个简单合成音,全部由 Web Audio 现场生成 —— 不内嵌任何音频文件,也不上传到任何地方。",
+  soundsMutedLabel: "已静音",
+  soundsOnLabel: "已开启",
+  soundsClickToMute: "点击静音",
+  soundsClickToUnmute: "点击开启",
+  soundsPreviewButton: "试听",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",
