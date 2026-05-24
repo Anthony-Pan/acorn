@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/primary.swiftdeps"
+  },
+  "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.d",
+    "object": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.dia"
+  }
+}

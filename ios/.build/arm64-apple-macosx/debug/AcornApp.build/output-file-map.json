@@ -1,0 +1,19 @@
+{
+  "": {
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/primary.swiftdeps"
+  },
+  "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/AcornApp.swift": {
+    "dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.d",
+    "object": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.swift.o",
+    "swiftmodule": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.swiftdeps",
+    "diagnostics": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.dia"
+  },
+  "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/RootView.swift": {
+    "dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.d",
+    "object": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.swift.o",
+    "swiftmodule": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView~partial.swiftmodule",
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.swiftdeps",
+    "diagnostics": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.dia"
+  }
+}
