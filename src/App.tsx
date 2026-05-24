@@ -1,7 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
 
 import { AcornStash } from "@/components/acorn-stash";
@@ -23,8 +23,11 @@ function App() {
   const hydrateChat = useChatStore((s) => s.hydrate);
   const current = useSessionStore((s) => s.current);
   const isStashing = useSessionStore((s) => s.isStashing);
+  const chatPhase = useChatStore((s) => s.phase);
+  const chatCurrent = useChatStore((s) => s.current);
 
   const [view, setView] = useState<View>("input");
+  const previousChatPhase = useRef<typeof chatPhase>("idle");
 
   useEffect(() => {
     void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession(), hydrateChat()]);
@@ -88,6 +91,30 @@ function App() {
       setView("input");
     }
   }, [current, isStashing, view]);
+
+  useEffect(() => {
+    const wasResponding =
+      previousChatPhase.current === "responding" || previousChatPhase.current === "thinking";
+    previousChatPhase.current = chatPhase;
+    if (chatPhase !== "idle" || !wasResponding) return;
+    if (view === "chat" && !document.hidden) return;
+    const lastReply = chatCurrent?.messages
+      .filter((m) => m.role === "assistant" && m.content.trim().length > 0)
+      .at(-1);
+    if (!lastReply) return;
+    const preview =
+      lastReply.content.length > 140
+        ? `${lastReply.content.slice(0, 140).trim()}…`
+        : lastReply.content.trim();
+    toast.message("Acorn replied", {
+      description: preview,
+      duration: 8000,
+      action: {
+        label: "Open",
+        onClick: () => setView("chat"),
+      },
+    });
+  }, [chatPhase, chatCurrent, view]);
 
   const defaultView = current && current.tasks.length > 0 ? "stash" : "input";
 
