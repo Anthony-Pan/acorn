@@ -59,12 +59,19 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGNING_REQUIRED: NO
-        CODE_SIGN_IDENTITY: ""
-        DEVELOPMENT_TEAM: ""
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
         SUPPORTS_MACCATALYST: NO
         GENERATE_INFOPLIST_FILE: NO
+        # Simulator: skip codesigning entirely so anyone can build without
+        # an Apple Developer account. CI uses this path.
+        "CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]": NO
+        "CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]": NO
+        "CODE_SIGN_IDENTITY[sdk=iphonesimulator*]": ""
+        # Device: Xcode handles signing automatically. DEVELOPMENT_TEAM is
+        # set per-developer through the Xcode UI (Signing & Capabilities
+        # tab). It is intentionally NOT pinned here so this repo stays
+        # team-agnostic. See ../README.md "Deploy to a real iPhone".
+        "CODE_SIGN_IDENTITY[sdk=iphoneos*]": Apple Development
     dependencies:
       - package: AcornIOSPackage
         product: AcornApp
