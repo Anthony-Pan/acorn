@@ -13,7 +13,6 @@ interface UpdateAvailable {
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
-
 import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
 import { CanvasView } from "@/components/canvas-view";
@@ -22,6 +21,7 @@ import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { StatusCapsule } from "@/components/status-capsule";
 import { TaskInput } from "@/components/task-input";
+import { activity } from "@/lib/activity";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
@@ -63,6 +63,25 @@ function App() {
         });
       } catch {}
     }, 60_000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const LAST_BRIEF_KEY = "acorn:last-brief";
+    const MIN_INTERVAL_MS = 18 * 60 * 60 * 1000;
+    const timer = window.setTimeout(async () => {
+      try {
+        const lastBrief = Number.parseInt(localStorage.getItem(LAST_BRIEF_KEY) ?? "0", 10);
+        if (Number.isFinite(lastBrief) && Date.now() - lastBrief < MIN_INTERVAL_MS) return;
+        const brief = await activity.dailyBrief(24);
+        if (brief.totalEntries === 0) return;
+        localStorage.setItem(LAST_BRIEF_KEY, String(Date.now()));
+        toast.message("Yesterday at a glance", {
+          description: brief.summary,
+          duration: 10000,
+        });
+      } catch {}
+    }, 6_000);
     return () => window.clearTimeout(timer);
   }, []);
 

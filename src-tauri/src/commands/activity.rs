@@ -91,3 +91,53 @@ pub async fn clear_activity(db: State<'_, Database>) -> AppResult<()> {
         .await?;
     Ok(())
 }
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DailyBrief {
+    pub total_entries: u32,
+    pub by_kind: Vec<(String, u32)>,
+    pub since_iso: String,
+    pub summary: String,
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub async fn build_daily_brief(
+    db: State<'_, Database>,
+    hours: Option<u32>,
+) -> AppResult<DailyBrief> {
+    let window = hours.unwrap_or(24).clamp(1, 24 * 7);
+    let since = Utc::now() - chrono::Duration::hours(window as i64);
+    let since_iso = since.to_rfc3339();
+
+    let rows: Vec<(String, i64)> = sqlx::query_as(
+        "SELECT kind, COUNT(*) FROM activity_log WHERE created_at >= ? GROUP BY kind ORDER BY 2 DESC",
+    )
+    .bind(&since_iso)
+    .fetch_all(db.pool())
+    .await?;
+
+    let by_kind: Vec<(String, u32)> = rows
+        .into_iter()
+        .map(|(kind, count)| (kind, count.max(0) as u32))
+        .collect();
+    let total_entries: u32 = by_kind.iter().map(|(_, n)| *n).sum();
+
+    let summary = if total_entries == 0 {
+        format!("Quiet last {window}h. Nothing logged.")
+    } else {
+        let busiest = by_kind
+            .iter()
+            .map(|(kind, n)| format!("{n} × {kind}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        format!("Last {window}h: {total_entries} entries — {busiest}.")
+    };
+
+    Ok(DailyBrief {
+        total_entries,
+        by_kind,
+        since_iso,
+        summary,
+    })
+}

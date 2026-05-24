@@ -135,6 +135,7 @@ pub fn run() {
             commands::activity::record_activity,
             commands::activity::list_recent_activity,
             commands::activity::clear_activity,
+            commands::activity::build_daily_brief,
             commands::updater::check_for_update,
             commands::capture::capture_primary_screen,
             commands::canvas::list_canvases,

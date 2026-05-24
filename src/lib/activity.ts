@@ -7,6 +7,13 @@ export interface ActivityEntry {
   createdAt: string;
 }
 
+export interface DailyBrief {
+  totalEntries: number;
+  byKind: [string, number][];
+  sinceIso: string;
+  summary: string;
+}
+
 export const activity = {
   record: (kind: string, content: string) =>
     invoke<ActivityEntry | null>("record_activity", { kind, content }),
@@ -15,4 +22,6 @@ export const activity = {
     invoke<ActivityEntry[]>("list_recent_activity", { limit: limit ?? null }),
 
   clear: () => invoke<void>("clear_activity"),
+
+  dailyBrief: (hours?: number) => invoke<DailyBrief>("build_daily_brief", { hours: hours ?? null }),
 };
