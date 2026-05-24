@@ -7,6 +7,7 @@ import { Toaster, toast } from "sonner";
 import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
 import { ChatView } from "@/components/chat-view";
+import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { TaskInput } from "@/components/task-input";
 import { useChatStore } from "@/stores/chat";
@@ -170,6 +171,7 @@ function App() {
           )}
         </motion.div>
       </AnimatePresence>
+      <CornieMascot />
       <Toaster
         position="top-center"
         toastOptions={{
