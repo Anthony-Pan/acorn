@@ -56,7 +56,9 @@ pub async fn chat(
     };
 
     let shared_memory = load_shared_memory(db.pool()).await;
-    let system_prompt = compose_system_prompt(shared_memory.as_deref());
+    let preferred_language = load_preferred_language(db.pool()).await;
+    let system_prompt =
+        compose_system_prompt(shared_memory.as_deref(), preferred_language.as_deref());
 
     let _ = on_event.send(ChatEvent::Thinking);
 
@@ -206,6 +208,7 @@ pub async fn chat(
 }
 
 const SHARED_MEMORY_KEY: &str = "shared_memory";
+const LANGUAGE_KEY: &str = "language";
 
 async fn load_setting_value(pool: &sqlx::SqlitePool, key: &str) -> Option<String> {
     let row: Option<(String,)> = sqlx::query_as("SELECT value FROM settings WHERE key = ?")
@@ -223,8 +226,35 @@ async fn load_shared_memory(pool: &sqlx::SqlitePool) -> Option<String> {
     load_setting_value(pool, SHARED_MEMORY_KEY).await
 }
 
-fn compose_system_prompt(shared_memory: Option<&str>) -> String {
+async fn load_preferred_language(pool: &sqlx::SqlitePool) -> Option<String> {
+    load_setting_value(pool, LANGUAGE_KEY).await
+}
+
+fn language_display(code: &str) -> &'static str {
+    if code.starts_with("zh") {
+        "Chinese (Simplified)"
+    } else if code.starts_with("ja") {
+        "Japanese"
+    } else if code.starts_with("ko") {
+        "Korean"
+    } else if code.starts_with("es") {
+        "Spanish"
+    } else if code.starts_with("fr") {
+        "French"
+    } else if code.starts_with("de") {
+        "German"
+    } else {
+        "English"
+    }
+}
+
+fn compose_system_prompt(shared_memory: Option<&str>, preferred_language: Option<&str>) -> String {
     let mut out = CHAT_SYSTEM_PROMPT.to_string();
+    if let Some(lang) = preferred_language {
+        out.push_str("\n\nYour friend has set the app language to ");
+        out.push_str(language_display(lang));
+        out.push_str(". Default to replying in that language unless they switch on their own.\n");
+    }
     if let Some(memory) = shared_memory {
         out.push_str(
             "\n\nLong-term notes about your friend (user-editable, stored locally, opt-out via Settings → Memory):\n",
