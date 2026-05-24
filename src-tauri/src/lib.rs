@@ -136,6 +136,11 @@ pub fn run() {
             commands::activity::clear_activity,
             commands::updater::check_for_update,
             commands::capture::capture_primary_screen,
+            commands::canvas::list_canvases,
+            commands::canvas::get_canvas,
+            commands::canvas::create_canvas,
+            commands::canvas::update_canvas,
+            commands::canvas::delete_canvas,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

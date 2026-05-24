@@ -1,5 +1,6 @@
 pub mod activity;
 pub mod ai;
+pub mod canvas;
 pub mod capture;
 pub mod chat;
 pub mod conversation;

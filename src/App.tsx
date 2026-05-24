@@ -16,6 +16,7 @@ import { Toaster, toast } from "sonner";
 
 import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
+import { CanvasView } from "@/components/canvas-view";
 import { ChatView } from "@/components/chat-view";
 import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
@@ -25,7 +26,7 @@ import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
 
-type View = "input" | "stash" | "chat" | "settings" | "calendar";
+type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas";
 
 function App() {
   const hydrateSession = useSessionStore((s) => s.hydrate);
@@ -167,6 +168,8 @@ function App() {
         setView("calendar");
       } else if (url.host === "chat") {
         setView("chat");
+      } else if (url.host === "canvas") {
+        setView("canvas");
       }
     });
 
@@ -182,7 +185,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (view === "settings" || view === "chat" || view === "calendar") return;
+    if (view === "settings" || view === "chat" || view === "calendar" || view === "canvas") return;
     if (current && current.tasks.length > 0) {
       setView("stash");
     } else if (!isStashing) {
@@ -232,11 +235,14 @@ function App() {
             <ChatView onBack={() => setView(defaultView)} />
           ) : view === "calendar" ? (
             <CalendarView onBack={() => setView(defaultView)} />
+          ) : view === "canvas" ? (
+            <CanvasView onBack={() => setView(defaultView)} />
           ) : view === "stash" ? (
             <AcornStash
               onOpenSettings={() => setView("settings")}
               onOpenChat={() => setView("chat")}
               onOpenCalendar={() => setView("calendar")}
+              onOpenCanvas={() => setView("canvas")}
               onAddMore={() => {
                 useSessionStore.getState().startNew();
                 setView("input");
@@ -247,6 +253,7 @@ function App() {
               onOpenSettings={() => setView("settings")}
               onOpenChat={() => setView("chat")}
               onOpenCalendar={() => setView("calendar")}
+              onOpenCanvas={() => setView("canvas")}
             />
           )}
         </motion.div>

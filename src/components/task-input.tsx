@@ -2,6 +2,7 @@ import {
   AlertCircle,
   CalendarDays,
   Clipboard,
+  FileText,
   Loader2,
   MessageCircle,
   Settings as SettingsIcon,
@@ -22,6 +23,7 @@ interface TaskInputProps {
   onOpenSettings: () => void;
   onOpenChat: () => void;
   onOpenCalendar: () => void;
+  onOpenCanvas: () => void;
 }
 
 function pickHint(error: string | null, t: ReturnType<typeof strings>): string {
@@ -42,7 +44,12 @@ function pickHint(error: string | null, t: ReturnType<typeof strings>): string {
   return t.stashFailedHint;
 }
 
-export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskInputProps) {
+export function TaskInput({
+  onOpenSettings,
+  onOpenChat,
+  onOpenCalendar,
+  onOpenCanvas,
+}: TaskInputProps) {
   const [value, setValue] = useState(() => {
     const pending = typeof window !== "undefined" ? sessionStorage.getItem("acorn:prefill") : null;
     if (pending) {
@@ -109,6 +116,9 @@ export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskIn
             <Button variant="outline" size="sm" onClick={onOpenChat}>
               <MessageCircle />
               {t.chat}
+            </Button>
+            <Button variant="outline" size="icon-sm" onClick={onOpenCanvas} aria-label="Canvas">
+              <FileText className="w-3.5 h-3.5" />
             </Button>
             <Button variant="outline" size="icon-sm" onClick={onOpenCalendar} aria-label="Calendar">
               <CalendarDays />
