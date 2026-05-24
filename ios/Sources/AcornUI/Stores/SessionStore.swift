@@ -89,6 +89,15 @@ public final class SessionStore {
         }
     }
 
+    public func drainPendingShareExtensionInbox(activeProviderId: String, language: String) async {
+        let pending = PendingStashQueue.drainAll()
+        guard let first = pending.first else { return }
+        await stash(rawInput: first.text, language: language, providerId: activeProviderId)
+        for remaining in pending.dropFirst() {
+            PendingStashQueue.enqueue(text: remaining.text)
+        }
+    }
+
     public func toggleStatus(taskId: String) async {
         guard let idx = tasks.firstIndex(where: { $0.id == taskId }) else { return }
         let task = tasks[idx]

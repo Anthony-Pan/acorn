@@ -32,6 +32,15 @@ public struct RootView: View {
                 await settings.hydrate()
                 await providers.hydrate()
                 await session.hydrateLatestSession()
+                await session.drainPendingShareExtensionInbox(
+                    activeProviderId: settings.activeProviderId,
+                    language: settings.language.isEmpty ? "en" : settings.language
+                )
+                let isActive: Bool
+                if case .idle = session.stashState { isActive = false } else { isActive = true }
+                if !session.tasks.isEmpty || (session.currentSession != nil && isActive) {
+                    router.navigate(.stash)
+                }
             }
     }
 }
