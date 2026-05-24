@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AnimatePresence, motion } from "framer-motion";
@@ -82,13 +83,11 @@ function App() {
     });
 
     const unlistenQuickAskShortcut = listen("shortcut:quick-ask", async () => {
-      const window = getCurrentWindow();
-      await window.show();
-      await window.setFocus();
-      toast.message("Quick ask", {
-        description: "A Spotlight-style ask overlay is coming in a future release.",
-        id: "shortcut-quick-ask",
-      });
+      try {
+        await invoke("toggle_quick");
+      } catch (err) {
+        console.error("quick window toggle failed", err);
+      }
     });
 
     const unlistenDeepLink = listen<string>("deep-link", async (event) => {
