@@ -1,5 +1,15 @@
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+
+interface UpdateAvailable {
+  currentVersion: string;
+  latestVersion: string;
+  releaseName: string | null;
+  releaseNotes: string | null;
+  releaseUrl: string;
+}
+
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";
@@ -29,6 +39,26 @@ function App() {
   useEffect(() => {
     void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession(), hydrateChat()]);
   }, [hydrateSession, hydrateSettings, hydrateProviders, hydrateChat]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(async () => {
+      try {
+        const update = await invoke<UpdateAvailable | null>("check_for_update");
+        if (!update) return;
+        toast.message(`Acorn ${update.latestVersion} is available`, {
+          description: `You're on ${update.currentVersion}. Open the release page to download.`,
+          duration: 12000,
+          action: {
+            label: "Open release",
+            onClick: () => {
+              window.open(update.releaseUrl, "_blank", "noreferrer noopener");
+            },
+          },
+        });
+      } catch {}
+    }, 60_000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const unlistenSubmit = listen<{ text: string }>("quick:submit", async (event) => {

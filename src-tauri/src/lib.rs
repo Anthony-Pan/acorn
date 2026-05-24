@@ -113,6 +113,7 @@ pub fn run() {
             commands::speech::get_active_speech_provider,
             commands::speech::set_active_speech_provider,
             commands::speech::transcribe_audio,
+            commands::updater::check_for_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
