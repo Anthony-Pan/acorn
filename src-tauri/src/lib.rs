@@ -63,6 +63,7 @@ pub fn run() {
                 tauri::async_runtime::block_on(async { db::Database::initialize(&db_path).await })?;
 
             app.manage(database);
+            app.manage(commands::tool_approval::ApprovalBroker::default());
 
             #[cfg(target_os = "macos")]
             {
@@ -142,6 +143,7 @@ pub fn run() {
             commands::canvas::update_canvas,
             commands::canvas::delete_canvas,
             commands::search::search_index,
+            commands::tool_approval::respond_tool_approval,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
