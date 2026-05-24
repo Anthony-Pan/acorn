@@ -127,6 +127,12 @@ export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskIn
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              e.preventDefault();
+              if (canStash) void handleStash();
+            }
+          }}
           placeholder={t.inputPlaceholder}
           disabled={isStashing}
           className="w-full min-h-[180px] bg-card border-[0.5px] border-border rounded-2xl px-4.5 py-4 text-[14px] leading-[1.7] resize-none focus:outline-none focus:ring-2 focus:ring-ring/30 placeholder:text-[var(--acorn-orange-muted)]/60 disabled:opacity-60"
