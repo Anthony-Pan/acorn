@@ -1,0 +1,66 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          track_progress: true
+
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request for Acorn, a Tauri 2 desktop app (Rust backend +
+            React 19 frontend). Read CLAUDE.md first and hold the diff to its
+            conventions. Focus on:
+
+            1. **Correctness & architecture**
+               - Any new `#[tauri::command]` is registered in `generate_handler![…]`
+                 in `src-tauri/src/lib.rs` (the #1 missed step).
+               - Frontend calls go through typed wrappers in `src/lib/*.ts`, never
+                 `invoke()` directly from components.
+               - Migrations under `src-tauri/migrations/` are append-only — flag any
+                 edit to an already-shipped migration.
+
+            2. **Security**
+               - SQL built only via `sqlx::query(...).bind(...)` — flag any user input
+                 interpolated with `format!()`.
+               - Secrets/API keys go to the OS keychain, never the DB, files, or logs.
+               - Input validation at the backend boundary.
+
+            3. **Code quality & conventions**
+               - Strict TypeScript: no `any`, no `@ts-ignore`, handle
+                 `noUncheckedIndexedAccess`. Only `console.warn`/`console.error`.
+               - Rust: return `AppResult<T>`; `anyhow` only in startup/setup.
+               - Do NOT reformat `src/components/ui/**` or `src/index.css`.
+               - Diffs stay minimal and scoped — flag unrelated drive-by refactors.
+
+            4. **Performance** — obvious bottlenecks, N+1 queries, unbounded work.
+
+            This repo has NO automated test suite by design — do not request added
+            tests or test coverage unless the PR itself introduces a test framework.
+            Verify against the CI gates instead (biome, tsc, vite build, cargo
+            fmt/clippy/check).
+
+            Leave specific issues as inline comments and a short top-level summary.
+            Be constructive; praise good patterns where you see them.
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
