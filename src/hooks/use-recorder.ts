@@ -60,6 +60,11 @@ export function useRecorder(): UseRecorder {
 
     cleanup();
 
+    if (blob.size === 0) {
+      setState("idle");
+      throw new Error("No audio was captured. Try holding the button a little longer.");
+    }
+
     try {
       const buffer = await blob.arrayBuffer();
       const text = await transcribe(new Uint8Array(buffer), blob.type);
