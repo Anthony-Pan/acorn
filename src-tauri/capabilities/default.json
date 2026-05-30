@@ -1,13 +1,15 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for both windows",
-  "windows": ["main", "quick"],
+  "description": "Capability for the main, quick, and overlay windows",
+  "windows": ["main", "quick", "notch", "pet", "summary", "pin-*"],
   "permissions": [
     "core:default",
     "core:window:allow-hide",
     "core:window:allow-show",
     "core:window:allow-set-focus",
+    "core:window:allow-close",
+    "core:window:allow-start-dragging",
     "opener:default",
     "deep-link:default"
   ]

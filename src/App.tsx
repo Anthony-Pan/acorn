@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface UpdateAvailable {
@@ -19,7 +19,6 @@ import { CanvasView } from "@/components/canvas-view";
 import { ChatView } from "@/components/chat-view";
 import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
-import { StatusCapsule } from "@/components/status-capsule";
 import { TaskInput } from "@/components/task-input";
 import { activity } from "@/lib/activity";
 import { useChatStore } from "@/stores/chat";
@@ -45,6 +44,27 @@ function App() {
   useEffect(() => {
     void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession(), hydrateChat()]);
   }, [hydrateSession, hydrateSettings, hydrateProviders, hydrateChat]);
+
+  // Mirror chat activity to the overlay windows (notch capsule, companion).
+  // Overlays live in their own webview process and cannot read the Zustand
+  // store, so this event is their only source of truth.
+  useEffect(() => {
+    let last = "";
+    const broadcast = (s: ReturnType<typeof useChatStore.getState>) => {
+      const payload = {
+        phase: s.phase,
+        tool: s.activeTools[0]?.name ?? null,
+        toolCount: s.activeTools.length,
+        providerId: s.current?.providerId ?? null,
+      };
+      const key = JSON.stringify(payload);
+      if (key === last) return;
+      last = key;
+      void emit("overlay:phase", payload);
+    };
+    broadcast(useChatStore.getState());
+    return useChatStore.subscribe(broadcast);
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -315,7 +335,6 @@ function App() {
         </motion.div>
       </AnimatePresence>
       <CornieMascot />
-      <StatusCapsule />
       <Toaster
         position="top-center"
         toastOptions={{

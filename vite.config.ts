@@ -15,6 +15,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, "index.html"),
         quick: path.resolve(__dirname, "quick.html"),
+        overlay: path.resolve(__dirname, "overlay.html"),
       },
     },
   },

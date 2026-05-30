@@ -85,6 +85,7 @@ pub fn run() {
                 wire_quick_window_blur(app.handle());
                 wire_main_window_close_to_hide(app.handle());
                 wire_deep_link(app.handle());
+                commands::overlay::ensure_notch(app.handle());
             }
 
             Ok(())
@@ -125,6 +126,9 @@ pub fn run() {
             commands::window::toggle_quick,
             commands::window::hide_quick,
             commands::window::open_settings,
+            commands::overlay::set_overlay_interactive,
+            commands::overlay::show_notch_overlay,
+            commands::overlay::hide_notch_overlay,
             commands::shortcut::get_summon_shortcut,
             commands::shortcut::set_summon_shortcut,
             commands::shortcut::reset_summon_shortcut,
