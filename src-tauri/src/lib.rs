@@ -67,7 +67,9 @@ pub fn run() {
 
             #[cfg(target_os = "macos")]
             {
-                app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+                // Run as a regular Dock app (Dock icon + ⌘-Tab switcher), not a
+                // menubar-only accessory. The tray icon is kept alongside it.
+                app.set_activation_policy(tauri::ActivationPolicy::Regular);
             }
 
             #[cfg(desktop)]
@@ -146,8 +148,26 @@ pub fn run() {
             commands::search::search_index,
             commands::tool_approval::respond_tool_approval,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app_handle, _event| {
+            // macOS: the main window hides (instead of quitting) on close, so a
+            // Dock-icon click with no visible window must reopen it — otherwise
+            // a regular Dock app would have no way back to its window.
+            #[cfg(target_os = "macos")]
+            {
+                if let tauri::RunEvent::Reopen {
+                    has_visible_windows: false,
+                    ..
+                } = &_event
+                {
+                    if let Some(window) = _app_handle.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+            }
+        });
 }
 
 #[cfg(desktop)]
