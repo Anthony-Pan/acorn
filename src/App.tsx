@@ -21,6 +21,7 @@ import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { TaskInput } from "@/components/task-input";
 import { activity } from "@/lib/activity";
+import { pins } from "@/lib/pin";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
@@ -157,17 +158,24 @@ function App() {
         return;
       }
       try {
-        await navigator.clipboard.writeText(lastReply.content);
+        const pin = await pins.create({
+          conversationId: conversation?.id ?? null,
+          messageId: lastReply.id,
+          label: conversation?.title?.trim() || "Pinned",
+          content: lastReply.content,
+        });
+        await pins.openWindow(pin.id, pin.x, pin.y);
+        void navigator.clipboard.writeText(lastReply.content).catch(() => {});
         const preview =
           lastReply.content.length > 80
             ? `${lastReply.content.slice(0, 80).trim()}…`
             : lastReply.content.trim();
-        toast.success("Reply copied", {
+        toast.success("Pinned to desktop", {
           description: preview,
           id: "shortcut-pin",
         });
       } catch (err) {
-        toast.error("Could not copy", {
+        toast.error("Could not pin", {
           description: err instanceof Error ? err.message : String(err),
           id: "shortcut-pin-error",
         });

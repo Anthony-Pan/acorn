@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 
 import "../index.css";
 import { NotchOverlay } from "./NotchOverlay";
+import { PinOverlay } from "./PinOverlay";
 
 /**
  * Single entry point for every overlay window. The `?kind=` query string (set by
@@ -22,7 +23,9 @@ if (!root) {
 
 function renderOverlay(which: string) {
   switch (which) {
-    // Additional overlay kinds (pin, pet, summary) are wired in as they land.
+    case "pin":
+      return <PinOverlay pinId={params.get("pinId") ?? ""} />;
+    // Additional overlay kinds (pet, summary) are wired in as they land.
     default:
       return <NotchOverlay />;
   }

@@ -167,3 +167,73 @@ pub fn hide_notch_overlay(app: AppHandle) -> Result<(), String> {
     }
     Ok(())
 }
+
+const PIN_W: f64 = 280.0;
+const PIN_H: f64 = 132.0;
+
+fn pin_label(pin_id: &str) -> String {
+    format!("pin-{pin_id}")
+}
+
+/// Open (or focus) the desktop card window for a pin. Restores to a saved
+/// logical position when present, otherwise lands in a top-right cascade.
+pub fn open_pin(app: &AppHandle, pin_id: &str, x: Option<f64>, y: Option<f64>) {
+    let label = pin_label(pin_id);
+    let query = format!("kind=pin&pinId={pin_id}");
+    match build_overlay(app, &label, &query, PIN_W, PIN_H, true) {
+        Ok(window) => {
+            match (x, y) {
+                (Some(px), Some(py)) => {
+                    let _ = window.set_position(LogicalPosition::new(px, py));
+                }
+                _ => {
+                    let _ = position_pin_cascade(app, &window);
+                }
+            }
+            let _ = window.show();
+            #[cfg(target_os = "macos")]
+            elevate_overlay(&window);
+        }
+        Err(err) => eprintln!("acorn: failed to open pin window: {err}"),
+    }
+}
+
+/// Place a freshly opened pin near the top-right, nudged diagonally by the
+/// number of pins already on screen so multiple cards don't stack exactly.
+fn position_pin_cascade(app: &AppHandle, window: &WebviewWindow) -> tauri::Result<()> {
+    let existing = app
+        .webview_windows()
+        .keys()
+        .filter(|label| label.starts_with("pin-"))
+        .count()
+        .saturating_sub(1) as f64; // exclude the window we just built
+    if let Some(monitor) = window.current_monitor()? {
+        let scale = monitor.scale_factor();
+        let monitor_width = monitor.size().width as f64 / scale;
+        let offset = (existing % 6.0) * 28.0;
+        let x = (monitor_width - PIN_W - 32.0 - offset).max(16.0);
+        let y = 72.0 + offset;
+        window.set_position(LogicalPosition::new(x, y))?;
+    }
+    Ok(())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn open_pin_window(
+    app: AppHandle,
+    pin_id: String,
+    x: Option<f64>,
+    y: Option<f64>,
+) -> Result<(), String> {
+    let handle = app.clone();
+    app.run_on_main_thread(move || open_pin(&handle, &pin_id, x, y))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn close_pin_window(app: AppHandle, pin_id: String) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window(&pin_label(&pin_id)) {
+        window.close().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}

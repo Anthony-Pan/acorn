@@ -86,6 +86,7 @@ pub fn run() {
                 wire_main_window_close_to_hide(app.handle());
                 wire_deep_link(app.handle());
                 commands::overlay::ensure_notch(app.handle());
+                restore_pins(app.handle());
             }
 
             Ok(())
@@ -129,6 +130,13 @@ pub fn run() {
             commands::overlay::set_overlay_interactive,
             commands::overlay::show_notch_overlay,
             commands::overlay::hide_notch_overlay,
+            commands::overlay::open_pin_window,
+            commands::overlay::close_pin_window,
+            commands::pin::list_pins,
+            commands::pin::get_pin,
+            commands::pin::create_pin,
+            commands::pin::update_pin_position,
+            commands::pin::delete_pin,
             commands::shortcut::get_summon_shortcut,
             commands::shortcut::set_summon_shortcut,
             commands::shortcut::reset_summon_shortcut,
@@ -275,6 +283,17 @@ fn wire_deep_link(app: &tauri::AppHandle) {
             }
         });
     });
+}
+
+#[cfg(desktop)]
+fn restore_pins(app: &tauri::AppHandle) {
+    let pins = tauri::async_runtime::block_on(async {
+        commands::pin::load_pins(app.state::<db::Database>().inner()).await
+    })
+    .unwrap_or_default();
+    for pin in pins {
+        commands::overlay::open_pin(app, &pin.id, pin.x, pin.y);
+    }
 }
 
 fn handle_tray_menu(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {

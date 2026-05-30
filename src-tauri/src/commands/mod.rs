@@ -5,6 +5,7 @@ pub mod capture;
 pub mod chat;
 pub mod conversation;
 pub mod overlay;
+pub mod pin;
 pub mod provider_config;
 pub mod search;
 pub mod session;
