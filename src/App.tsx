@@ -26,7 +26,7 @@ import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
-import type { SummaryPayload } from "@/types/overlay";
+import type { OverlayPhase, SummaryPayload } from "@/types/overlay";
 
 type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas";
 
@@ -54,11 +54,22 @@ function App() {
   useEffect(() => {
     let last = "";
     const broadcast = (s: ReturnType<typeof useChatStore.getState>) => {
-      const payload = {
+      const lastAssistant = s.current?.messages
+        .filter((m) => m.role === "assistant" && m.content.trim().length > 0)
+        .at(-1)?.content;
+      const lastReply = lastAssistant
+        ? lastAssistant.length > 120
+          ? `${lastAssistant.slice(0, 120).trim()}…`
+          : lastAssistant.trim()
+        : null;
+      const payload: OverlayPhase = {
         phase: s.phase,
         tool: s.activeTools[0]?.name ?? null,
         toolCount: s.activeTools.length,
         providerId: s.current?.providerId ?? null,
+        model: s.current?.model ?? null,
+        lastReply,
+        error: s.error ?? null,
       };
       const key = JSON.stringify(payload);
       if (key === last) return;

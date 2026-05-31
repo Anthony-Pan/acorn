@@ -13,8 +13,8 @@ use tauri::webview::{WebviewWindow, WebviewWindowBuilder};
 use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, WebviewUrl, WindowEvent};
 
 pub const NOTCH_LABEL: &str = "notch";
-const NOTCH_W: f64 = 380.0;
-const NOTCH_H: f64 = 72.0;
+const NOTCH_W: f64 = 560.0;
+const NOTCH_H: f64 = 64.0;
 /// Gap below the menu bar; clears a notch comfortably on notched displays and
 /// reads as "under the menu bar" on the rest.
 const NOTCH_TOP_INSET: f64 = 8.0;

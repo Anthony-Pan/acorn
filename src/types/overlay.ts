@@ -9,6 +9,10 @@ export interface OverlayPhase {
   tool: string | null;
   toolCount: number;
   providerId: string | null;
+  model: string | null;
+  /** Short preview of the latest assistant reply, for the hover-expanded capsule. */
+  lastReply: string | null;
+  error: string | null;
 }
 
 /** Payload for the transient reply-summary overlay (`summary:show` event). */
