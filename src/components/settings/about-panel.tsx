@@ -1,5 +1,5 @@
-import { getName, getVersion } from "@tauri-apps/api/app";
-import { ExternalLink } from "lucide-react";
+import { getName, getTauriVersion, getVersion } from "@tauri-apps/api/app";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AcornLogo } from "@/components/acorn-logo";
@@ -10,15 +10,34 @@ const REPO_URL = "https://github.com/onyxcraft/acorn";
 
 export function AboutPanel() {
   const language = useSettingsStore((s) => s.language);
+  const zh = language.startsWith("zh");
   const t = strings(language);
 
   const [appName, setAppName] = useState<string>("Acorn");
   const [version, setVersion] = useState<string>("");
+  const [tauriVersion, setTauriVersion] = useState<string>("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     void getName().then(setAppName);
     void getVersion().then(setVersion);
+    void getTauriVersion().then(setTauriVersion);
   }, []);
+
+  const buildMode = import.meta.env.MODE === "production" ? "release" : "dev";
+
+  const copyDiagnostics = () => {
+    const diagnostics = [
+      `${appName} ${version || "?"} (${buildMode})`,
+      `Tauri: ${tauriVersion || "?"}`,
+      `Platform: ${navigator.userAgent}`,
+      `Language: ${language}`,
+    ].join("\n");
+    void navigator.clipboard.writeText(diagnostics).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    });
+  };
 
   return (
     <section className="flex-1 px-8 py-7 overflow-y-auto">
@@ -37,9 +56,7 @@ export function AboutPanel() {
         </dd>
 
         <dt className="text-muted-foreground">{t.aboutBuildLabel}</dt>
-        <dd className="font-mono text-foreground/80">
-          {import.meta.env.MODE === "production" ? "release" : "dev"}
-        </dd>
+        <dd className="font-mono text-foreground/80">{buildMode}</dd>
 
         <dt className="text-muted-foreground">{t.aboutLicenseLabel}</dt>
         <dd className="font-mono text-foreground">{t.aboutLicenseValue}</dd>
@@ -57,6 +74,19 @@ export function AboutPanel() {
           </a>
         </dd>
       </dl>
+
+      <button
+        type="button"
+        onClick={copyDiagnostics}
+        className="mt-6 inline-flex items-center gap-1.5 rounded-md border-[0.5px] border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-acorn-olive" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+        {copied ? (zh ? "已复制" : "Copied") : zh ? "复制诊断信息" : "Copy diagnostics"}
+      </button>
     </section>
   );
 }
