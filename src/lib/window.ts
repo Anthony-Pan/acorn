@@ -13,4 +13,6 @@ export const overlay = {
   hideNotch: () => invoke<void>("hide_notch_overlay"),
   showSummary: () => invoke<void>("show_summary_overlay"),
   hideSummary: () => invoke<void>("hide_summary_overlay"),
+  showApproval: () => invoke<void>("show_approval_overlay"),
+  hideApproval: () => invoke<void>("hide_approval_overlay"),
 };

@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom/client";
 
 import "../index.css";
+import { ApprovalOverlay } from "./ApprovalOverlay";
 import { NotchOverlay } from "./NotchOverlay";
 import { PetOverlay } from "./PetOverlay";
 import { PinOverlay } from "./PinOverlay";
@@ -31,6 +32,8 @@ function renderOverlay(which: string) {
       return <SummaryOverlay />;
     case "pet":
       return <PetOverlay />;
+    case "approval":
+      return <ApprovalOverlay />;
     default:
       return <NotchOverlay />;
   }

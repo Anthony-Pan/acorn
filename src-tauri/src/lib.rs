@@ -88,6 +88,7 @@ pub fn run() {
                 commands::overlay::ensure_notch(app.handle());
                 restore_pins(app.handle());
                 maybe_spawn_pet(app.handle());
+                commands::overlay::ensure_approval_window(app.handle());
             }
 
             Ok(())
@@ -138,6 +139,8 @@ pub fn run() {
             commands::overlay::show_pet_overlay,
             commands::overlay::hide_pet_overlay,
             commands::overlay::teleport_pet,
+            commands::overlay::show_approval_overlay,
+            commands::overlay::hide_approval_overlay,
             commands::pin::list_pins,
             commands::pin::get_pin,
             commands::pin::create_pin,

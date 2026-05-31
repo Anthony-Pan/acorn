@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main, quick, and overlay windows",
-  "windows": ["main", "quick", "notch", "pet", "summary", "pin-*"],
+  "windows": ["main", "quick", "notch", "pet", "summary", "approval", "pin-*"],
   "permissions": [
     "core:default",
     "core:window:allow-hide",

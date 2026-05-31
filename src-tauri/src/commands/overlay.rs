@@ -342,3 +342,46 @@ pub fn teleport_pet(app: AppHandle, corner: String) -> Result<(), String> {
     })
     .map_err(|e| e.to_string())
 }
+
+pub const APPROVAL_LABEL: &str = "approval";
+const APPROVAL_W: f64 = 360.0;
+const APPROVAL_H: f64 = 156.0;
+
+/// Build the tool-approval card window hidden at boot, so its event listener is
+/// registered well before any tool ever needs confirmation (no cold-start race).
+pub fn ensure_approval_window(app: &AppHandle) {
+    if let Err(err) = build_overlay(
+        app,
+        APPROVAL_LABEL,
+        "kind=approval",
+        APPROVAL_W,
+        APPROVAL_H,
+        true,
+    ) {
+        eprintln!("acorn: failed to create approval overlay: {err}");
+    }
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn show_approval_overlay(app: AppHandle) -> Result<(), String> {
+    let handle = app.clone();
+    app.run_on_main_thread(move || {
+        ensure_approval_window(&handle);
+        if let Some(window) = handle.get_webview_window(APPROVAL_LABEL) {
+            // Sit just under the capsule.
+            let _ = position_top_center(&window, APPROVAL_W, APPROVAL_H, 60.0);
+            let _ = window.show();
+            #[cfg(target_os = "macos")]
+            elevate_overlay(&window);
+        }
+    })
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn hide_approval_overlay(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window(APPROVAL_LABEL) {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
