@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
 import { AcornLogo } from "@/components/acorn-logo";
+import { ContextBar } from "@/components/context-bar";
 import { NoteCards } from "@/components/note-cards";
 import { PinCards } from "@/components/pin-cards";
 import { TaskActionCards } from "@/components/task-action-cards";
@@ -349,6 +350,9 @@ export function ChatView({ onBack }: ChatViewProps) {
               <div className="text-xs text-muted-foreground mb-2">
                 Configure a provider in Settings before you can chat.
               </div>
+            ) : null}
+            {current && current.messages.length > 0 ? (
+              <ContextBar contents={current.messages.map((m) => m.content)} draft={draft} />
             ) : null}
             {draft.length > 500 ? (
               <div className="text-[10px] text-muted-foreground mb-1.5 text-right">
