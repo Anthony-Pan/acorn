@@ -15,6 +15,11 @@ export interface OverlayPhase {
   error: string | null;
 }
 
+/** Voice capture state mirrored to the island over the `overlay:voice` event. */
+export interface OverlayVoice {
+  state: "idle" | "recording" | "transcribing";
+}
+
 /** Payload for the transient reply-summary overlay (`summary:show` event). */
 export interface SummaryPayload {
   content: string;

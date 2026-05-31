@@ -1,4 +1,4 @@
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Loader2, Mic, Square } from "lucide-react";
 import { useEffect } from "react";
@@ -14,6 +14,12 @@ interface VoiceButtonProps {
 
 export function VoiceButton({ onTranscript, onError }: VoiceButtonProps) {
   const { state, start, stopAndTranscribe, cancel } = useRecorder();
+
+  // Mirror voice capture to the dynamic island so the mic state is visible even
+  // when this window is behind another app.
+  useEffect(() => {
+    void emit("overlay:voice", { state });
+  }, [state]);
 
   const handleClick = async () => {
     try {
