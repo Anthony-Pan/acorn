@@ -49,6 +49,14 @@ pub fn run() {
                     let _ = app.emit(commands::shortcut::SHORTCUT_QUICK_ASK_EVENT, ());
                     return;
                 }
+                if shortcut_matches(shortcut, commands::shortcut::KNOWLEDGE_CLOUD_SHORTCUT) {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                    let _ = app.emit(commands::shortcut::SHORTCUT_KNOWLEDGE_CLOUD_EVENT, ());
+                    return;
+                }
                 toggle_quick_window(app);
             })
             .build(),
@@ -124,6 +132,9 @@ pub fn run() {
             commands::conversation::delete_conversation,
             commands::conversation::rename_conversation,
             commands::conversation::set_conversation_provider,
+            commands::conversation::list_conversation_cloud,
+            commands::conversation::set_conversation_favorite,
+            commands::conversation::set_conversation_archived,
             commands::chat::chat,
             commands::window::show_main,
             commands::window::toggle_quick,
@@ -200,6 +211,7 @@ fn register_global_shortcuts(app: &tauri::AppHandle, shortcut_str: &str) -> anyh
         commands::shortcut::SCREENSHOT_SHORTCUT,
         commands::shortcut::PUSH_TO_TALK_SHORTCUT,
         commands::shortcut::QUICK_ASK_SHORTCUT,
+        commands::shortcut::KNOWLEDGE_CLOUD_SHORTCUT,
     ];
     let gs = app.global_shortcut();
     gs.register(summon)?;

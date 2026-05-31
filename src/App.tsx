@@ -17,6 +17,7 @@ import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
 import { CanvasView } from "@/components/canvas-view";
 import { ChatView } from "@/components/chat-view";
+import { KnowledgeCloud } from "@/components/knowledge-cloud";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { TaskInput } from "@/components/task-input";
 import { activity } from "@/lib/activity";
@@ -28,7 +29,7 @@ import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
 import type { OverlayPhase, SummaryPayload } from "@/types/overlay";
 
-type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas";
+type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas" | "cloud";
 
 function App() {
   const hydrateSession = useSessionStore((s) => s.hydrate);
@@ -202,6 +203,7 @@ function App() {
         target === "chat" ||
         target === "calendar" ||
         target === "canvas" ||
+        target === "cloud" ||
         target === "input" ||
         target === "stash"
       ) {
@@ -303,6 +305,10 @@ function App() {
       }
     });
 
+    const unlistenKnowledgeCloud = listen("shortcut:knowledge-cloud", () => {
+      setView("cloud");
+    });
+
     const unlistenDeepLink = listen<string>("deep-link", async (event) => {
       const url = parseDeepLink(event.payload);
       if (!url) return;
@@ -336,11 +342,19 @@ function App() {
       void unlistenScreenshotShortcut.then((fn) => fn());
       void unlistenPushToTalkShortcut.then((fn) => fn());
       void unlistenQuickAskShortcut.then((fn) => fn());
+      void unlistenKnowledgeCloud.then((fn) => fn());
     };
   }, []);
 
   useEffect(() => {
-    if (view === "settings" || view === "chat" || view === "calendar" || view === "canvas") return;
+    if (
+      view === "settings" ||
+      view === "chat" ||
+      view === "calendar" ||
+      view === "canvas" ||
+      view === "cloud"
+    )
+      return;
     if (current && current.tasks.length > 0) {
       setView("stash");
     } else if (!isStashing) {
@@ -395,6 +409,14 @@ function App() {
             <CalendarView onBack={() => setView(defaultView)} />
           ) : view === "canvas" ? (
             <CanvasView onBack={() => setView(defaultView)} />
+          ) : view === "cloud" ? (
+            <KnowledgeCloud
+              onBack={() => setView(defaultView)}
+              onOpen={(conversationId) => {
+                void useChatStore.getState().open(conversationId);
+                setView("chat");
+              }}
+            />
           ) : view === "stash" ? (
             <AcornStash
               onOpenSettings={() => setView("settings")}
