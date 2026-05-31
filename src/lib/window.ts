@@ -11,4 +11,6 @@ export const overlay = {
     invoke<void>("set_overlay_interactive", { label, interactive }),
   showNotch: () => invoke<void>("show_notch_overlay"),
   hideNotch: () => invoke<void>("hide_notch_overlay"),
+  showSummary: () => invoke<void>("show_summary_overlay"),
+  hideSummary: () => invoke<void>("hide_summary_overlay"),
 };

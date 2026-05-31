@@ -237,3 +237,44 @@ pub fn close_pin_window(app: AppHandle, pin_id: String) -> Result<(), String> {
     }
     Ok(())
 }
+
+pub const SUMMARY_LABEL: &str = "summary";
+const SUMMARY_W: f64 = 340.0;
+const SUMMARY_H: f64 = 188.0;
+
+/// Build + show the transient reply-summary overlay. The window is kept alive
+/// across dismissals (hidden, not closed) so its `summary:show` listener never
+/// misses an event after first creation.
+fn ensure_summary(app: &AppHandle) {
+    match build_overlay(
+        app,
+        SUMMARY_LABEL,
+        "kind=summary",
+        SUMMARY_W,
+        SUMMARY_H,
+        false,
+    ) {
+        Ok(window) => {
+            let _ = position_top_center(&window, SUMMARY_W, SUMMARY_H, 12.0);
+            let _ = window.show();
+            #[cfg(target_os = "macos")]
+            elevate_overlay(&window);
+        }
+        Err(err) => eprintln!("acorn: failed to create summary overlay: {err}"),
+    }
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn show_summary_overlay(app: AppHandle) -> Result<(), String> {
+    let handle = app.clone();
+    app.run_on_main_thread(move || ensure_summary(&handle))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn hide_summary_overlay(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window(SUMMARY_LABEL) {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}

@@ -22,10 +22,12 @@ import { SettingsPage } from "@/components/settings/settings-page";
 import { TaskInput } from "@/components/task-input";
 import { activity } from "@/lib/activity";
 import { pins } from "@/lib/pin";
+import { overlay } from "@/lib/window";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
+import type { SummaryPayload } from "@/types/overlay";
 
 type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas";
 
@@ -41,6 +43,7 @@ function App() {
 
   const [view, setView] = useState<View>("input");
   const previousChatPhase = useRef<typeof chatPhase>("idle");
+  const latestSummary = useRef<SummaryPayload | null>(null);
 
   useEffect(() => {
     void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession(), hydrateChat()]);
@@ -142,7 +145,23 @@ function App() {
     });
 
     const unlistenNavigate = listen<string>("navigate", (event) => {
-      if (event.payload === "settings") setView("settings");
+      const target = event.payload;
+      if (
+        target === "settings" ||
+        target === "chat" ||
+        target === "calendar" ||
+        target === "canvas" ||
+        target === "input" ||
+        target === "stash"
+      ) {
+        setView(target);
+      }
+    });
+
+    // Re-send the latest reply summary when the summary overlay (re)mounts, in
+    // case its listener registered just after our initial emit.
+    const unlistenSummaryRequest = listen("summary:request", () => {
+      if (latestSummary.current) void emit("summary:show", latestSummary.current);
     });
 
     const unlistenPinShortcut = listen("shortcut:pin-response", async () => {
@@ -260,6 +279,7 @@ function App() {
     return () => {
       void unlistenSubmit.then((fn) => fn());
       void unlistenNavigate.then((fn) => fn());
+      void unlistenSummaryRequest.then((fn) => fn());
       void unlistenDeepLink.then((fn) => fn());
       void unlistenPinShortcut.then((fn) => fn());
       void unlistenScreenshotShortcut.then((fn) => fn());
@@ -288,17 +308,20 @@ function App() {
       .at(-1);
     if (!lastReply) return;
     const preview =
-      lastReply.content.length > 140
-        ? `${lastReply.content.slice(0, 140).trim()}…`
+      lastReply.content.length > 240
+        ? `${lastReply.content.slice(0, 240).trim()}…`
         : lastReply.content.trim();
-    toast.message("Acorn replied", {
-      description: preview,
-      duration: 8000,
-      action: {
-        label: "Open",
-        onClick: () => setView("chat"),
-      },
-    });
+    const payload: SummaryPayload = {
+      content: lastReply.content,
+      preview,
+      providerId: chatCurrent?.providerId ?? null,
+      ts: Date.now(),
+    };
+    latestSummary.current = payload;
+    void overlay
+      .showSummary()
+      .then(() => emit("summary:show", payload))
+      .catch(() => {});
   }, [chatPhase, chatCurrent, view]);
 
   const defaultView = current && current.tasks.length > 0 ? "stash" : "input";

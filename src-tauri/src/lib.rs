@@ -132,6 +132,8 @@ pub fn run() {
             commands::overlay::hide_notch_overlay,
             commands::overlay::open_pin_window,
             commands::overlay::close_pin_window,
+            commands::overlay::show_summary_overlay,
+            commands::overlay::hide_summary_overlay,
             commands::pin::list_pins,
             commands::pin::get_pin,
             commands::pin::create_pin,

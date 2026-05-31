@@ -49,14 +49,16 @@ export function NotchOverlay() {
 
   const visible = state.phase !== "idle" || done;
 
-  const handleEnter = () => {
-    setExpanded(true);
-    void overlay.setInteractive(NOTCH_LABEL, true);
-  };
-  const handleLeave = () => {
-    setExpanded(false);
-    void overlay.setInteractive(NOTCH_LABEL, false);
-  };
+  // A fully click-through window receives no pointer events, so we drive
+  // interactivity from content visibility: the window passes clicks through
+  // while empty (idle) and captures them only while the pill is on screen,
+  // which is what makes hover-expand fire at all.
+  useEffect(() => {
+    void overlay.setInteractive(NOTCH_LABEL, visible);
+  }, [visible]);
+
+  const handleEnter = () => setExpanded(true);
+  const handleLeave = () => setExpanded(false);
 
   const label =
     state.phase === "thinking"

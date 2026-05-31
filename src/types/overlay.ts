@@ -10,3 +10,11 @@ export interface OverlayPhase {
   toolCount: number;
   providerId: string | null;
 }
+
+/** Payload for the transient reply-summary overlay (`summary:show` event). */
+export interface SummaryPayload {
+  content: string;
+  preview: string;
+  providerId: string | null;
+  ts: number;
+}
