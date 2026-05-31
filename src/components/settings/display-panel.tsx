@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { settings } from "@/lib/db";
 import { strings } from "@/lib/i18n";
+import { pet } from "@/lib/pet";
 import { cn } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settings";
 
-const CORNIE_HIDDEN_KEY = "acorn:cornie-hidden";
+const PET_HIDDEN_KEY = "pet-hidden";
 const SOUNDS_MUTED_KEY = "acorn:sounds-muted";
 
 function readBool(key: string): boolean {
@@ -30,15 +32,16 @@ export function DisplayPanel() {
   const [soundsMuted, setSoundsMuted] = useState(false);
 
   useEffect(() => {
-    setCornieHidden(readBool(CORNIE_HIDDEN_KEY));
+    void settings.get(PET_HIDDEN_KEY).then((value) => setCornieHidden(value === "true"));
     setSoundsMuted(readBool(SOUNDS_MUTED_KEY));
   }, []);
 
   const toggleCornie = () => {
-    const next = !cornieHidden;
-    writeBool(CORNIE_HIDDEN_KEY, next);
-    setCornieHidden(next);
-    if (!next) window.location.reload();
+    const nextHidden = !cornieHidden;
+    setCornieHidden(nextHidden);
+    void settings.set(PET_HIDDEN_KEY, nextHidden ? "true" : "");
+    if (nextHidden) void pet.hide();
+    else void pet.show();
   };
 
   const toggleSounds = () => {

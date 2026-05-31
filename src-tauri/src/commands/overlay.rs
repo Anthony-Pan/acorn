@@ -278,3 +278,67 @@ pub fn hide_summary_overlay(app: AppHandle) -> Result<(), String> {
     }
     Ok(())
 }
+
+pub const PET_LABEL: &str = "pet";
+const PET_W: f64 = 108.0;
+const PET_H: f64 = 124.0;
+const PET_MARGIN: f64 = 24.0;
+
+/// Anchor the companion to one of the four screen corners.
+fn position_pet_corner(window: &WebviewWindow, corner: &str) -> tauri::Result<()> {
+    if let Some(monitor) = window.current_monitor()? {
+        let scale = monitor.scale_factor();
+        let monitor_width = monitor.size().width as f64 / scale;
+        let monitor_height = monitor.size().height as f64 / scale;
+        let right = monitor_width - PET_W - PET_MARGIN;
+        let bottom = monitor_height - PET_H - PET_MARGIN;
+        let top = PET_MARGIN + 28.0; // clear the menu bar / notch
+        let (x, y) = match corner {
+            "topLeft" => (PET_MARGIN, top),
+            "topRight" => (right, top),
+            "bottomLeft" => (PET_MARGIN, bottom),
+            _ => (right, bottom), // bottomRight (default)
+        };
+        window.set_position(LogicalPosition::new(x, y))?;
+    }
+    Ok(())
+}
+
+/// Create + show the companion overlay in the bottom-right corner.
+pub fn ensure_pet(app: &AppHandle) {
+    match build_overlay(app, PET_LABEL, "kind=pet", PET_W, PET_H, true) {
+        Ok(window) => {
+            let _ = position_pet_corner(&window, "bottomRight");
+            let _ = window.show();
+            #[cfg(target_os = "macos")]
+            elevate_overlay(&window);
+        }
+        Err(err) => eprintln!("acorn: failed to create pet overlay: {err}"),
+    }
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn show_pet_overlay(app: AppHandle) -> Result<(), String> {
+    let handle = app.clone();
+    app.run_on_main_thread(move || ensure_pet(&handle))
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn hide_pet_overlay(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window(PET_LABEL) {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub fn teleport_pet(app: AppHandle, corner: String) -> Result<(), String> {
+    let handle = app.clone();
+    app.run_on_main_thread(move || {
+        if let Some(window) = handle.get_webview_window(PET_LABEL) {
+            let _ = position_pet_corner(&window, &corner);
+        }
+    })
+    .map_err(|e| e.to_string())
+}

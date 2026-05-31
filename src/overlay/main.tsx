@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 
 import "../index.css";
 import { NotchOverlay } from "./NotchOverlay";
+import { PetOverlay } from "./PetOverlay";
 import { PinOverlay } from "./PinOverlay";
 import { SummaryOverlay } from "./SummaryOverlay";
 
@@ -28,7 +29,8 @@ function renderOverlay(which: string) {
       return <PinOverlay pinId={params.get("pinId") ?? ""} />;
     case "summary":
       return <SummaryOverlay />;
-    // Additional overlay kinds (pet) are wired in as they land.
+    case "pet":
+      return <PetOverlay />;
     default:
       return <NotchOverlay />;
   }

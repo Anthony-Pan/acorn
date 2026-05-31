@@ -87,6 +87,7 @@ pub fn run() {
                 wire_deep_link(app.handle());
                 commands::overlay::ensure_notch(app.handle());
                 restore_pins(app.handle());
+                maybe_spawn_pet(app.handle());
             }
 
             Ok(())
@@ -134,6 +135,9 @@ pub fn run() {
             commands::overlay::close_pin_window,
             commands::overlay::show_summary_overlay,
             commands::overlay::hide_summary_overlay,
+            commands::overlay::show_pet_overlay,
+            commands::overlay::hide_pet_overlay,
+            commands::overlay::teleport_pet,
             commands::pin::list_pins,
             commands::pin::get_pin,
             commands::pin::create_pin,
@@ -295,6 +299,18 @@ fn restore_pins(app: &tauri::AppHandle) {
     .unwrap_or_default();
     for pin in pins {
         commands::overlay::open_pin(app, &pin.id, pin.x, pin.y);
+    }
+}
+
+#[cfg(desktop)]
+fn maybe_spawn_pet(app: &tauri::AppHandle) {
+    let hidden = tauri::async_runtime::block_on(async {
+        commands::settings::load_setting(app.state::<db::Database>().inner(), "pet-hidden").await
+    })
+    .ok()
+    .flatten();
+    if hidden.as_deref() != Some("true") {
+        commands::overlay::ensure_pet(app);
     }
 }
 

@@ -17,7 +17,6 @@ import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
 import { CanvasView } from "@/components/canvas-view";
 import { ChatView } from "@/components/chat-view";
-import { CornieMascot } from "@/components/cornie-mascot";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { TaskInput } from "@/components/task-input";
 import { activity } from "@/lib/activity";
@@ -68,6 +67,47 @@ function App() {
     };
     broadcast(useChatStore.getState());
     return useChatStore.subscribe(broadcast);
+  }, []);
+
+  // Files dropped on the main window — or onto the companion (which forwards
+  // their paths) — are copied to the clipboard for pasting into a chat.
+  useEffect(() => {
+    const eatFiles = (paths: string[]) => {
+      const valid = paths.filter((p) => p.length > 0);
+      if (valid.length === 0) return;
+      void navigator.clipboard
+        .writeText(valid.join("\n"))
+        .then(() => {
+          const first = valid[0]?.split("/").pop() ?? valid[0];
+          const summary =
+            valid.length === 1
+              ? `Cornie ate ${first}`
+              : `Cornie ate ${valid.length} files (${first} + ${valid.length - 1} more)`;
+          toast.success(summary, {
+            description: "Paths copied to clipboard — paste into chat to share with Acorn.",
+            id: "cornie-eats",
+            duration: 6000,
+          });
+        })
+        .catch((err: unknown) => {
+          toast.error("Cornie spilled it", {
+            description: err instanceof Error ? err.message : String(err),
+          });
+        });
+    };
+
+    const unlistenMainDrop = getCurrentWindow().onDragDropEvent((event) => {
+      const payload = event.payload as { type: string; paths?: string[] };
+      if (payload.type !== "drop") return;
+      eatFiles(payload.paths ?? []);
+    });
+    const unlistenPetDrop = listen<{ paths: string[] }>("pet:files-dropped", (event) => {
+      eatFiles(event.payload.paths ?? []);
+    });
+    return () => {
+      void unlistenMainDrop.then((fn) => fn());
+      void unlistenPetDrop.then((fn) => fn());
+    };
   }, []);
 
   useEffect(() => {
@@ -365,7 +405,6 @@ function App() {
           )}
         </motion.div>
       </AnimatePresence>
-      <CornieMascot />
       <Toaster
         position="top-center"
         toastOptions={{
