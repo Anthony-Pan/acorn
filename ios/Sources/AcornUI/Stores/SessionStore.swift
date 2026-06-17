@@ -1,0 +1,143 @@
+import Foundation
+import Observation
+import AcornCore
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
+
+@MainActor
+@Observable
+public final class SessionStore {
+    public enum StashState: Sendable {
+        case idle
+        case awaitingFirstTask
+        case streaming
+        case done
+        case failed(String)
+    }
+
+    public var currentSession: Session?
+    public var tasks: [Task] = []
+    public var summary: String = ""
+    public var stashState: StashState = .idle
+
+    private let services: Services
+
+    public init(services: Services) {
+        self.services = services
+    }
+
+    public func reset() {
+        currentSession = nil
+        tasks = []
+        summary = ""
+        stashState = .idle
+    }
+
+    public func stash(rawInput: String, language: String, providerId: String) async {
+        reset()
+        stashState = .awaitingFirstTask
+        let stream = await services.ai.stash(
+            rawInput: rawInput,
+            language: language,
+            providerId: providerId
+        )
+        do {
+            for try await event in stream {
+                switch event {
+                case .sessionCreated(let session):
+                    currentSession = session
+                case .progress:
+                    if case .awaitingFirstTask = stashState {
+                        stashState = .streaming
+                    }
+                case .task(let task):
+                    tasks.append(task)
+                    stashState = .streaming
+                case .summary(let s):
+                    summary = s
+                case .done:
+                    stashState = .done
+                    refreshWidget()
+                    Sounds.play(.chime)
+                }
+            }
+        } catch {
+            stashState = .failed(error.localizedDescription)
+            Sounds.play(.error)
+        }
+    }
+
+    private func refreshWidget() {
+        let snapshot = WidgetCache.fromTasks(tasks, summary: summary)
+        WidgetCache.write(snapshot)
+        #if canImport(WidgetKit) && os(iOS)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
+    }
+
+    public func hydrateLatestSession() async {
+        do {
+            let recent = try await services.sessions.listRecent(limit: 1)
+            if let session = recent.first {
+                let tasks = try await services.sessions.tasks(for: session.id)
+                self.currentSession = session
+                self.tasks = tasks
+                self.summary = session.aiSummary ?? ""
+                self.stashState = .done
+            }
+        } catch {
+            // Silent; UI will fall back to empty state.
+        }
+    }
+
+    public func drainPendingShareExtensionInbox(activeProviderId: String, language: String) async {
+        let pending = PendingStashQueue.drainAll()
+        guard let first = pending.first else { return }
+        await stash(rawInput: first.text, language: language, providerId: activeProviderId)
+        for remaining in pending.dropFirst() {
+            PendingStashQueue.enqueue(text: remaining.text)
+        }
+    }
+
+    public func toggleStatus(taskId: String) async {
+        guard let idx = tasks.firstIndex(where: { $0.id == taskId }) else { return }
+        let task = tasks[idx]
+        let nextStatus: TaskStatus = switch task.status {
+        case .pending: .inProgress
+        case .inProgress: .completed
+        case .completed: .pending
+        case .skipped: .pending
+        }
+        if let updated = try? await services.tasks.updateStatus(taskId: taskId, status: nextStatus) {
+            tasks[idx] = updated
+            refreshWidget()
+            await syncLiveActivity(for: updated)
+        }
+    }
+
+    public func skip(taskId: String) async {
+        if let updated = try? await services.tasks.updateStatus(taskId: taskId, status: .skipped) {
+            if let idx = tasks.firstIndex(where: { $0.id == taskId }) {
+                tasks[idx] = updated
+                refreshWidget()
+                await syncLiveActivity(for: updated)
+            }
+        }
+    }
+
+    private func syncLiveActivity(for task: Task) async {
+        #if canImport(ActivityKit) && os(iOS)
+        guard #available(iOS 16.2, *) else { return }
+        switch task.status {
+        case .inProgress:
+            await TaskActivityController.start(for: task)
+            await TaskActivityController.update(for: task)
+        case .pending:
+            await TaskActivityController.end(for: task)
+        case .completed, .skipped:
+            await TaskActivityController.end(for: task)
+        }
+        #endif
+    }
+}
