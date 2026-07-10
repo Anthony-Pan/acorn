@@ -40,10 +40,12 @@ pub async fn set_summon_shortcut(
 
     #[cfg(desktop)]
     {
-        let gs = app.global_shortcut();
-        gs.unregister_all()
+        app.global_shortcut()
+            .unregister_all()
             .map_err(|e| AppError::InvalidInput(format!("could not unregister previous: {e}")))?;
-        gs.register(parsed)
+        // unregister_all also dropped the pin/screenshot/push-to-talk/quick-ask/
+        // cloud extras, so re-register the full set — not just the summon key.
+        crate::register_global_shortcuts(&app, parsed)
             .map_err(|e| AppError::InvalidInput(format!("could not register: {e}")))?;
     }
     #[cfg(not(desktop))]

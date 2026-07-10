@@ -88,7 +88,9 @@ pub fn run() {
                 .ok()
                 .flatten()
                 .unwrap_or_else(|| commands::shortcut::DEFAULT_SHORTCUT.to_string());
-                register_global_shortcuts(app.handle(), &stored)?;
+                let summon = Shortcut::from_str(&stored)
+                    .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
+                register_global_shortcuts(app.handle(), summon)?;
                 build_tray(app.handle())?;
                 wire_quick_window_blur(app.handle());
                 wire_main_window_close_to_hide(app.handle());
@@ -202,10 +204,15 @@ pub fn run() {
         });
 }
 
+/// Register the summon shortcut plus the fixed extras. `set_summon_shortcut`
+/// re-runs this after its `unregister_all`, so every shortcut the app owns must
+/// be registered here — a shortcut registered anywhere else would silently die
+/// the first time the user rebinds the summon key.
 #[cfg(desktop)]
-fn register_global_shortcuts(app: &tauri::AppHandle, shortcut_str: &str) -> anyhow::Result<()> {
-    let summon = Shortcut::from_str(shortcut_str)
-        .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
+pub(crate) fn register_global_shortcuts(
+    app: &tauri::AppHandle,
+    summon: Shortcut,
+) -> anyhow::Result<()> {
     let extras = [
         commands::shortcut::PIN_SHORTCUT,
         commands::shortcut::SCREENSHOT_SHORTCUT,
