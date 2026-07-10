@@ -72,6 +72,10 @@ function playCustom(key: SoundKey): boolean {
 function tone(frequency: number, duration: number, gainPeak: number): void {
   const audio = getContext();
   if (!audio) return;
+  // WebKit hands out a suspended context when the first tone plays outside a
+  // user gesture (e.g. the reply chime); try to wake it before scheduling. If
+  // the autoplay policy refuses, the tone is skipped — same as before.
+  if (audio.state === "suspended") void audio.resume();
   const osc = audio.createOscillator();
   const gain = audio.createGain();
   osc.type = "sine";
