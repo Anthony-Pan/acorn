@@ -287,14 +287,14 @@ function App() {
       }
     });
 
+    // The voice button owns the actual capture (it listens for this event
+    // too); here we only surface a view that has one so the shortcut always
+    // lands somewhere useful.
     const unlistenPushToTalkShortcut = listen("shortcut:push-to-talk", async () => {
       const main = getCurrentWindow();
       await main.show();
       await main.setFocus();
-      toast.message("Push to talk", {
-        description: "Hold-to-talk voice input ships with the next voice overhaul.",
-        id: "shortcut-ptt",
-      });
+      setView((v) => (v === "chat" || v === "input" ? v : "chat"));
     });
 
     const unlistenQuickAskShortcut = listen("shortcut:quick-ask", async () => {
