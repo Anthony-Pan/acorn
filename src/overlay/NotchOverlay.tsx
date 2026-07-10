@@ -110,6 +110,7 @@ export function NotchOverlay() {
           <motion.button
             type="button"
             key="capsule"
+            layout
             initial={{ opacity: 0, y: -10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.9 }}
@@ -130,12 +131,19 @@ export function NotchOverlay() {
             </span>
 
             {voiceActive ? (
-              <Mic
-                className={cn(
-                  "h-3 w-3 shrink-0 text-acorn-red",
-                  voice === "recording" && "animate-pulse",
-                )}
-              />
+              voice === "recording" ? (
+                <span
+                  aria-hidden
+                  className="notch-voice-meter flex h-3 shrink-0 items-center gap-[2px]"
+                >
+                  <span className="w-[2px] rounded-full bg-acorn-red" />
+                  <span className="w-[2px] rounded-full bg-acorn-red" />
+                  <span className="w-[2px] rounded-full bg-acorn-red" />
+                  <span className="w-[2px] rounded-full bg-acorn-red" />
+                </span>
+              ) : (
+                <Mic className="h-3 w-3 shrink-0 text-acorn-red" />
+              )
             ) : hasError ? (
               <AlertTriangle className="h-3 w-3 shrink-0 text-acorn-red" />
             ) : done ? (
@@ -146,7 +154,9 @@ export function NotchOverlay() {
               <Loader2 className="h-3 w-3 shrink-0 animate-spin text-acorn-orange" />
             )}
 
-            <span className="truncate font-medium text-foreground">{label}</span>
+            <motion.span layout className="truncate font-medium text-foreground">
+              {label}
+            </motion.span>
 
             {!hasError && state.toolCount > 1 ? (
               <span className="shrink-0 text-muted-foreground">+{state.toolCount - 1}</span>
@@ -187,6 +197,24 @@ export function NotchOverlay() {
           </motion.button>
         ) : null}
       </AnimatePresence>
+      <style>{notchKeyframes}</style>
     </div>
   );
 }
+
+// Equalizer bars while the mic is live. Durations are staggered per bar so the
+// dance reads organic rather than metronomic.
+const notchKeyframes = `
+@keyframes acorn-notch-eq {
+  0%, 100% { transform: scaleY(0.3); }
+  50%      { transform: scaleY(1); }
+}
+.notch-voice-meter > span {
+  height: 100%;
+  transform-origin: center;
+  animation: acorn-notch-eq 0.9s ease-in-out infinite;
+}
+.notch-voice-meter > span:nth-child(2) { animation-duration: 0.7s; animation-delay: 0.12s; }
+.notch-voice-meter > span:nth-child(3) { animation-duration: 1.1s; animation-delay: 0.05s; }
+.notch-voice-meter > span:nth-child(4) { animation-duration: 0.8s; animation-delay: 0.2s; }
+`;
