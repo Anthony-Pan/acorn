@@ -110,14 +110,17 @@ fn position_top_center(
     top_inset: f64,
 ) -> tauri::Result<()> {
     if let Some(monitor) = window.current_monitor()? {
-        // `Monitor::size()` is in physical pixels; convert to logical so the
-        // math is correct on Retina displays.
+        // Monitor geometry is in physical pixels; convert to logical so the
+        // math is correct on Retina displays. Offsetting by the monitor's own
+        // origin keeps the overlay on the screen it lives on — without it,
+        // secondary displays would push the window back onto the primary.
         let scale = monitor.scale_factor();
+        let origin = monitor.position().to_logical::<f64>(scale);
         let monitor_width = monitor.size().width as f64 / scale;
         window.set_size(LogicalSize::new(width, height))?;
         window.set_position(LogicalPosition::new(
-            (monitor_width - width) / 2.0,
-            top_inset,
+            origin.x + (monitor_width - width) / 2.0,
+            origin.y + top_inset,
         ))?;
     }
     Ok(())
@@ -209,10 +212,11 @@ fn position_pin_cascade(app: &AppHandle, window: &WebviewWindow) -> tauri::Resul
         .saturating_sub(1) as f64; // exclude the window we just built
     if let Some(monitor) = window.current_monitor()? {
         let scale = monitor.scale_factor();
+        let origin = monitor.position().to_logical::<f64>(scale);
         let monitor_width = monitor.size().width as f64 / scale;
         let offset = (existing % 6.0) * 28.0;
-        let x = (monitor_width - PIN_W - 32.0 - offset).max(16.0);
-        let y = 72.0 + offset;
+        let x = origin.x + (monitor_width - PIN_W - 32.0 - offset).max(16.0);
+        let y = origin.y + 72.0 + offset;
         window.set_position(LogicalPosition::new(x, y))?;
     }
     Ok(())
@@ -288,15 +292,17 @@ const PET_MARGIN: f64 = 24.0;
 fn position_pet_corner(window: &WebviewWindow, corner: &str) -> tauri::Result<()> {
     if let Some(monitor) = window.current_monitor()? {
         let scale = monitor.scale_factor();
+        let origin = monitor.position().to_logical::<f64>(scale);
         let monitor_width = monitor.size().width as f64 / scale;
         let monitor_height = monitor.size().height as f64 / scale;
-        let right = monitor_width - PET_W - PET_MARGIN;
-        let bottom = monitor_height - PET_H - PET_MARGIN;
-        let top = PET_MARGIN + 28.0; // clear the menu bar / notch
+        let left = origin.x + PET_MARGIN;
+        let right = origin.x + monitor_width - PET_W - PET_MARGIN;
+        let bottom = origin.y + monitor_height - PET_H - PET_MARGIN;
+        let top = origin.y + PET_MARGIN + 28.0; // clear the menu bar / notch
         let (x, y) = match corner {
-            "topLeft" => (PET_MARGIN, top),
+            "topLeft" => (left, top),
             "topRight" => (right, top),
-            "bottomLeft" => (PET_MARGIN, bottom),
+            "bottomLeft" => (left, bottom),
             _ => (right, bottom), // bottomRight (default)
         };
         window.set_position(LogicalPosition::new(x, y))?;
