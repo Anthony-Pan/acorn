@@ -21,6 +21,15 @@ export function VoiceButton({ onTranscript, onError }: VoiceButtonProps) {
     void emit("overlay:voice", { state });
   }, [state]);
 
+  // The recorder dies with this component (navigating away mid-capture), so
+  // make sure the island doesn't stay stuck on "Listening…".
+  useEffect(
+    () => () => {
+      void emit("overlay:voice", { state: "idle" });
+    },
+    [],
+  );
+
   const handleClick = async () => {
     try {
       if (state === "idle") {
