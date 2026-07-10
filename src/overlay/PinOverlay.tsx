@@ -48,15 +48,17 @@ export function PinOverlay({ pinId }: PinOverlayProps) {
     if (!pinId) return;
     const win = getCurrentWindow();
     let moveTimer: number | null = null;
-    const unlistenPromise = (async () => {
-      const factor = await win.scaleFactor();
-      return win.onMoved(({ payload }) => {
-        if (moveTimer) window.clearTimeout(moveTimer);
-        moveTimer = window.setTimeout(() => {
-          void pins.updatePosition(pinId, payload.x / factor, payload.y / factor).catch(() => {});
-        }, POSITION_DEBOUNCE_MS);
-      });
-    })();
+    const unlistenPromise = win.onMoved(({ payload }) => {
+      if (moveTimer) window.clearTimeout(moveTimer);
+      moveTimer = window.setTimeout(() => {
+        // Read the scale factor at save time: the drag may have ended on a
+        // monitor with a different DPI than the one it started on.
+        void win
+          .scaleFactor()
+          .then((factor) => pins.updatePosition(pinId, payload.x / factor, payload.y / factor))
+          .catch(() => {});
+      }, POSITION_DEBOUNCE_MS);
+    });
     return () => {
       if (moveTimer) window.clearTimeout(moveTimer);
       void unlistenPromise.then((fn) => fn());
