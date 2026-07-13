@@ -113,6 +113,8 @@ pub fn run() {
             commands::task::update_task_status,
             commands::task::list_subtasks,
             commands::task::toggle_subtask,
+            commands::task::set_task_schedule,
+            commands::task::delete_task,
             commands::settings::get_setting,
             commands::settings::set_setting,
             commands::settings::delete_setting,

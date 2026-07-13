@@ -47,6 +47,17 @@ pub struct Task {
     pub created_at: DateTime<Utc>,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
+    /// Calendar-event mapping: start of the timed block (RFC3339). `None` = undated.
+    pub scheduled_start: Option<DateTime<Utc>>,
+    /// Calendar-event mapping: end of the block. If `None`, derive from
+    /// `scheduled_start + duration_minutes` at push time.
+    pub scheduled_end: Option<DateTime<Utc>>,
+    /// Reminder/task mapping: due date (Google Tasks honours the date only).
+    pub due_date: Option<DateTime<Utc>>,
+    /// All-day vs timed for event mapping.
+    pub all_day: bool,
+    /// Last-write-wins clock; bumped by every mutating task command.
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]

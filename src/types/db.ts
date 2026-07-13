@@ -25,6 +25,16 @@ export interface Task {
   createdAt: string;
   startedAt: string | null;
   completedAt: string | null;
+  /** Calendar-event mapping: start of the timed block (RFC3339); null = undated. */
+  scheduledStart: string | null;
+  /** Calendar-event mapping: end of the block; null derives from durationMinutes. */
+  scheduledEnd: string | null;
+  /** Reminder/task mapping: due date (Google Tasks honours the date only). */
+  dueDate: string | null;
+  /** All-day vs timed for event mapping. */
+  allDay: boolean;
+  /** Last-write-wins clock; bumped by every mutating task command. */
+  updatedAt: string;
 }
 
 export interface Subtask {

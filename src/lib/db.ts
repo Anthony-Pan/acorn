@@ -33,6 +33,16 @@ export const tasks = {
   listSubtasks: (taskId: string) => invoke<Subtask[]>("list_subtasks", { taskId }),
 
   toggleSubtask: (subtaskId: string) => invoke<Subtask>("toggle_subtask", { subtaskId }),
+
+  setSchedule: (
+    taskId: string,
+    scheduledStart: string | null,
+    scheduledEnd: string | null,
+    dueDate: string | null,
+    allDay: boolean,
+  ) => invoke<Task>("set_task_schedule", { taskId, scheduledStart, scheduledEnd, dueDate, allDay }),
+
+  remove: (taskId: string) => invoke<void>("delete_task", { taskId }),
 };
 
 export const settings = {

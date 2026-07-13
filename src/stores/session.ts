@@ -30,6 +30,11 @@ function previewTask(decomposed: DecomposedTask, sessionId: string): Task {
     createdAt: new Date().toISOString(),
     startedAt: null,
     completedAt: null,
+    scheduledStart: null,
+    scheduledEnd: null,
+    dueDate: null,
+    allDay: false,
+    updatedAt: new Date().toISOString(),
   };
 }
 
