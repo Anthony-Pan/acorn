@@ -91,7 +91,7 @@ pub fn run() {
                 let summon = Shortcut::from_str(&stored)
                     .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
                 register_global_shortcuts(app.handle(), summon)?;
-                build_tray(app.handle())?;
+                build_tray(app.handle(), &stored)?;
                 wire_quick_window_blur(app.handle());
                 wire_main_window_close_to_hide(app.handle());
                 wire_deep_link(app.handle());
@@ -239,13 +239,8 @@ fn shortcut_matches(target: &Shortcut, spec: &str) -> bool {
         .unwrap_or(false)
 }
 
-fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {
-    let show = MenuItem::with_id(app, "show", "Show Acorn", true, None::<&str>)?;
-    let summon = MenuItem::with_id(app, "summon", "Summon  ⌘⇧A", true, None::<&str>)?;
-    let settings = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
-    let separator = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit Acorn", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &summon, &settings, &separator, &quit])?;
+fn build_tray(app: &tauri::AppHandle, summon_shortcut: &str) -> anyhow::Result<()> {
+    let menu = tray_menu(app, summon_shortcut)?;
 
     let icon = app
         .default_window_icon()
@@ -260,6 +255,51 @@ fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {
         .build(app)?;
 
     Ok(())
+}
+
+fn tray_menu(app: &tauri::AppHandle, summon_shortcut: &str) -> anyhow::Result<Menu<tauri::Wry>> {
+    let summon_label = format!("Summon  {}", format_shortcut_label(summon_shortcut));
+    let show = MenuItem::with_id(app, "show", "Show Acorn", true, None::<&str>)?;
+    let summon = MenuItem::with_id(app, "summon", summon_label, true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Acorn", true, None::<&str>)?;
+    Ok(Menu::with_items(
+        app,
+        &[&show, &summon, &settings, &separator, &quit],
+    )?)
+}
+
+/// Refresh the tray's "Summon" entry after a rebind so the menu never
+/// advertises a shortcut that is no longer registered.
+pub(crate) fn update_tray_summon_shortcut(app: &tauri::AppHandle, shortcut: &str) {
+    if let Some(tray) = app.tray_by_id("acorn-tray") {
+        match tray_menu(app, shortcut) {
+            Ok(menu) => {
+                if let Err(err) = tray.set_menu(Some(menu)) {
+                    eprintln!("acorn: could not update tray menu: {err}");
+                }
+            }
+            Err(err) => eprintln!("acorn: could not rebuild tray menu: {err}"),
+        }
+    }
+}
+
+/// "CmdOrCtrl+Shift+KeyA" → "⌘⇧A" for menu labels.
+fn format_shortcut_label(raw: &str) -> String {
+    raw.split('+')
+        .map(|part| match part {
+            "CmdOrCtrl" | "CommandOrControl" | "Cmd" | "Command" | "Super" | "Meta" => {
+                "⌘".to_string()
+            }
+            "Ctrl" | "Control" => "⌃".to_string(),
+            "Shift" => "⇧".to_string(),
+            "Alt" | "Option" => "⌥".to_string(),
+            p if p.starts_with("Key") => p[3..].to_string(),
+            p if p.starts_with("Digit") => p[5..].to_string(),
+            p => p.to_string(),
+        })
+        .collect()
 }
 
 #[cfg(desktop)]

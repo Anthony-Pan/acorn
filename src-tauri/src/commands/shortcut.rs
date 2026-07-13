@@ -47,6 +47,7 @@ pub async fn set_summon_shortcut(
         // cloud extras, so re-register the full set — not just the summon key.
         crate::register_global_shortcuts(&app, parsed)
             .map_err(|e| AppError::InvalidInput(format!("could not register: {e}")))?;
+        crate::update_tray_summon_shortcut(&app, trimmed);
     }
     #[cfg(not(desktop))]
     let _ = (app, parsed);
