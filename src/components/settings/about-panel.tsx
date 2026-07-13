@@ -40,18 +40,18 @@ export function AboutPanel() {
   };
 
   return (
-    <section className="flex-1 px-8 py-7 overflow-y-auto">
+    <section className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
       <header className="mb-6 flex items-start gap-3">
         <AcornLogo size={32} />
         <div>
-          <h1 className="text-lg font-medium text-foreground">{t.aboutPanelTitle}</h1>
-          <p className="text-xs text-muted-foreground mt-1">{t.aboutPanelSubtitle}</p>
+          <h1 className="text-[20px] font-semibold text-foreground">{t.aboutPanelTitle}</h1>
+          <p className="mt-1 text-[13px] text-muted-foreground">{t.aboutPanelSubtitle}</p>
         </div>
       </header>
 
-      <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-3 text-sm max-w-md">
+      <dl className="grid max-w-md grid-cols-[max-content_1fr] gap-x-6 gap-y-3 rounded-lg border-[0.5px] border-border bg-card px-4 py-3.5 text-[13px] shadow-[var(--shadow-card)]">
         <dt className="text-muted-foreground">{t.aboutVersionLabel}</dt>
-        <dd className="font-mono text-foreground">
+        <dd className="font-mono tabular-nums text-foreground">
           {appName} {version || "…"}
         </dd>
 
@@ -78,7 +78,7 @@ export function AboutPanel() {
       <button
         type="button"
         onClick={copyDiagnostics}
-        className="mt-6 inline-flex items-center gap-1.5 rounded-md border-[0.5px] border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+        className="mt-6 inline-flex items-center gap-1.5 rounded-md border-[0.5px] border-border px-3 py-1 text-[13px] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
       >
         {copied ? (
           <Check className="h-3.5 w-3.5 text-acorn-olive" />

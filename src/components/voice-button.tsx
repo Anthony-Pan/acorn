@@ -79,7 +79,7 @@ export function VoiceButton({ onTranscript, onError }: VoiceButtonProps) {
         onClick={handleClick}
         disabled={state === "transcribing"}
         className={cn(
-          "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-colors",
+          "inline-flex h-8 items-center gap-1.5 px-2.5 text-[13px] rounded-md transition-colors",
           "border-[0.5px] border-border",
           state === "recording" && "bg-acorn-red text-acorn-paper border-transparent animate-pulse",
           state === "idle" && "text-muted-foreground hover:bg-muted",

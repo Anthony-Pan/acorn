@@ -93,48 +93,50 @@ export function ShortcutRecorder({ language }: ShortcutRecorderProps) {
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <div>
-        <div className="text-sm">{t.shortcutLabel}</div>
-        <div className="text-[11px] text-muted-foreground">{t.shortcutCaption}</div>
+    <div className="flex w-full items-center justify-between gap-6">
+      <div className="min-w-0">
+        <div className="text-[13px] text-foreground">{t.shortcutLabel}</div>
+        <div className="mt-0.5 text-[11px] text-muted-foreground">{t.shortcutCaption}</div>
       </div>
-      <button
-        ref={recorderRef}
-        type="button"
-        onClick={phase === "idle" ? startRecording : undefined}
-        disabled={phase === "saving"}
-        className="bg-card border-[0.5px] border-border rounded-md px-3 py-1.5 text-sm font-mono min-w-[140px] text-left focus:outline-none focus:ring-2 focus:ring-ring/30"
-      >
-        {phase === "recording"
-          ? draft
-            ? formatShortcut(draft)
-            : "Press a combination..."
-          : formatShortcut(shortcut)}
-      </button>
-      {phase === "recording" ? (
-        <>
-          <Button onClick={saveShortcut} disabled={!draft} size="sm">
-            {t.saveShortcut}
-          </Button>
-          <Button onClick={cancelRecording} variant="outline" size="sm">
-            {t.cancelRecording}
-          </Button>
-        </>
-      ) : (
-        <Button
-          onClick={resetShortcut}
-          variant="outline"
-          size="icon-sm"
+      <div className="flex flex-shrink-0 items-center gap-2">
+        <button
+          ref={recorderRef}
+          type="button"
+          onClick={phase === "idle" ? startRecording : undefined}
           disabled={phase === "saving"}
-          aria-label={t.resetShortcut}
+          className="min-w-[132px] rounded-md border-[0.5px] border-border bg-background px-3 py-1 text-center font-mono text-[13px] tabular-nums transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30"
         >
-          {phase === "saving" ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <RotateCcw className="w-3.5 h-3.5" />
-          )}
-        </Button>
-      )}
+          {phase === "recording"
+            ? draft
+              ? formatShortcut(draft)
+              : "Press a combination..."
+            : formatShortcut(shortcut)}
+        </button>
+        {phase === "recording" ? (
+          <>
+            <Button onClick={saveShortcut} disabled={!draft} size="sm">
+              {t.saveShortcut}
+            </Button>
+            <Button onClick={cancelRecording} variant="outline" size="sm">
+              {t.cancelRecording}
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={resetShortcut}
+            variant="outline"
+            size="icon-sm"
+            disabled={phase === "saving"}
+            aria-label={t.resetShortcut}
+          >
+            {phase === "saving" ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <RotateCcw className="w-3.5 h-3.5" />
+            )}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

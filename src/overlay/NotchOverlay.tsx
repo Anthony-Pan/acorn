@@ -120,9 +120,8 @@ export function NotchOverlay() {
             onClick={hasError ? openChat : undefined}
             style={{ pointerEvents: "auto" }}
             className={cn(
-              "flex max-w-[460px] items-center gap-2 rounded-full border-[0.5px] px-2.5 py-1",
-              "bg-card/95 text-[11px] shadow-sm backdrop-blur select-none",
-              hasError || voiceActive ? "border-acorn-red/50" : "border-acorn-orange/40",
+              "glass flex max-w-[460px] items-center gap-2 rounded-full px-2.5 py-1",
+              "text-[11px] select-none",
               hasError && "cursor-pointer",
             )}
           >
@@ -175,7 +174,7 @@ export function NotchOverlay() {
                   {state.providerId ? (
                     <>
                       <span className="text-muted-foreground/50">·</span>
-                      <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                      <span className="shrink-0 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                         {state.providerId}
                         {state.model ? ` · ${state.model}` : ""}
                       </span>

@@ -83,17 +83,17 @@ export function SummaryOverlay() {
             initial={{ opacity: 0, y: -14, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -14, scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             onPointerEnter={clearDismiss}
             onPointerLeave={scheduleDismiss}
             style={{ pointerEvents: "auto" }}
-            className="w-[320px] overflow-hidden rounded-2xl border-[0.5px] border-acorn-brown/30 bg-card/95 shadow-lg backdrop-blur"
+            className="glass w-[320px] overflow-hidden rounded-lg"
           >
-            <div className="flex items-center gap-1.5 bg-gradient-to-r from-acorn-orange/90 to-acorn-brown px-3 py-1.5 text-acorn-paper">
-              <MessageSquare className="h-3 w-3" />
-              <span className="text-[11px] font-semibold">Acorn replied</span>
+            <div className="flex items-center gap-1.5 border-b-[0.5px] border-border px-3 py-1.5">
+              <MessageSquare className="h-3 w-3 text-primary" />
+              <span className="text-[11px] font-semibold text-foreground">Acorn replied</span>
               {data.providerId ? (
-                <span className="ml-auto font-mono text-[9px] uppercase tracking-wider opacity-80">
+                <span className="ml-auto font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                   {data.providerId}
                 </span>
               ) : null}
@@ -105,7 +105,7 @@ export function SummaryOverlay() {
               <button
                 type="button"
                 onClick={handleCopy}
-                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:bg-acorn-brown/10 hover:text-foreground"
+                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 {copied ? (
                   <Check className="h-3 w-3 text-acorn-olive" />
@@ -117,7 +117,7 @@ export function SummaryOverlay() {
               <button
                 type="button"
                 onClick={handleOpen}
-                className="rounded-full bg-acorn-orange/15 px-2 py-0.5 text-[10px] font-medium text-acorn-brown hover:bg-acorn-orange/25"
+                className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground transition-colors hover:bg-accent"
               >
                 Open full
               </button>

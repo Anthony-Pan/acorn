@@ -23,7 +23,9 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
-        "visible": true
+        "visible": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       },
       {
         "label": "quick",

@@ -29,9 +29,9 @@ export function ContextBar({ contents, draft }: ContextBarProps) {
 
   return (
     <div className="mb-2">
-      <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
+      <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground select-none">
         <span>Context</span>
-        <span className={cn("tabular-nums", near && "text-acorn-red")}>
+        <span className={cn("tabular-nums", near && "text-destructive")}>
           ~{formatTokens(tokens)} / {formatTokens(BUDGET_TOKENS)}
         </span>
       </div>
@@ -39,7 +39,7 @@ export function ContextBar({ contents, draft }: ContextBarProps) {
         <div
           className={cn(
             "h-full rounded-full transition-[width] duration-300",
-            near ? "bg-acorn-red" : "bg-acorn-orange",
+            near ? "bg-destructive" : "bg-acorn-orange",
           )}
           style={{ width: `${Math.max(2, pct)}%` }}
         />

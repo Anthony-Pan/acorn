@@ -88,35 +88,31 @@ export function PinOverlay({ pinId }: PinOverlayProps) {
 
   return (
     <div className="h-screen w-screen overflow-hidden p-1.5" style={{ pointerEvents: "auto" }}>
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl border-[0.5px] border-acorn-brown/30 bg-card/95 shadow-lg backdrop-blur">
-        <div className="h-1 bg-gradient-to-r from-acorn-orange to-acorn-brown" />
+      <div className="glass flex h-full flex-col overflow-hidden rounded-lg">
         <div
           data-tauri-drag-region
-          className="flex cursor-grab items-center justify-between gap-2 px-3 pt-1.5 pb-1 active:cursor-grabbing"
+          className="flex cursor-grab select-none items-center justify-between gap-2 border-b-[0.5px] border-border px-3 pt-1.5 pb-1 active:cursor-grabbing"
         >
-          <span
-            data-tauri-drag-region
-            className="truncate text-[11px] font-semibold text-acorn-brown"
-          >
+          <span data-tauri-drag-region className="truncate text-[11px] font-semibold text-primary">
             {label}
           </span>
           <button
             type="button"
             onClick={handleClose}
             aria-label="Remove pin"
-            className="rounded-full p-0.5 text-muted-foreground hover:bg-acorn-brown/10 hover:text-foreground"
+            className="rounded-full p-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto whitespace-pre-wrap px-3 text-[12px] leading-relaxed text-foreground">
+        <div className="flex-1 overflow-y-auto whitespace-pre-wrap px-3 pt-1.5 text-[12px] leading-relaxed text-foreground">
           {content}
         </div>
         <div className="flex justify-end px-2 pt-1 pb-1.5">
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:bg-acorn-brown/10 hover:text-foreground"
+            className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             {copied ? <Check className="h-3 w-3 text-acorn-olive" /> : <Copy className="h-3 w-3" />}
             {copied ? "Copied" : "Copy"}

@@ -57,7 +57,7 @@ export function PinCards({ raw }: PinCardsProps) {
 
   if (pins.length === 0) {
     return (
-      <pre className="text-xs font-mono bg-muted/40 rounded-md p-3 overflow-x-auto">
+      <pre className="text-[11px] font-mono bg-muted/40 rounded-md p-3 overflow-x-auto">
         <code>{raw}</code>
       </pre>
     );
@@ -66,7 +66,7 @@ export function PinCards({ raw }: PinCardsProps) {
   const visible = pins.map((pin, idx) => ({ pin, idx })).filter(({ idx }) => !dismissed.has(idx));
 
   if (visible.length === 0) {
-    return <div className="text-xs text-muted-foreground italic">All pins dismissed.</div>;
+    return <div className="text-[11px] text-muted-foreground italic">All pins dismissed.</div>;
   }
 
   return (
@@ -74,7 +74,7 @@ export function PinCards({ raw }: PinCardsProps) {
       {visible.map(({ pin, idx }) => (
         <div
           key={idx}
-          className="group inline-flex items-center gap-2 border-[0.5px] border-acorn-brown/40 bg-acorn-brown/10 hover:bg-acorn-brown/15 rounded-full pl-3 pr-1 py-1 transition-colors"
+          className="group inline-flex items-center gap-2 border-[0.5px] border-acorn-brown/25 bg-acorn-brown/10 hover:bg-acorn-brown/15 rounded-full pl-3 pr-1 py-1 transition-colors"
         >
           <button
             type="button"
@@ -94,7 +94,7 @@ export function PinCards({ raw }: PinCardsProps) {
             <span className="text-[10px] uppercase tracking-wider text-acorn-brown-deep font-medium">
               {pin.label}
             </span>
-            <span className="text-xs text-foreground/85 font-mono truncate max-w-[200px]">
+            <span className="text-[11px] text-foreground/85 font-mono truncate max-w-[200px]">
               {pin.value}
             </span>
           </button>

@@ -97,7 +97,8 @@ export function CanvasView({ onBack }: CanvasViewProps) {
   return (
     <div className="min-h-screen bg-background flex">
       <aside className="w-60 flex-shrink-0 border-r-[0.5px] border-border flex flex-col">
-        <div className="px-3 py-3 border-b-[0.5px] border-border flex items-center gap-2">
+        <div data-tauri-drag-region className="h-[36px] flex-shrink-0" />
+        <div className="px-3 pb-3 border-b-[0.5px] border-border flex items-center gap-2">
           <Button variant="outline" size="icon-sm" onClick={onBack} aria-label="Back">
             <ArrowLeft />
           </Button>
@@ -113,19 +114,19 @@ export function CanvasView({ onBack }: CanvasViewProps) {
         </div>
         <div className="flex-1 overflow-y-auto py-2">
           {loading ? (
-            <div className="px-4 py-6 text-xs text-muted-foreground inline-flex items-center gap-2">
+            <div className="px-4 py-6 text-[13px] text-muted-foreground inline-flex items-center gap-2">
               <Loader2 className="w-3 h-3 animate-spin" />
               Loading…
             </div>
           ) : list.length === 0 ? (
-            <div className="px-4 py-6 text-xs text-muted-foreground">No canvases yet.</div>
+            <div className="px-4 py-6 text-[13px] text-muted-foreground">No canvases yet.</div>
           ) : (
             list.map((c) => (
               <div
                 key={c.id}
                 className={cn(
                   "group mx-1 my-0.5 px-2 py-1.5 rounded-md flex items-start gap-2 transition-colors",
-                  current?.id === c.id ? "bg-acorn-orange/12" : "hover:bg-muted/60",
+                  current?.id === c.id ? "bg-accent" : "hover:bg-muted/60",
                 )}
               >
                 <button
@@ -135,8 +136,8 @@ export function CanvasView({ onBack }: CanvasViewProps) {
                 >
                   <FileText className="w-3.5 h-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-foreground truncate">{c.title}</div>
-                    <div className="text-[10px] text-muted-foreground">
+                    <div className="text-[13px] text-foreground truncate">{c.title}</div>
+                    <div className="text-[11px] text-muted-foreground">
                       {formatDistanceToNowStrict(new Date(c.updatedAt), { addSuffix: true })}
                     </div>
                   </div>
@@ -145,7 +146,7 @@ export function CanvasView({ onBack }: CanvasViewProps) {
                   type="button"
                   aria-label="Delete canvas"
                   onClick={() => void handleDelete(c)}
-                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-acorn-red px-1"
+                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-colors px-1"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -158,15 +159,18 @@ export function CanvasView({ onBack }: CanvasViewProps) {
       <div className="flex-1 flex flex-col min-w-0">
         {current ? (
           <>
-            <header className="flex items-center justify-between px-7 py-3.5 border-b-[0.5px] border-border">
+            <header
+              data-tauri-drag-region
+              className="h-[52px] flex-shrink-0 flex items-center justify-between gap-3 px-7 border-b-[0.5px] border-border select-none"
+            >
               <input
                 value={draftTitle}
                 onChange={(e) => setDraftTitle(e.target.value)}
                 placeholder="Canvas title"
-                className="flex-1 text-sm font-medium text-foreground bg-transparent focus:outline-none placeholder:text-muted-foreground"
+                className="flex-1 text-[13px] font-medium text-foreground bg-transparent focus:outline-none placeholder:text-muted-foreground"
               />
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground inline-flex items-center gap-1">
+                <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1 select-none">
                   {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                   {saving ? "Saving…" : "Saved"}
                 </span>
@@ -192,13 +196,13 @@ export function CanvasView({ onBack }: CanvasViewProps) {
                   value={draftContent}
                   onChange={(e) => setDraftContent(e.target.value)}
                   placeholder="Markdown. Auto-saves while you type."
-                  className="w-full max-w-3xl mx-auto min-h-[70vh] block bg-transparent text-sm font-mono leading-relaxed focus:outline-none resize-none"
+                  className="w-full max-w-3xl mx-auto min-h-[70vh] block bg-transparent text-[13px] font-mono leading-relaxed focus:outline-none resize-none"
                 />
               )}
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
+          <div className="flex-1 flex items-center justify-center text-[13px] text-muted-foreground">
             Pick a canvas, or start a new one.
           </div>
         )}

@@ -104,20 +104,23 @@ export function CalendarView({ onBack }: CalendarViewProps) {
   const selectedIsToday = selectedKey === todayKey();
 
   return (
-    <div className="min-h-screen bg-background p-7">
-      <div className="max-w-2xl mx-auto">
-        <header className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2.5">
-            <AcornLogo size={28} />
-            <div className="text-[15px] font-medium text-foreground">Calendar</div>
-          </div>
-          <Button variant="outline" size="sm" onClick={onBack}>
-            <ArrowLeft />
-            Back
-          </Button>
-        </header>
+    <div className="min-h-screen bg-background">
+      <header
+        data-tauri-drag-region
+        className="flex h-[52px] items-center justify-between pl-[76px] pr-4 select-none"
+      >
+        <div className="pointer-events-none flex items-center gap-2.5">
+          <AcornLogo size={24} />
+          <div className="text-[13px] font-semibold text-foreground leading-none">Calendar</div>
+        </div>
+        <Button variant="outline" size="sm" onClick={onBack}>
+          <ArrowLeft />
+          Back
+        </Button>
+      </header>
 
-        <div className="bg-card border-[0.5px] border-border rounded-2xl p-5 mb-5">
+      <div className="max-w-2xl mx-auto px-7 pt-3 pb-7">
+        <div className="bg-card border-[0.5px] border-border rounded-lg shadow-[var(--shadow-card)] p-5 mb-5">
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -128,7 +131,7 @@ export function CalendarView({ onBack }: CalendarViewProps) {
               <ChevronLeft className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-3">
-              <div className="text-[15px] font-medium text-acorn-brown-deep">
+              <div className="text-[15px] font-semibold text-foreground select-none">
                 {formatMonth(cursor)}
               </div>
               {!isSameMonth(cursor, new Date()) ? (
@@ -139,7 +142,7 @@ export function CalendarView({ onBack }: CalendarViewProps) {
                     setCursor(now);
                     setSelected(now);
                   }}
-                  className="text-[11px] text-acorn-orange hover:text-acorn-brown transition-colors inline-flex items-center gap-1"
+                  className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1"
                 >
                   <SunMedium className="w-3 h-3" />
                   Today
@@ -160,7 +163,7 @@ export function CalendarView({ onBack }: CalendarViewProps) {
             {WEEKDAYS.map((label) => (
               <div
                 key={label}
-                className="text-[10px] uppercase tracking-wider text-muted-foreground text-center py-1"
+                className="text-[11px] font-medium text-muted-foreground text-center py-1 select-none"
               >
                 {label}
               </div>
@@ -182,7 +185,7 @@ export function CalendarView({ onBack }: CalendarViewProps) {
         </div>
 
         {error ? (
-          <div className="bg-acorn-red/5 border border-acorn-red/30 rounded-md px-3.5 py-2.5 mb-4 text-xs text-acorn-red">
+          <div className="bg-destructive/5 border-[0.5px] border-destructive/30 rounded-md px-3.5 py-2.5 mb-4 text-[11px] text-destructive">
             {error}
           </div>
         ) : null}
@@ -193,7 +196,7 @@ export function CalendarView({ onBack }: CalendarViewProps) {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.16 }}
+            transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
           >
             <DayPanel
               date={selected}
@@ -227,14 +230,14 @@ function DayCell({ day, cursor, selected, hasStash, onSelect }: DayCellProps) {
       type="button"
       onClick={() => onSelect(day)}
       className={cn(
-        "relative aspect-square rounded-lg text-[13px] flex flex-col items-center justify-center transition-all duration-150",
-        "border-[0.5px] border-transparent",
+        "relative aspect-square rounded-full text-[13px] tabular-nums flex flex-col items-center justify-center transition-colors duration-150",
         inMonth ? "text-foreground" : "text-muted-foreground/40",
-        isSelected
-          ? "bg-acorn-orange text-acorn-paper shadow-[0_0_0_3px_rgba(181,128,63,0.18)]"
-          : today
-            ? "bg-acorn-orange/12 text-acorn-brown-deep font-medium"
-            : "hover:bg-muted/60 hover:border-border",
+        today
+          ? "bg-primary text-primary-foreground font-semibold"
+          : isSelected
+            ? "bg-accent text-accent-foreground font-medium"
+            : "hover:bg-muted/60",
+        today && isSelected ? "ring-2 ring-ring/30" : "",
       )}
     >
       <span className={cn("leading-none", isSelected ? "font-semibold" : "")}>{day.getDate()}</span>
@@ -242,7 +245,7 @@ function DayCell({ day, cursor, selected, hasStash, onSelect }: DayCellProps) {
         <span
           className={cn(
             "absolute bottom-1.5 w-1 h-1 rounded-full",
-            isSelected ? "bg-acorn-paper" : "bg-acorn-orange",
+            today ? "bg-primary-foreground" : "bg-primary",
           )}
         />
       ) : null}
@@ -266,29 +269,29 @@ function DayPanel({ date, detail, hasStash, loading, isToday }: DayPanelProps) {
   const stats = useMemo(() => tallyTasks(tasks), [tasks]);
 
   return (
-    <div className="bg-card border-[0.5px] border-border rounded-2xl p-5">
+    <div className="bg-card border-[0.5px] border-border rounded-lg shadow-[var(--shadow-card)] p-5">
       <div className="flex items-baseline justify-between mb-3">
-        <div className="text-sm font-medium text-acorn-brown-deep">
+        <div className="text-[13px] font-semibold text-foreground">
           {formatDayLabel(date)}
           {isToday ? (
-            <span className="ml-2 text-[10px] uppercase tracking-wider text-acorn-orange">
+            <span className="ml-2 text-[11px] font-medium uppercase tracking-wider text-primary">
               Today
             </span>
           ) : null}
         </div>
         {tasks.length > 0 ? (
-          <div className="text-[11px] text-muted-foreground">
-            <span className="font-medium text-acorn-brown-deep">{stats.completed}</span> done ·{" "}
-            <span className="font-medium text-acorn-orange">{stats.inProgress}</span> in progress ·{" "}
+          <div className="text-[11px] text-muted-foreground tabular-nums">
+            <span className="font-medium text-foreground">{stats.completed}</span> done ·{" "}
+            <span className="font-medium text-primary">{stats.inProgress}</span> in progress ·{" "}
             {stats.pending + stats.skipped} to go
           </div>
         ) : null}
       </div>
 
       {detail?.aiSummary ? (
-        <div className="bg-acorn-orange/5 border-l-2 border-acorn-orange rounded-r-md px-3.5 py-2.5 mb-4">
-          <div className="text-xs text-muted-foreground leading-relaxed flex gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-acorn-orange flex-shrink-0 mt-0.5" />
+        <div className="bg-primary/5 border-l-2 border-primary/60 rounded-r-md px-3.5 py-2.5 mb-4">
+          <div className="text-[13px] text-muted-foreground leading-relaxed flex gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
             <span>{detail.aiSummary}</span>
           </div>
         </div>
@@ -327,7 +330,7 @@ function DayTaskRow({ task }: { task: Task }) {
     <div
       className={cn(
         "flex items-start gap-2.5 px-3 py-2.5 rounded-lg border-[0.5px] transition-colors",
-        active ? "border-acorn-orange/50 bg-acorn-orange/5" : "border-border bg-card",
+        active ? "border-primary/50 bg-primary/5" : "border-border bg-card",
         done || skipped ? "opacity-60" : "",
       )}
     >
@@ -337,14 +340,14 @@ function DayTaskRow({ task }: { task: Task }) {
           done
             ? "bg-acorn-olive"
             : active
-              ? "border-2 border-acorn-orange"
+              ? "border-[1.5px] border-primary"
               : skipped
                 ? "border-[1.5px] border-dashed border-border"
                 : "border-[1.5px] border-border",
         )}
       >
         {done ? <Check className="w-3 h-3 text-acorn-paper" /> : null}
-        {active ? <div className="w-1.5 h-1.5 rounded-full bg-acorn-orange" /> : null}
+        {active ? <div className="w-1.5 h-1.5 rounded-full bg-primary" /> : null}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
@@ -358,7 +361,7 @@ function DayTaskRow({ task }: { task: Task }) {
           </div>
           <PriorityBadge priority={task.priority} />
         </div>
-        <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-2">
+        <div className="text-[11px] text-muted-foreground tabular-nums mt-0.5 flex items-center gap-2">
           <span className="inline-flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {formatDurationMinutes(task.durationMinutes)}
@@ -373,7 +376,7 @@ function DayTaskRow({ task }: { task: Task }) {
 
 function EmptyState({ label, icon }: { label: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-center gap-2 py-8 text-xs text-muted-foreground">
+    <div className="flex items-center justify-center gap-2 py-8 text-[13px] text-muted-foreground">
       {icon}
       <span>{label}</span>
     </div>

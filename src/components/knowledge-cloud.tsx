@@ -248,34 +248,42 @@ export function KnowledgeCloud({ onBack, onOpen }: KnowledgeCloudProps) {
       })}
 
       {/* Top bar. */}
-      <header className="absolute inset-x-0 top-0 flex items-center gap-3 px-6 py-4">
+      <header
+        data-tauri-drag-region
+        className="absolute inset-x-0 top-0 flex h-[52px] items-center gap-3 pl-[76px] pr-4 select-none"
+      >
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-acorn-paper/80 backdrop-blur transition-colors hover:bg-white/10"
+          className="flex h-7 items-center gap-1.5 rounded-full border-[0.5px] border-white/10 bg-white/5 px-3 text-[13px] text-acorn-paper/80 backdrop-blur-xl transition-colors hover:bg-white/10"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Back
         </button>
-        <h1 className="text-sm font-medium tracking-wide text-acorn-paper/90">Knowledge Cloud</h1>
+        <h1
+          data-tauri-drag-region
+          className="text-[13px] font-semibold tracking-wide text-acorn-paper/90"
+        >
+          Knowledge Cloud
+        </h1>
         <div className="ml-auto flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 backdrop-blur">
+          <div className="flex h-7 items-center gap-1.5 rounded-full border-[0.5px] border-white/10 bg-white/5 px-3 backdrop-blur-xl">
             <Search className="h-3.5 w-3.5 text-acorn-paper/50" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search the cloud…"
-              className="w-44 bg-transparent text-xs text-acorn-paper placeholder:text-acorn-paper/40 focus:outline-none"
+              className="w-44 bg-transparent text-[13px] text-acorn-paper placeholder:text-acorn-paper/40 focus:outline-none"
             />
           </div>
           <button
             type="button"
             onClick={() => setIncludeArchived((v) => !v)}
             className={cn(
-              "rounded-full px-3 py-1.5 text-xs backdrop-blur transition-colors",
+              "flex h-7 items-center rounded-full border-[0.5px] px-3 text-[13px] backdrop-blur-xl transition-colors",
               includeArchived
-                ? "bg-acorn-orange/30 text-acorn-paper"
-                : "bg-white/5 text-acorn-paper/70 hover:bg-white/10",
+                ? "border-acorn-orange/40 bg-acorn-orange/30 text-acorn-paper"
+                : "border-white/10 bg-white/5 text-acorn-paper/70 hover:bg-white/10",
             )}
           >
             Archived
@@ -284,25 +292,27 @@ export function KnowledgeCloud({ onBack, onOpen }: KnowledgeCloudProps) {
       </header>
 
       {loading ? (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-acorn-paper/50">
+        <div className="absolute inset-0 flex items-center justify-center text-[13px] text-acorn-paper/50">
           Gathering your conversations…
         </div>
       ) : stars.length === 0 ? (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-acorn-paper/50">
+        <div className="absolute inset-0 flex items-center justify-center text-[13px] text-acorn-paper/50">
           No conversations yet — your cloud will grow as you chat.
         </div>
       ) : null}
 
       {/* Selected detail card. */}
       {selectedStar ? (
-        <div className="absolute bottom-6 left-1/2 w-[360px] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/40 p-4 backdrop-blur-xl">
+        <div className="absolute bottom-6 left-1/2 w-[360px] -translate-x-1/2 rounded-lg border-[0.5px] border-white/15 bg-black/40 p-4 shadow-[var(--shadow-overlay)] backdrop-blur-xl">
           <div className="mb-1 flex items-start justify-between gap-2">
-            <span className="text-sm font-medium text-acorn-paper">{selectedStar.node.title}</span>
+            <span className="text-[13px] font-medium text-acorn-paper">
+              {selectedStar.node.title}
+            </span>
             <button
               type="button"
               onClick={() => toggleFavorite(selectedStar.node)}
               title={selectedStar.node.favorite ? "Unstar" : "Star"}
-              className="shrink-0 text-acorn-paper/60 hover:text-acorn-orange"
+              className="shrink-0 text-acorn-paper/60 transition-colors hover:text-acorn-orange"
             >
               <Star
                 className={cn(
@@ -312,7 +322,7 @@ export function KnowledgeCloud({ onBack, onOpen }: KnowledgeCloudProps) {
               />
             </button>
           </div>
-          <div className="mb-3 flex items-center gap-3 text-[11px] text-acorn-paper/50">
+          <div className="mb-3 flex items-center gap-3 text-[11px] tabular-nums text-acorn-paper/50">
             <span className="flex items-center gap-1">
               <MessageSquare className="h-3 w-3" />
               {selectedStar.node.messageCount}
@@ -323,14 +333,14 @@ export function KnowledgeCloud({ onBack, onOpen }: KnowledgeCloudProps) {
             <button
               type="button"
               onClick={() => onOpen(selectedStar.node.id)}
-              className="flex-1 rounded-full bg-acorn-orange px-3 py-1.5 text-xs font-medium text-acorn-paper hover:bg-acorn-brown"
+              className="flex h-7 flex-1 items-center justify-center rounded-full bg-acorn-orange px-3 text-[13px] font-medium text-acorn-paper transition-colors hover:bg-acorn-brown"
             >
               Open
             </button>
             <button
               type="button"
               onClick={() => toggleArchived(selectedStar.node)}
-              className="flex items-center gap-1 rounded-full bg-white/5 px-3 py-1.5 text-xs text-acorn-paper/70 hover:bg-white/10"
+              className="flex h-7 items-center gap-1 rounded-full border-[0.5px] border-white/10 bg-white/5 px-3 text-[13px] text-acorn-paper/70 transition-colors hover:bg-white/10"
             >
               <Archive className="h-3 w-3" />
               {selectedStar.node.archived ? "Unarchive" : "Archive"}
