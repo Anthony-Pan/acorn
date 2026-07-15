@@ -16,6 +16,9 @@ pub enum AppError {
 
     #[error("invalid input: {0}")]
     InvalidInput(String),
+
+    #[error("sync error: {0}")]
+    Sync(String),
 }
 
 impl Serialize for AppError {

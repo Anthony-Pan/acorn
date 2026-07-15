@@ -3,6 +3,7 @@ mod commands;
 mod db;
 mod error;
 mod speech;
+mod sync;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
@@ -99,6 +100,7 @@ pub fn run() {
                 restore_pins(app.handle());
                 maybe_spawn_pet(app.handle());
                 commands::overlay::ensure_approval_window(app.handle());
+                sync::scheduler::spawn(app.handle().clone());
             }
 
             Ok(())
@@ -183,6 +185,15 @@ pub fn run() {
             commands::canvas::delete_canvas,
             commands::search::search_index,
             commands::tool_approval::respond_tool_approval,
+            commands::sync::list_sync_accounts,
+            commands::sync::connect_google_account,
+            commands::sync::connect_apple_account,
+            commands::sync::disconnect_sync_account,
+            commands::sync::list_remote_containers,
+            commands::sync::set_account_container,
+            commands::sync::set_account_enabled,
+            commands::sync::trigger_sync_now,
+            commands::sync::get_sync_status,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
