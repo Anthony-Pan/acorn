@@ -181,13 +181,17 @@ impl SyncProvider for GoogleCalendarProvider {
         Ok(outcomes)
     }
 
-    async fn pull(&self, _cursor: Option<String>) -> SyncResult<PullBatch> {
+    async fn pull(
+        &self,
+        _cursor: Option<String>,
+        _linked_ids: Vec<String>,
+    ) -> SyncResult<PullBatch> {
         Err(SyncError::NotImplemented(
             "google calendar pull is Phase 2".into(),
         ))
     }
 
-    async fn full_pull(&self) -> SyncResult<PullBatch> {
+    async fn full_pull(&self, _linked_ids: Vec<String>) -> SyncResult<PullBatch> {
         Err(SyncError::NotImplemented(
             "google calendar pull is Phase 2".into(),
         ))

@@ -198,17 +198,25 @@ pub async fn trigger_sync_now(
             account_id: account.id.clone(),
             account_label: account.account_label.clone(),
         });
-        let result = engine::push_account(&db, &account).await;
+        let result = engine::sync_account(&db, &account).await;
         engine::record_result(&db, &account.id, &result).await;
         match result {
             Ok(stats) => {
                 let _ = on_event.send(SyncEvent::Pushed {
                     account_id: account.id.clone(),
-                    created: stats.created,
-                    updated: stats.updated,
-                    deleted: stats.deleted,
-                    failed: stats.failed,
+                    created: stats.push.created,
+                    updated: stats.push.updated,
+                    deleted: stats.push.deleted,
+                    failed: stats.push.failed,
                 });
+                if let Some(pull) = stats.pull {
+                    let _ = on_event.send(SyncEvent::Pulled {
+                        account_id: account.id.clone(),
+                        applied: pull.applied,
+                        deleted: pull.deleted,
+                        conflicts: pull.conflicts,
+                    });
+                }
                 let _ = on_event.send(SyncEvent::Finished {
                     account_id: account.id.clone(),
                 });

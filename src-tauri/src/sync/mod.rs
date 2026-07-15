@@ -11,5 +11,6 @@ pub mod keychain;
 pub mod mapping;
 pub mod provider;
 pub mod providers;
+pub mod resolve;
 pub mod scheduler;
 pub mod types;

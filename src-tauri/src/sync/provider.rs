@@ -10,8 +10,7 @@ use super::types::{
 /// One implementation per system; the engine drives them all uniformly.
 #[async_trait]
 pub trait SyncProvider: Send + Sync {
-    /// Which backend this provider talks to. No call site until the Phase 2
-    /// pull dispatch; kept so every impl declares its identity.
+    /// Which backend this provider talks to.
     #[allow(dead_code)]
     fn kind(&self) -> SyncProviderKind;
 
@@ -23,15 +22,16 @@ pub trait SyncProvider: Send + Sync {
     /// engine rather than aborting the whole batch.
     async fn push(&self, ops: Vec<SyncOp>) -> SyncResult<Vec<PushOutcome>>;
 
-    /// Incremental pull from `cursor` (Phase 2+; the trait fixes the shape now
-    /// so providers don't churn). Returning [`SyncError::FullResyncRequired`]
-    /// tells the engine to fall back to [`SyncProvider::full_pull`].
-    #[allow(dead_code)]
-    async fn pull(&self, cursor: Option<String>) -> SyncResult<PullBatch>;
+    /// Incremental pull from `cursor`. `linked_ids` are the remote ids Acorn
+    /// currently tracks — Google impls ignore them (their change feeds are
+    /// account-wide); EventKit verifies each id directly since the classic API
+    /// has no change feed. Returning [`SyncError::FullResyncRequired`] tells
+    /// the engine to clear the cursor and fall back to
+    /// [`SyncProvider::full_pull`].
+    async fn pull(&self, cursor: Option<String>, linked_ids: Vec<String>) -> SyncResult<PullBatch>;
 
-    /// Full pull — first sync and 410 recovery (Phase 2+).
-    #[allow(dead_code)]
-    async fn full_pull(&self) -> SyncResult<PullBatch>;
+    /// Full pull — first sync and 410 recovery.
+    async fn full_pull(&self, linked_ids: Vec<String>) -> SyncResult<PullBatch>;
 }
 
 /// Construct the provider for an account, minting a fresh access token from the

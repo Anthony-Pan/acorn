@@ -100,13 +100,17 @@ impl SyncProvider for AppleEventKitProvider {
         run_blocking(move || push_blocking(kind, container_id, ops)).await
     }
 
-    async fn pull(&self, _cursor: Option<String>) -> SyncResult<PullBatch> {
+    async fn pull(
+        &self,
+        _cursor: Option<String>,
+        _linked_ids: Vec<String>,
+    ) -> SyncResult<PullBatch> {
         Err(SyncError::NotImplemented(
             "EventKit pull lands in Phase 2".into(),
         ))
     }
 
-    async fn full_pull(&self) -> SyncResult<PullBatch> {
+    async fn full_pull(&self, _linked_ids: Vec<String>) -> SyncResult<PullBatch> {
         Err(SyncError::NotImplemented(
             "EventKit pull lands in Phase 2".into(),
         ))

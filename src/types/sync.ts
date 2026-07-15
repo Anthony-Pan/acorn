@@ -50,5 +50,12 @@ export type SyncEvent =
       deleted: number;
       failed: number;
     }
+  | {
+      kind: "pulled";
+      accountId: string;
+      applied: number;
+      deleted: number;
+      conflicts: number;
+    }
   | { kind: "finished"; accountId: string }
   | { kind: "error"; accountId: string; message: string };

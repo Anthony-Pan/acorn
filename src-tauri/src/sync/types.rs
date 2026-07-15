@@ -152,16 +152,13 @@ pub enum PushResult {
     },
 }
 
-/// A batch of remote changes from an incremental (or full) pull. Phase 2+; the
-/// trait already returns it so providers keep a stable shape.
-#[allow(dead_code)]
+/// A batch of remote changes from an incremental (or full) pull.
 #[derive(Debug, Clone, Default)]
 pub struct PullBatch {
     pub changes: Vec<RemoteChange>,
     pub next_cursor: Option<String>,
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct RemoteChange {
     pub remote_id: String,
@@ -185,6 +182,12 @@ pub enum SyncEvent {
         updated: u32,
         deleted: u32,
         failed: u32,
+    },
+    Pulled {
+        account_id: String,
+        applied: u32,
+        deleted: u32,
+        conflicts: u32,
     },
     Finished {
         account_id: String,
