@@ -90,9 +90,11 @@ pub async fn connect_apple_account(
     }
     #[cfg(not(target_os = "macos"))]
     {
-        return Err(AppError::Sync(
+        // Referenced so non-macOS builds don't flag the macOS-arm params unused.
+        let _ = (&db, &signal);
+        Err(AppError::Sync(
             "Apple Calendar/Reminders sync requires macOS".into(),
-        ));
+        ))
     }
     #[cfg(target_os = "macos")]
     {
