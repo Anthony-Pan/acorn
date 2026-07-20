@@ -373,6 +373,7 @@ export function ChatView({ onBack }: ChatViewProps) {
               <div className="flex flex-col gap-2">
                 <VoiceButton
                   onTranscript={(text) => setDraft((d) => (d ? `${d} ${text}` : text))}
+                  onError={(err) => toast.error("Voice input failed", { description: err.message })}
                 />
                 <Button onClick={() => void handleSend()} disabled={!canSend} size="sm">
                   {phase === "idle" ? (

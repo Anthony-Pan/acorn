@@ -187,16 +187,6 @@ function App() {
       }
     });
 
-    const unlistenPushToTalkShortcut = listen("shortcut:push-to-talk", async () => {
-      const main = getCurrentWindow();
-      await main.show();
-      await main.setFocus();
-      toast.message("Push to talk", {
-        description: "Hold-to-talk voice input ships with the next voice overhaul.",
-        id: "shortcut-ptt",
-      });
-    });
-
     const unlistenQuickAskShortcut = listen("shortcut:quick-ask", async () => {
       try {
         await invoke("toggle_quick");
@@ -235,7 +225,6 @@ function App() {
       void unlistenDeepLink.then((fn) => fn());
       void unlistenPinShortcut.then((fn) => fn());
       void unlistenScreenshotShortcut.then((fn) => fn());
-      void unlistenPushToTalkShortcut.then((fn) => fn());
       void unlistenQuickAskShortcut.then((fn) => fn());
     };
   }, []);

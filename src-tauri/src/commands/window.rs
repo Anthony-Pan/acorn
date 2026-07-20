@@ -42,7 +42,29 @@ pub fn toggle_quick_window(app: &AppHandle) {
             _ => {
                 let _ = window.show();
                 let _ = window.set_focus();
+                #[cfg(target_os = "macos")]
+                activate_app(app);
             }
         }
     }
+}
+
+/// Bring the whole application forward so a freshly-shown borderless window can
+/// actually take keyboard focus. Acorn runs as a macOS *accessory* app (no Dock
+/// icon); for accessory apps, `show()` + `set_focus()` alone often leave the
+/// quick window visible-but-not-key when another app is frontmost. Activating
+/// the NSApplication on the main thread makes the summoned window key.
+#[cfg(target_os = "macos")]
+fn activate_app(app: &AppHandle) {
+    let _ = app.run_on_main_thread(|| {
+        // SAFETY: `run_on_main_thread` guarantees we are on the main thread,
+        // which every NSApplication call requires.
+        if let Some(mtm) = objc2::MainThreadMarker::new() {
+            let ns_app = objc2_app_kit::NSApplication::sharedApplication(mtm);
+            #[allow(deprecated)]
+            unsafe {
+                ns_app.activateIgnoringOtherApps(true);
+            }
+        }
+    });
 }

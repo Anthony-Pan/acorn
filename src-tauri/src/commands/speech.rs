@@ -112,6 +112,12 @@ pub async fn transcribe_audio(
     mime_type: String,
     language: Option<String>,
 ) -> SpeechResult<TranscribeOutcome> {
+    if audio.is_empty() {
+        return Err(SpeechError::UnsupportedFormat(
+            "recording was empty — no audio captured".into(),
+        ));
+    }
+
     let active = read_active_provider_id(&db)
         .await
         .unwrap_or_else(|| default_speech_provider_id().to_string());

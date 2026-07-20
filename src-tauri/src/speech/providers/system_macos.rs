@@ -26,6 +26,12 @@ use crate::speech::metadata::SpeechProviderMetadata;
 use crate::speech::provider::SpeechProvider;
 use crate::speech::types::TranscribeResponse;
 
+/// Upper bound on how long we wait for `SFSpeechRecognizer` to deliver a final
+/// result. Without this, empty/too-short/silent clips (where the framework may
+/// never invoke the result handler) would block the worker thread forever and
+/// leave the UI stuck on "Transcribing…".
+const RECOGNITION_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(30);
+
 pub struct SystemSpeechMacosProvider {
     metadata: SpeechProviderMetadata,
 }
@@ -71,6 +77,12 @@ fn transcribe_blocking(
     language: Option<&str>,
 ) -> SpeechResult<String> {
     ensure_authorized_blocking()?;
+
+    if audio.is_empty() {
+        return Err(SpeechError::NativeApi(
+            "no audio was captured — try holding the record button a little longer".into(),
+        ));
+    }
 
     let suffix = mime_to_extension(mime_type);
     let temp = NamedTempFile::with_suffix(suffix).map_err(|e| SpeechError::Io(e.to_string()))?;
@@ -126,14 +138,22 @@ fn transcribe_blocking(
     let block_ref: &Block<dyn Fn(_, _)> = &block;
 
     // SAFETY: recognitionTaskWithRequest:resultHandler: borrows the request
-    // and block; the returned task is kept alive in `_task` until rx.recv()
-    // returns, so the session stays alive until the callback fires.
-    let _task = unsafe { recognizer.recognitionTaskWithRequest_resultHandler(&request, block_ref) };
+    // and block; the returned task is kept alive in `task` until the wait on
+    // `rx` returns, so the session stays alive until the callback fires.
+    let task = unsafe { recognizer.recognitionTaskWithRequest_resultHandler(&request, block_ref) };
 
-    let outcome = rx
-        .recv()
-        .map_err(|_| SpeechError::NativeApi("recognition channel closed unexpectedly".into()))?;
+    let outcome = match rx.recv_timeout(RECOGNITION_TIMEOUT) {
+        Ok(result) => result,
+        Err(std_mpsc::RecvTimeoutError::Timeout) => Err(SpeechError::NativeApi(
+            "speech recognition timed out before producing a result".into(),
+        )),
+        Err(std_mpsc::RecvTimeoutError::Disconnected) => Err(SpeechError::NativeApi(
+            "recognition channel closed unexpectedly".into(),
+        )),
+    };
 
+    // Keep the recognition task alive until we have stopped waiting on it.
+    drop(task);
     drop(temp);
     outcome
 }

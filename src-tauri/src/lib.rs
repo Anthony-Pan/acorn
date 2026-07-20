@@ -12,7 +12,7 @@ use tauri_plugin_deep_link::DeepLinkExt;
 #[cfg(desktop)]
 use std::str::FromStr;
 #[cfg(desktop)]
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
+use tauri_plugin_global_shortcut::{Shortcut, ShortcutState};
 
 use commands::window::toggle_quick_window;
 
@@ -78,7 +78,12 @@ pub fn run() {
                 .ok()
                 .flatten()
                 .unwrap_or_else(|| commands::shortcut::DEFAULT_SHORTCUT.to_string());
-                register_global_shortcuts(app.handle(), &stored)?;
+                // Non-fatal: a hotkey already claimed by another app must not
+                // abort startup. Helper shortcuts fail independently inside.
+                if let Err(err) = commands::shortcut::register_all_shortcuts(app.handle(), &stored)
+                {
+                    eprintln!("acorn: summon shortcut registration failed: {err}");
+                }
                 build_tray(app.handle())?;
                 wire_quick_window_blur(app.handle());
                 wire_main_window_close_to_hide(app.handle());
@@ -148,28 +153,6 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-#[cfg(desktop)]
-fn register_global_shortcuts(app: &tauri::AppHandle, shortcut_str: &str) -> anyhow::Result<()> {
-    let summon = Shortcut::from_str(shortcut_str)
-        .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
-    let extras = [
-        commands::shortcut::PIN_SHORTCUT,
-        commands::shortcut::SCREENSHOT_SHORTCUT,
-        commands::shortcut::PUSH_TO_TALK_SHORTCUT,
-        commands::shortcut::QUICK_ASK_SHORTCUT,
-    ];
-    let gs = app.global_shortcut();
-    gs.register(summon)?;
-    for raw in extras {
-        if let Ok(parsed) = Shortcut::from_str(raw) {
-            if let Err(err) = gs.register(parsed) {
-                eprintln!("acorn: could not register shortcut '{raw}': {err}");
-            }
-        }
-    }
-    Ok(())
 }
 
 #[cfg(desktop)]
