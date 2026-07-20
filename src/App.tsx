@@ -27,6 +27,7 @@ import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
+import { useSyncStore } from "@/stores/sync";
 import type { OverlayPhase, SummaryPayload } from "@/types/overlay";
 
 type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas" | "cloud";
@@ -36,6 +37,7 @@ function App() {
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const hydrateProviders = useProvidersStore((s) => s.hydrate);
   const hydrateChat = useChatStore((s) => s.hydrate);
+  const hydrateSync = useSyncStore((s) => s.hydrate);
   const current = useSessionStore((s) => s.current);
   const isStashing = useSessionStore((s) => s.isStashing);
   const chatPhase = useChatStore((s) => s.phase);
@@ -46,8 +48,14 @@ function App() {
   const latestSummary = useRef<SummaryPayload | null>(null);
 
   useEffect(() => {
-    void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession(), hydrateChat()]);
-  }, [hydrateSession, hydrateSettings, hydrateProviders, hydrateChat]);
+    void Promise.all([
+      hydrateSettings(),
+      hydrateProviders(),
+      hydrateSession(),
+      hydrateChat(),
+      hydrateSync(),
+    ]);
+  }, [hydrateSession, hydrateSettings, hydrateProviders, hydrateChat, hydrateSync]);
 
   // Mirror chat activity to the overlay windows (notch capsule, companion).
   // Overlays live in their own webview process and cannot read the Zustand

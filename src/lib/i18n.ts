@@ -44,6 +44,23 @@ interface UiStrings {
   privacySection: string;
   memorySection: string;
   aboutSection: string;
+  syncSection: string;
+  syncPanelTitle: string;
+  syncPanelSubtitle: string;
+  syncAddTitle: string;
+  syncNoAccounts: string;
+  syncTargetEvent: string;
+  syncTargetReminder: string;
+  syncContainerLabel: string;
+  syncContainerPlaceholder: string;
+  syncEnabledLabel: string;
+  syncNowButton: string;
+  syncSyncing: string;
+  syncDisconnect: string;
+  syncNeverSynced: string;
+  syncLastSynced: (when: string) => string;
+  syncPendingCount: (n: number) => string;
+  syncConflictCount: (n: number) => string;
   comingSoonBadge: string;
   aboutPanelTitle: string;
   aboutPanelSubtitle: string;
@@ -143,6 +160,24 @@ const EN: UiStrings = {
   privacySection: "Privacy",
   memorySection: "Memory",
   aboutSection: "About",
+  syncSection: "Sync",
+  syncPanelTitle: "Calendar & Reminders Sync",
+  syncPanelSubtitle:
+    "Connect Apple or Google accounts and Acorn will mirror your task cards out to them.",
+  syncAddTitle: "Connect an account",
+  syncNoAccounts: "No accounts connected yet. Connect one below to start syncing.",
+  syncTargetEvent: "Events",
+  syncTargetReminder: "Reminders",
+  syncContainerLabel: "Sync into",
+  syncContainerPlaceholder: "Default calendar/list",
+  syncEnabledLabel: "Enabled",
+  syncNowButton: "Sync now",
+  syncSyncing: "Syncing…",
+  syncDisconnect: "Disconnect",
+  syncNeverSynced: "Never synced",
+  syncLastSynced: (when) => `Last synced ${when}`,
+  syncPendingCount: (n) => `${n} pending`,
+  syncConflictCount: (n) => `${n} in conflict`,
   comingSoonBadge: "SOON",
   aboutPanelTitle: "About Acorn",
   aboutPanelSubtitle: "Build info, license, and a link back to the repo.",
@@ -247,6 +282,23 @@ const ZH: UiStrings = {
   privacySection: "隐私",
   memorySection: "共享记忆",
   aboutSection: "关于",
+  syncSection: "同步",
+  syncPanelTitle: "日历与提醒事项同步",
+  syncPanelSubtitle: "连接 Apple 或 Google 账户,Acorn 会把任务卡片同步过去。",
+  syncAddTitle: "连接账户",
+  syncNoAccounts: "还没有连接账户。先在下方连接一个开始同步。",
+  syncTargetEvent: "日历事件",
+  syncTargetReminder: "提醒事项",
+  syncContainerLabel: "同步到",
+  syncContainerPlaceholder: "默认日历/列表",
+  syncEnabledLabel: "启用",
+  syncNowButton: "立即同步",
+  syncSyncing: "同步中…",
+  syncDisconnect: "断开连接",
+  syncNeverSynced: "从未同步",
+  syncLastSynced: (when) => `上次同步 ${when}`,
+  syncPendingCount: (n) => `${n} 个待同步`,
+  syncConflictCount: (n) => `${n} 个冲突`,
   comingSoonBadge: "即将",
   aboutPanelTitle: "关于 Acorn",
   aboutPanelSubtitle: "版本信息、协议、以及仓库链接。",

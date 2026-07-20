@@ -6,5 +6,13 @@
     <string>Acorn needs microphone access to capture your voice notes.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>Acorn uses macOS on-device speech recognition to transcribe your voice notes locally. Your audio never leaves your machine.</string>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>Acorn syncs your task cards with Apple Calendar so scheduled tasks show up as events.</string>
+    <key>NSRemindersFullAccessUsageDescription</key>
+    <string>Acorn syncs your task cards with Apple Reminders so tasks show up as reminders with due dates.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Acorn syncs your task cards with Apple Calendar so scheduled tasks show up as events.</string>
+    <key>NSRemindersUsageDescription</key>
+    <string>Acorn syncs your task cards with Apple Reminders so tasks show up as reminders with due dates.</string>
 </dict>
 </plist>

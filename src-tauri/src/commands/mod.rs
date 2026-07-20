@@ -12,6 +12,7 @@ pub mod session;
 pub mod settings;
 pub mod shortcut;
 pub mod speech;
+pub mod sync;
 pub mod task;
 pub mod tool_approval;
 pub mod updater;

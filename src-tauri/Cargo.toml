@@ -23,7 +23,7 @@ tauri-plugin-autostart = "2"
 tauri-plugin-deep-link = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "fs", "process", "time", "io-util"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync", "fs", "process", "time", "io-util", "net"] }
 sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono", "uuid", "migrate"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
@@ -36,15 +36,23 @@ keyring = { version = "3", features = ["apple-native", "windows-native", "sync-s
 bytes = "1"
 tempfile = "3"
 xcap = "0.9.6"
+# OAuth 2.0 PKCE (Google Calendar / Tasks): S256 challenge + random verifier/state.
+sha2 = "0.10"
+base64 = "0.22"
+getrandom = "0.2"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-global-shortcut = "2"
 
 [target."cfg(target_os = \"macos\")".dependencies]
 objc2 = "0.6"
-objc2-foundation = { version = "0.3", features = ["NSString", "NSURL", "NSLocale", "NSError"] }
+objc2-foundation = { version = "0.3", features = ["NSString", "NSURL", "NSLocale", "NSError", "NSDate", "NSCalendar", "NSArray", "NSEnumerator", "NSObject", "NSNotification", "NSOperation", "block2"] }
 objc2-app-kit = { version = "0.3", features = ["NSResponder", "NSWindow", "NSApplication", "NSScreen"] }
 objc2-speech = "0.3"
+objc2-event-kit = { version = "0.3", features = [
+    "EKEventStore", "EKEvent", "EKReminder", "EKCalendar", "EKCalendarItem",
+    "EKObject", "EKTypes", "EKError", "block2",
+] }
 block2 = "0.6"
 
 [profile.release]

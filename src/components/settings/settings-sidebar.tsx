@@ -5,6 +5,7 @@ import {
   Info,
   Keyboard,
   Monitor,
+  RefreshCw,
   Settings as SettingsIcon,
   ShieldCheck,
   Sparkles,
@@ -24,6 +25,7 @@ export type SettingsSection =
   | { kind: "sounds" }
   | { kind: "privacy" }
   | { kind: "memory" }
+  | { kind: "sync" }
   | { kind: "about" }
   | { kind: "provider"; providerId: string };
 
@@ -107,6 +109,12 @@ export function SettingsSidebar({
             label={t.memorySection}
             selected={selectedKey === "memory"}
             onClick={() => onSelect({ kind: "memory" })}
+          />
+          <SectionRow
+            icon={<RefreshCw className="h-4 w-4" />}
+            label={t.syncSection}
+            selected={selectedKey === "sync"}
+            onClick={() => onSelect({ kind: "sync" })}
           />
           <SectionRow
             icon={<Info className="h-4 w-4" />}

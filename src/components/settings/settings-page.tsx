@@ -12,6 +12,7 @@ import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
 import { ShortcutsPanel } from "@/components/settings/shortcuts-panel";
 import { SoundsPanel } from "@/components/settings/sounds-panel";
+import { SyncPanel } from "@/components/settings/sync-panel";
 import { Button } from "@/components/ui/button";
 import { strings } from "@/lib/i18n";
 import { useProvidersStore } from "@/stores/providers";
@@ -103,6 +104,8 @@ function SettingsContent({ section }: { section: SettingsSection }) {
   if (section.kind === "privacy") return <PrivacyPanel />;
 
   if (section.kind === "memory") return <MemoryPanel />;
+
+  if (section.kind === "sync") return <SyncPanel />;
 
   const provider = catalog.find((p) => p.id === section.providerId);
   if (!provider) {
