@@ -10,7 +10,7 @@
 //! webviews).
 
 use tauri::webview::{WebviewWindow, WebviewWindowBuilder};
-use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, WebviewUrl, WindowEvent};
+use tauri::{AppHandle, LogicalPosition, LogicalSize, Manager, WebviewUrl};
 
 pub const NOTCH_LABEL: &str = "notch";
 const NOTCH_W: f64 = 560.0;
@@ -60,7 +60,7 @@ fn build_overlay(
         // builds; re-apply the native tweaks whenever the overlay gains focus.
         let reelevate = window.clone();
         window.on_window_event(move |event| {
-            if let WindowEvent::Focused(true) = event {
+            if let tauri::WindowEvent::Focused(true) = event {
                 elevate_overlay(&reelevate);
             }
         });
