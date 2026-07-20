@@ -73,6 +73,7 @@ pub fn run() {
 
             app.manage(database);
             app.manage(commands::tool_approval::ApprovalBroker::default());
+            app.manage(sync::scheduler::SyncSignal::default());
 
             #[cfg(target_os = "macos")]
             {

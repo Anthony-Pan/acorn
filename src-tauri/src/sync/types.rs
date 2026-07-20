@@ -260,6 +260,8 @@ pub struct SyncStatus {
     pub last_synced_at: Option<DateTime<Utc>>,
     pub last_error: Option<String>,
     pub pending: i64,
+    /// Links parked in `sync_state = 'conflict'` awaiting a user decision.
+    pub conflicts: i64,
 }
 
 /// Guard against a provider string the catalogue doesn't know.

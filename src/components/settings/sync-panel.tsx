@@ -197,6 +197,9 @@ function AccountCard({ account }: { account: SyncAccount }) {
           <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
             {statusLine}
             {status && status.pending > 0 ? ` · ${t.syncPendingCount(status.pending)}` : ""}
+            {status && status.conflicts > 0 ? (
+              <span className="text-destructive"> · {t.syncConflictCount(status.conflicts)}</span>
+            ) : null}
           </div>
         </div>
         <Switch

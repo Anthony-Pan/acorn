@@ -60,6 +60,7 @@ interface UiStrings {
   syncNeverSynced: string;
   syncLastSynced: (when: string) => string;
   syncPendingCount: (n: number) => string;
+  syncConflictCount: (n: number) => string;
   comingSoonBadge: string;
   aboutPanelTitle: string;
   aboutPanelSubtitle: string;
@@ -176,6 +177,7 @@ const EN: UiStrings = {
   syncNeverSynced: "Never synced",
   syncLastSynced: (when) => `Last synced ${when}`,
   syncPendingCount: (n) => `${n} pending`,
+  syncConflictCount: (n) => `${n} in conflict`,
   comingSoonBadge: "SOON",
   aboutPanelTitle: "About Acorn",
   aboutPanelSubtitle: "Build info, license, and a link back to the repo.",
@@ -296,6 +298,7 @@ const ZH: UiStrings = {
   syncNeverSynced: "从未同步",
   syncLastSynced: (when) => `上次同步 ${when}`,
   syncPendingCount: (n) => `${n} 个待同步`,
+  syncConflictCount: (n) => `${n} 个冲突`,
   comingSoonBadge: "即将",
   aboutPanelTitle: "关于 Acorn",
   aboutPanelSubtitle: "版本信息、协议、以及仓库链接。",

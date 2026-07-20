@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::db::models::{NewTaskInput, Subtask, Task, TaskStatus};
 use crate::db::Database;
 use crate::error::{AppError, AppResult};
+use crate::sync::scheduler::SyncSignal;
 
 /// The write choke point: mark every live sync link for a task dirty so the sync
 /// engine re-pushes it. Callers pair this with an `updated_at` bump on the task
@@ -37,7 +38,11 @@ async fn fetch_task(db: &Database, task_id: &str) -> AppResult<Task> {
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn insert_task(db: State<'_, Database>, input: NewTaskInput) -> AppResult<Task> {
+pub async fn insert_task(
+    db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
+    input: NewTaskInput,
+) -> AppResult<Task> {
     let task_id = Uuid::new_v4().to_string();
     let now = Utc::now();
 
@@ -76,13 +81,15 @@ pub async fn insert_task(db: State<'_, Database>, input: NewTaskInput) -> AppRes
     tx.commit().await?;
 
     // No links exist for a brand-new task; the engine's reconcile pass creates
-    // pending_create links for each enabled account on the next cycle.
+    // pending_create links for each enabled account when the pinged cycle runs.
+    signal.ping();
     fetch_task(&db, &task_id).await
 }
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn update_task_status(
     db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
     task_id: String,
     status: TaskStatus,
 ) -> AppResult<Task> {
@@ -132,6 +139,7 @@ pub async fn update_task_status(
     dirty_task_links(&mut *tx, &task_id).await?;
     tx.commit().await?;
 
+    signal.ping();
     fetch_task(&db, &task_id).await
 }
 
@@ -140,6 +148,7 @@ pub async fn update_task_status(
 #[tauri::command(rename_all = "camelCase")]
 pub async fn set_task_schedule(
     db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
     task_id: String,
     scheduled_start: Option<DateTime<Utc>>,
     scheduled_end: Option<DateTime<Utc>>,
@@ -171,6 +180,7 @@ pub async fn set_task_schedule(
     dirty_task_links(&mut *tx, &task_id).await?;
     tx.commit().await?;
 
+    signal.ping();
     fetch_task(&db, &task_id).await
 }
 
@@ -182,7 +192,11 @@ pub async fn set_task_schedule(
 /// `ON DELETE SET NULL` on `sync_links.task_id` keeps the tombstones alive with
 /// their `remote_id` so the delete still ships after the domain row is gone.
 #[tauri::command(rename_all = "camelCase")]
-pub async fn delete_task(db: State<'_, Database>, task_id: String) -> AppResult<()> {
+pub async fn delete_task(
+    db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
+    task_id: String,
+) -> AppResult<()> {
     let now = Utc::now();
     let mut tx = db.pool().begin().await?;
 
@@ -213,6 +227,7 @@ pub async fn delete_task(db: State<'_, Database>, task_id: String) -> AppResult<
     }
 
     tx.commit().await?;
+    signal.ping();
     Ok(())
 }
 
@@ -228,7 +243,11 @@ pub async fn list_subtasks(db: State<'_, Database>, task_id: String) -> AppResul
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn toggle_subtask(db: State<'_, Database>, subtask_id: String) -> AppResult<Subtask> {
+pub async fn toggle_subtask(
+    db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
+    subtask_id: String,
+) -> AppResult<Subtask> {
     let now = Utc::now();
     let mut tx = db.pool().begin().await?;
 
@@ -259,6 +278,7 @@ pub async fn toggle_subtask(db: State<'_, Database>, subtask_id: String) -> AppR
     }
 
     tx.commit().await?;
+    signal.ping();
 
     sqlx::query_as::<_, Subtask>("SELECT * FROM subtasks WHERE id = ?")
         .bind(&subtask_id)

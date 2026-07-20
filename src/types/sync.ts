@@ -37,6 +37,8 @@ export interface SyncStatus {
   lastSyncedAt: string | null;
   lastError: string | null;
   pending: number;
+  /** Links parked in a both-sides-changed conflict awaiting a user decision. */
+  conflicts: number;
 }
 
 /** Streamed progress from triggerSyncNow. */

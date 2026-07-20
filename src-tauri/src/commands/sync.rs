@@ -8,6 +8,7 @@ use crate::sync::engine;
 use crate::sync::keychain;
 use crate::sync::provider::build_provider;
 use crate::sync::providers::google_oauth;
+use crate::sync::scheduler::SyncSignal;
 use crate::sync::types::{
     require_kind, RemoteContainer, SyncAccount, SyncEvent, SyncProviderKind, SyncStatus,
 };
@@ -43,6 +44,7 @@ pub async fn list_sync_accounts(db: State<'_, Database>) -> AppResult<Vec<SyncAc
 #[tauri::command(rename_all = "camelCase")]
 pub async fn connect_google_account(
     db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
     provider: String,
 ) -> AppResult<SyncAccount> {
     let kind = require_kind(&provider)?;
@@ -67,6 +69,8 @@ pub async fn connect_google_account(
     .execute(db.pool())
     .await?;
 
+    // Kick the first sync so the connection shows results within seconds.
+    signal.ping();
     load_account(&db, &id).await
 }
 
@@ -75,6 +79,7 @@ pub async fn connect_google_account(
 #[tauri::command(rename_all = "camelCase")]
 pub async fn connect_apple_account(
     db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
     provider: String,
 ) -> AppResult<SyncAccount> {
     let kind = require_kind(&provider)?;
@@ -107,6 +112,7 @@ pub async fn connect_apple_account(
         .bind(label)
         .execute(db.pool())
         .await?;
+        signal.ping();
         load_account(&db, &id).await
     }
 }
@@ -144,6 +150,7 @@ pub async fn list_remote_containers(
 #[tauri::command(rename_all = "camelCase")]
 pub async fn set_account_container(
     db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
     account_id: String,
     container_id: String,
     container_name: String,
@@ -159,12 +166,14 @@ pub async fn set_account_container(
     if rows == 0 {
         return Err(AppError::NotFound(format!("sync account {account_id}")));
     }
+    signal.ping();
     load_account(&db, &account_id).await
 }
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn set_account_enabled(
     db: State<'_, Database>,
+    signal: State<'_, SyncSignal>,
     account_id: String,
     enabled: bool,
 ) -> AppResult<SyncAccount> {
@@ -176,6 +185,9 @@ pub async fn set_account_enabled(
         .rows_affected();
     if rows == 0 {
         return Err(AppError::NotFound(format!("sync account {account_id}")));
+    }
+    if enabled {
+        signal.ping();
     }
     load_account(&db, &account_id).await
 }
@@ -248,10 +260,11 @@ pub async fn get_sync_status(
 
     let mut out = Vec::with_capacity(accounts.len());
     for account in accounts {
-        let pending: (i64,) = sqlx::query_as(
-            "SELECT count(*) FROM sync_links
-              WHERE account_id = ?
-                AND sync_state IN ('pending_create', 'pending_update', 'pending_delete')",
+        let (pending, conflicts): (i64, i64) = sqlx::query_as(
+            "SELECT
+                count(*) FILTER (WHERE sync_state IN ('pending_create', 'pending_update', 'pending_delete')),
+                count(*) FILTER (WHERE sync_state = 'conflict')
+              FROM sync_links WHERE account_id = ?",
         )
         .bind(&account.id)
         .fetch_one(db.pool())
@@ -261,7 +274,8 @@ pub async fn get_sync_status(
             enabled: account.enabled,
             last_synced_at: account.last_synced_at,
             last_error: account.last_error,
-            pending: pending.0,
+            pending,
+            conflicts,
         });
     }
     Ok(out)

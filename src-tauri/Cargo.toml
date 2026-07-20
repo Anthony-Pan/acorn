@@ -46,7 +46,7 @@ tauri-plugin-global-shortcut = "2"
 
 [target."cfg(target_os = \"macos\")".dependencies]
 objc2 = "0.6"
-objc2-foundation = { version = "0.3", features = ["NSString", "NSURL", "NSLocale", "NSError", "NSDate", "NSCalendar", "NSArray", "NSEnumerator", "NSObject"] }
+objc2-foundation = { version = "0.3", features = ["NSString", "NSURL", "NSLocale", "NSError", "NSDate", "NSCalendar", "NSArray", "NSEnumerator", "NSObject", "NSNotification", "NSOperation", "block2"] }
 objc2-app-kit = { version = "0.3", features = ["NSResponder", "NSWindow", "NSApplication", "NSScreen"] }
 objc2-speech = "0.3"
 objc2-event-kit = { version = "0.3", features = [
