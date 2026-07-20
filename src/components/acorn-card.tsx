@@ -32,22 +32,23 @@ function PendingCard({ task, onStart }: { task: Task; onStart: (task: Task) => v
   return (
     <motion.button
       layout
-      initial={{ opacity: 0, y: 24, scale: 0.86 }}
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.94 }}
-      transition={{ type: "spring", stiffness: 320, damping: 22 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      whileTap={{ scale: 0.97 }}
       type="button"
       onClick={() => onStart(task)}
       className={cn(
-        "w-full text-left bg-card border-[0.5px] border-border rounded-xl px-4 py-3.5",
-        "hover:border-acorn-orange/40 transition-colors group",
+        "w-full text-left bg-card border-[0.5px] border-border rounded-lg px-4 py-3.5",
+        "shadow-[var(--shadow-card)] hover:border-acorn-orange/40 transition-colors group",
       )}
     >
       <div className="flex items-center gap-2.5">
         <div className="w-[22px] h-[22px] rounded-full border-[1.5px] border-border group-hover:border-acorn-orange/60 transition-colors" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <div className="text-sm font-medium text-foreground truncate">{task.title}</div>
+            <div className="text-[13px] font-medium text-foreground truncate">{task.title}</div>
             <PriorityBadge priority={task.priority} />
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
@@ -74,14 +75,14 @@ function InProgressCard({
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.18 }}
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
       className={cn(
-        "bg-card rounded-xl px-4 py-4 border-2 border-acorn-orange",
-        "shadow-[0_0_0_4px_rgba(181,128,63,0.1)]",
+        "bg-card rounded-lg px-4 py-4 border-[0.5px] border-acorn-orange/50",
+        "shadow-[var(--shadow-card)]",
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="w-[26px] h-[26px] rounded-full border-2 border-acorn-orange flex items-center justify-center flex-shrink-0 mt-0.5">
+        <div className="w-[26px] h-[26px] rounded-full border-[1.5px] border-acorn-orange flex items-center justify-center flex-shrink-0 mt-0.5">
           <div className="w-2 h-2 rounded-full bg-acorn-orange" />
         </div>
         <div className="flex-1 min-w-0">
@@ -90,15 +91,15 @@ function InProgressCard({
             <PriorityBadge priority={task.priority} />
           </div>
           {task.description ? (
-            <div className="text-xs text-muted-foreground mb-3 leading-relaxed">
+            <div className="text-[13px] text-muted-foreground mb-3 leading-relaxed">
               Est. {formatDurationMinutes(task.durationMinutes)} · {task.description}
             </div>
           ) : (
-            <div className="text-xs text-muted-foreground mb-3">
+            <div className="text-[13px] text-muted-foreground mb-3">
               Est. {formatDurationMinutes(task.durationMinutes)}
             </div>
           )}
-          <div className="flex items-center gap-2 pt-2.5 border-t-[0.5px] border-acorn-brown/10">
+          <div className="flex items-center gap-2 pt-2.5 border-t-[0.5px] border-border">
             {task.startedAt ? <ProgressTimer startedAt={task.startedAt} /> : <span />}
             <div className="ml-auto flex gap-2">
               <Button variant="outline" size="sm" onClick={() => onSkip(task)}>
@@ -129,15 +130,15 @@ function CompletedCard({ task }: { task: Task }) {
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 0.55 }}
-      transition={{ duration: 0.2 }}
-      className="bg-card border-[0.5px] border-border rounded-xl px-4 py-3.5"
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      className="bg-card border-[0.5px] border-border rounded-lg px-4 py-3.5 shadow-[var(--shadow-card)]"
     >
       <div className="flex items-center gap-2.5">
         <div className="w-[22px] h-[22px] rounded-full bg-acorn-olive flex items-center justify-center">
           <Check className="w-3.5 h-3.5 text-acorn-paper" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-foreground line-through">{task.title}</div>
+          <div className="text-[13px] font-medium text-foreground line-through">{task.title}</div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
             {finishedAt ? `Done at ${finishedAt}` : "Done"}
             {took ? ` · took ${took}` : null}
@@ -154,13 +155,13 @@ function SkippedCard({ task }: { task: Task }) {
       layout
       initial={{ opacity: 0 }}
       animate={{ opacity: 0.4 }}
-      transition={{ duration: 0.2 }}
-      className="bg-card border-[0.5px] border-dashed border-border rounded-xl px-4 py-3.5"
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      className="bg-card border-[0.5px] border-dashed border-border rounded-lg px-4 py-3.5"
     >
       <div className="flex items-center gap-2.5">
         <div className="w-[22px] h-[22px] rounded-full border-[1.5px] border-dashed border-border" />
         <div className="flex-1 min-w-0">
-          <div className="text-sm text-muted-foreground line-through">{task.title}</div>
+          <div className="text-[13px] text-muted-foreground line-through">{task.title}</div>
           <div className="text-[11px] text-muted-foreground mt-0.5">Skipped</div>
         </div>
       </div>
@@ -177,7 +178,7 @@ function ProgressTimer({ startedAt }: { startedAt: string }) {
   }, []);
 
   return (
-    <div className="flex items-center gap-1.5 text-acorn-orange text-xs font-medium">
+    <div className="flex items-center gap-1.5 text-acorn-orange text-[11px] font-medium tabular-nums">
       <Clock className="w-3.5 h-3.5" />
       {formatTimerSince(startedAt, now)} in progress
     </div>

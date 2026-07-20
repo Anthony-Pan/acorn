@@ -7,7 +7,7 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Geist Variable', system-ui, sans-serif;
 
     --color-acorn-cream: var(--acorn-cream);
     --color-acorn-paper: var(--acorn-paper);
@@ -61,17 +61,22 @@
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 0.75rem;
 
-  --acorn-cream: #faf4ec;
-  --acorn-paper: #fffefb;
-  --acorn-brown: #8b4513;
-  --acorn-brown-deep: #5c2e0a;
-  --acorn-orange: #b5803f;
+  --acorn-cream: #f6f2ec;
+  --acorn-paper: #fffdfa;
+  --acorn-brown: #81471d;
+  --acorn-brown-deep: #572f0f;
+  --acorn-orange: #ae7f46;
   --acorn-orange-muted: #8b6f4f;
   --acorn-ink: #3d2818;
   --acorn-olive: #6b8e23;
   --acorn-red: #c44536;
+
+  --shadow-card: 0 0 0 0.5px rgba(61, 40, 24, 0.06), 0 1px 2px rgba(61, 40, 24, 0.05),
+    0 4px 12px rgba(61, 40, 24, 0.06);
+  --shadow-overlay: 0 0 0 0.5px rgba(61, 40, 24, 0.1), 0 8px 20px rgba(61, 40, 24, 0.1),
+    0 24px 60px rgba(61, 40, 24, 0.14);
 
   --background: var(--acorn-cream);
   --foreground: var(--acorn-ink);
@@ -83,13 +88,13 @@
   --primary-foreground: var(--acorn-paper);
   --secondary: rgba(181, 128, 63, 0.12);
   --secondary-foreground: var(--acorn-brown-deep);
-  --muted: rgba(139, 69, 19, 0.06);
+  --muted: rgba(139, 69, 19, 0.05);
   --muted-foreground: var(--acorn-orange-muted);
   --accent: rgba(181, 128, 63, 0.15);
   --accent-foreground: var(--acorn-brown-deep);
   --destructive: var(--acorn-red);
-  --border: rgba(139, 69, 19, 0.18);
-  --input: rgba(139, 69, 19, 0.18);
+  --border: rgba(139, 69, 19, 0.1);
+  --input: rgba(139, 69, 19, 0.1);
   --ring: var(--acorn-orange);
 
   --chart-1: var(--acorn-brown);
@@ -104,14 +109,19 @@
   --sidebar-primary-foreground: var(--acorn-paper);
   --sidebar-accent: rgba(181, 128, 63, 0.15);
   --sidebar-accent-foreground: var(--acorn-brown-deep);
-  --sidebar-border: rgba(139, 69, 19, 0.18);
+  --sidebar-border: rgba(139, 69, 19, 0.1);
   --sidebar-ring: var(--acorn-orange);
 }
 
 .dark {
-  --acorn-cream: #1a130c;
-  --acorn-paper: #221a12;
+  --acorn-cream: #1c1814;
+  --acorn-paper: #262019;
   --acorn-ink: #f2e6d4;
+
+  --shadow-card: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-overlay: 0 0 0 0.5px rgba(0, 0, 0, 0.55), 0 8px 20px rgba(0, 0, 0, 0.4),
+    0 24px 60px rgba(0, 0, 0, 0.5);
 
   --background: var(--acorn-cream);
   --foreground: var(--acorn-ink);
@@ -119,27 +129,35 @@
   --card-foreground: var(--acorn-ink);
   --popover: var(--acorn-paper);
   --popover-foreground: var(--acorn-ink);
-  --primary: #d4956a;
+  --primary: #cc9672;
   --primary-foreground: var(--acorn-cream);
-  --secondary: rgba(212, 149, 106, 0.15);
+  --secondary: rgba(204, 150, 114, 0.15);
   --secondary-foreground: #e5c9a3;
-  --muted: rgba(212, 149, 106, 0.08);
+  --muted: rgba(204, 150, 114, 0.08);
   --muted-foreground: #b5a088;
-  --accent: rgba(212, 149, 106, 0.2);
+  --accent: rgba(204, 150, 114, 0.18);
   --accent-foreground: #f2e6d4;
   --destructive: #e07565;
-  --border: rgba(212, 149, 106, 0.2);
-  --input: rgba(212, 149, 106, 0.25);
-  --ring: #d4956a;
+  --border: rgba(204, 150, 114, 0.14);
+  --input: rgba(204, 150, 114, 0.14);
+  --ring: #cc9672;
 
   --sidebar: var(--acorn-cream);
   --sidebar-foreground: var(--acorn-ink);
-  --sidebar-primary: #d4956a;
+  --sidebar-primary: #cc9672;
   --sidebar-primary-foreground: var(--acorn-cream);
-  --sidebar-accent: rgba(212, 149, 106, 0.2);
+  --sidebar-accent: rgba(204, 150, 114, 0.18);
   --sidebar-accent-foreground: #f2e6d4;
-  --sidebar-border: rgba(212, 149, 106, 0.2);
-  --sidebar-ring: #d4956a;
+  --sidebar-border: rgba(204, 150, 114, 0.14);
+  --sidebar-ring: #cc9672;
+}
+
+@utility glass {
+  background: color-mix(in srgb, var(--card) 72%, transparent);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 0.5px solid var(--border);
+  box-shadow: var(--shadow-overlay);
 }
 
 @layer base {
@@ -151,6 +169,7 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    letter-spacing: -0.006em;
   }
   html {
     @apply font-sans;

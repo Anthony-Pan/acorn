@@ -1,10 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import { toast } from "sonner";
 import { create } from "zustand";
 
 import { activity } from "@/lib/activity";
 import { conversations as conversationsApi, chat as runChat } from "@/lib/chat";
 import { sounds } from "@/lib/sounds";
+import { overlay } from "@/lib/window";
 import { useSessionStore } from "@/stores/session";
 import type { ChatEvent, Conversation, ConversationWithMessages, Message } from "@/types/chat";
 
@@ -135,24 +137,28 @@ export const useChatStore = create<ChatState>((set, get) => ({
       if (event.kind === "toolApprovalRequest") {
         const requestId = event.requestId;
         const toolName = event.call.name;
-        const argsPreview = JSON.stringify(event.call.arguments).slice(0, 80);
-        toast.message(`Confirm tool: ${toolName}`, {
-          description: argsPreview,
-          duration: 28000,
-          id: `tool-approval-${requestId}`,
-          action: {
-            label: "Allow",
-            onClick: () => {
-              void invoke("respond_tool_approval", { requestId, allow: true });
-            },
-          },
-          cancel: {
-            label: "Deny",
-            onClick: () => {
-              void invoke("respond_tool_approval", { requestId, allow: false });
-            },
-          },
-        });
+        const argsPreview = JSON.stringify(event.call.arguments).slice(0, 200);
+        // Surface the decision as a card under the dynamic island, so it's
+        // visible even when the chat window is hidden or behind a fullscreen app.
+        void overlay
+          .showApproval()
+          .then(() => emit("approval:show", { requestId, toolName, argsPreview }))
+          .catch(() => {
+            // Fall back to an in-app toast if the overlay can't be shown.
+            toast.message(`Confirm tool: ${toolName}`, {
+              description: argsPreview,
+              duration: 28000,
+              id: `tool-approval-${requestId}`,
+              action: {
+                label: "Allow",
+                onClick: () => void invoke("respond_tool_approval", { requestId, allow: true }),
+              },
+              cancel: {
+                label: "Deny",
+                onClick: () => void invoke("respond_tool_approval", { requestId, allow: false }),
+              },
+            });
+          });
         return;
       }
       if (event.kind === "toolDenied") {

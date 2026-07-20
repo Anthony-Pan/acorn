@@ -59,7 +59,7 @@ export function TaskActionCards({ json }: TaskActionCardsProps) {
 
   if (!tasks || tasks.length === 0) {
     return (
-      <pre className="text-xs font-mono bg-muted/40 rounded-md p-3 overflow-x-auto">
+      <pre className="text-[11px] font-mono bg-muted/40 rounded-md p-3 overflow-x-auto">
         <code>{json}</code>
       </pre>
     );
@@ -68,7 +68,9 @@ export function TaskActionCards({ json }: TaskActionCardsProps) {
   const visible = tasks.map((task, idx) => ({ task, idx })).filter(({ idx }) => !skipped.has(idx));
 
   if (visible.length === 0) {
-    return <div className="text-xs text-muted-foreground italic">All suggested tasks skipped.</div>;
+    return (
+      <div className="text-[11px] text-muted-foreground italic">All suggested tasks skipped.</div>
+    );
   }
 
   return (
@@ -76,16 +78,18 @@ export function TaskActionCards({ json }: TaskActionCardsProps) {
       {visible.map(({ task, idx }) => (
         <article
           key={idx}
-          className="border-[0.5px] border-border rounded-lg px-3 py-2.5 bg-card flex items-start gap-3"
+          className="border-[0.5px] border-border rounded-lg px-3 py-2.5 bg-card shadow-[var(--shadow-card)] flex items-start gap-3"
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <PriorityBadge priority={task.priority} />
-              <span className="text-[10px] text-muted-foreground">{task.durationMinutes}m</span>
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                {task.durationMinutes}m
+              </span>
             </div>
-            <div className="text-sm font-medium text-foreground">{task.title}</div>
+            <div className="text-[13px] font-medium text-foreground">{task.title}</div>
             {task.description ? (
-              <div className="text-xs text-muted-foreground mt-0.5">{task.description}</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">{task.description}</div>
             ) : null}
           </div>
           <div className="flex flex-col gap-1 flex-shrink-0">

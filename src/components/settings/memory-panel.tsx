@@ -66,10 +66,10 @@ export function MemoryPanel() {
   };
 
   return (
-    <section className="flex-1 px-8 py-7 overflow-y-auto">
+    <section className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
       <header className="mb-5">
-        <h1 className="text-lg font-medium text-foreground">{t.memoryPanelTitle}</h1>
-        <p className="text-xs text-muted-foreground mt-1">{t.memoryPanelSubtitle}</p>
+        <h1 className="text-[20px] font-semibold text-foreground">{t.memoryPanelTitle}</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">{t.memoryPanelSubtitle}</p>
       </header>
 
       <textarea
@@ -77,10 +77,10 @@ export function MemoryPanel() {
         onChange={(e) => setValue(e.target.value)}
         disabled={loading}
         placeholder={t.memoryPlaceholder}
-        className="w-full max-w-2xl h-64 border-[0.5px] border-border rounded-md px-3 py-2.5 text-sm font-mono bg-card focus:outline-none focus:border-acorn-orange resize-y"
+        className="h-64 w-full max-w-2xl resize-y rounded-lg border-[0.5px] border-border bg-card px-3.5 py-3 font-mono text-[13px] shadow-[var(--shadow-card)] focus:border-ring/60 focus:outline-none"
       />
 
-      <div className="mt-3 flex items-center gap-2 max-w-2xl">
+      <div className="mt-3 flex max-w-2xl items-center gap-2">
         <Button onClick={handleSave} disabled={!dirty || saving || loading} size="sm">
           {saving ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />

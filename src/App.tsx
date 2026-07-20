@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface UpdateAvailable {
@@ -17,17 +17,19 @@ import { AcornStash } from "@/components/acorn-stash";
 import { CalendarView } from "@/components/calendar-view";
 import { CanvasView } from "@/components/canvas-view";
 import { ChatView } from "@/components/chat-view";
-import { CornieMascot } from "@/components/cornie-mascot";
+import { KnowledgeCloud } from "@/components/knowledge-cloud";
 import { SettingsPage } from "@/components/settings/settings-page";
-import { StatusCapsule } from "@/components/status-capsule";
 import { TaskInput } from "@/components/task-input";
 import { activity } from "@/lib/activity";
+import { pins } from "@/lib/pin";
+import { overlay } from "@/lib/window";
 import { useChatStore } from "@/stores/chat";
 import { useProvidersStore } from "@/stores/providers";
 import { useSessionStore } from "@/stores/session";
 import { useSettingsStore } from "@/stores/settings";
+import type { OverlayPhase, SummaryPayload } from "@/types/overlay";
 
-type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas";
+type View = "input" | "stash" | "chat" | "settings" | "calendar" | "canvas" | "cloud";
 
 function App() {
   const hydrateSession = useSessionStore((s) => s.hydrate);
@@ -41,10 +43,84 @@ function App() {
 
   const [view, setView] = useState<View>("input");
   const previousChatPhase = useRef<typeof chatPhase>("idle");
+  const latestSummary = useRef<SummaryPayload | null>(null);
 
   useEffect(() => {
     void Promise.all([hydrateSettings(), hydrateProviders(), hydrateSession(), hydrateChat()]);
   }, [hydrateSession, hydrateSettings, hydrateProviders, hydrateChat]);
+
+  // Mirror chat activity to the overlay windows (notch capsule, companion).
+  // Overlays live in their own webview process and cannot read the Zustand
+  // store, so this event is their only source of truth.
+  useEffect(() => {
+    let last = "";
+    const broadcast = (s: ReturnType<typeof useChatStore.getState>) => {
+      const lastAssistant = s.current?.messages
+        .filter((m) => m.role === "assistant" && m.content.trim().length > 0)
+        .at(-1)?.content;
+      const lastReply = lastAssistant
+        ? lastAssistant.length > 120
+          ? `${lastAssistant.slice(0, 120).trim()}…`
+          : lastAssistant.trim()
+        : null;
+      const payload: OverlayPhase = {
+        phase: s.phase,
+        tool: s.activeTools[0]?.name ?? null,
+        toolCount: s.activeTools.length,
+        providerId: s.current?.providerId ?? null,
+        model: s.current?.model ?? null,
+        lastReply,
+        error: s.error ?? null,
+      };
+      const key = JSON.stringify(payload);
+      if (key === last) return;
+      last = key;
+      void emit("overlay:phase", payload);
+    };
+    broadcast(useChatStore.getState());
+    return useChatStore.subscribe(broadcast);
+  }, []);
+
+  // Files dropped on the main window — or onto the companion (which forwards
+  // their paths) — are copied to the clipboard for pasting into a chat.
+  useEffect(() => {
+    const eatFiles = (paths: string[]) => {
+      const valid = paths.filter((p) => p.length > 0);
+      if (valid.length === 0) return;
+      void navigator.clipboard
+        .writeText(valid.join("\n"))
+        .then(() => {
+          const first = valid[0]?.split("/").pop() ?? valid[0];
+          const summary =
+            valid.length === 1
+              ? `Cornie ate ${first}`
+              : `Cornie ate ${valid.length} files (${first} + ${valid.length - 1} more)`;
+          toast.success(summary, {
+            description: "Paths copied to clipboard — paste into chat to share with Acorn.",
+            id: "cornie-eats",
+            duration: 6000,
+          });
+        })
+        .catch((err: unknown) => {
+          toast.error("Cornie spilled it", {
+            description: err instanceof Error ? err.message : String(err),
+          });
+        });
+    };
+
+    const unlistenMainDrop = getCurrentWindow().onDragDropEvent((event) => {
+      const payload = event.payload as { type: string; paths?: string[] };
+      if (payload.type !== "drop") return;
+      eatFiles(payload.paths ?? []);
+    });
+    const unlistenPetDrop = listen<{ paths: string[] }>("pet:files-dropped", (event) => {
+      eatFiles(event.payload.paths ?? []);
+    });
+    return () => {
+      void unlistenMainDrop.then((fn) => fn());
+      void unlistenPetDrop.then((fn) => fn());
+    };
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -121,7 +197,24 @@ function App() {
     });
 
     const unlistenNavigate = listen<string>("navigate", (event) => {
-      if (event.payload === "settings") setView("settings");
+      const target = event.payload;
+      if (
+        target === "settings" ||
+        target === "chat" ||
+        target === "calendar" ||
+        target === "canvas" ||
+        target === "cloud" ||
+        target === "input" ||
+        target === "stash"
+      ) {
+        setView(target);
+      }
+    });
+
+    // Re-send the latest reply summary when the summary overlay (re)mounts, in
+    // case its listener registered just after our initial emit.
+    const unlistenSummaryRequest = listen("summary:request", () => {
+      if (latestSummary.current) void emit("summary:show", latestSummary.current);
     });
 
     const unlistenPinShortcut = listen("shortcut:pin-response", async () => {
@@ -137,17 +230,24 @@ function App() {
         return;
       }
       try {
-        await navigator.clipboard.writeText(lastReply.content);
+        const pin = await pins.create({
+          conversationId: conversation?.id ?? null,
+          messageId: lastReply.id,
+          label: conversation?.title?.trim() || "Pinned",
+          content: lastReply.content,
+        });
+        await pins.openWindow(pin.id, pin.x, pin.y);
+        void navigator.clipboard.writeText(lastReply.content).catch(() => {});
         const preview =
           lastReply.content.length > 80
             ? `${lastReply.content.slice(0, 80).trim()}…`
             : lastReply.content.trim();
-        toast.success("Reply copied", {
+        toast.success("Pinned to desktop", {
           description: preview,
           id: "shortcut-pin",
         });
       } catch (err) {
-        toast.error("Could not copy", {
+        toast.error("Could not pin", {
           description: err instanceof Error ? err.message : String(err),
           id: "shortcut-pin-error",
         });
@@ -187,14 +287,14 @@ function App() {
       }
     });
 
+    // The voice button owns the actual capture (it listens for this event
+    // too); here we only surface a view that has one so the shortcut always
+    // lands somewhere useful.
     const unlistenPushToTalkShortcut = listen("shortcut:push-to-talk", async () => {
       const main = getCurrentWindow();
       await main.show();
       await main.setFocus();
-      toast.message("Push to talk", {
-        description: "Hold-to-talk voice input ships with the next voice overhaul.",
-        id: "shortcut-ptt",
-      });
+      setView((v) => (v === "chat" || v === "input" ? v : "chat"));
     });
 
     const unlistenQuickAskShortcut = listen("shortcut:quick-ask", async () => {
@@ -203,6 +303,10 @@ function App() {
       } catch (err) {
         console.error("quick window toggle failed", err);
       }
+    });
+
+    const unlistenKnowledgeCloud = listen("shortcut:knowledge-cloud", () => {
+      setView("cloud");
     });
 
     const unlistenDeepLink = listen<string>("deep-link", async (event) => {
@@ -232,16 +336,25 @@ function App() {
     return () => {
       void unlistenSubmit.then((fn) => fn());
       void unlistenNavigate.then((fn) => fn());
+      void unlistenSummaryRequest.then((fn) => fn());
       void unlistenDeepLink.then((fn) => fn());
       void unlistenPinShortcut.then((fn) => fn());
       void unlistenScreenshotShortcut.then((fn) => fn());
       void unlistenPushToTalkShortcut.then((fn) => fn());
       void unlistenQuickAskShortcut.then((fn) => fn());
+      void unlistenKnowledgeCloud.then((fn) => fn());
     };
   }, []);
 
   useEffect(() => {
-    if (view === "settings" || view === "chat" || view === "calendar" || view === "canvas") return;
+    if (
+      view === "settings" ||
+      view === "chat" ||
+      view === "calendar" ||
+      view === "canvas" ||
+      view === "cloud"
+    )
+      return;
     if (current && current.tasks.length > 0) {
       setView("stash");
     } else if (!isStashing) {
@@ -260,17 +373,20 @@ function App() {
       .at(-1);
     if (!lastReply) return;
     const preview =
-      lastReply.content.length > 140
-        ? `${lastReply.content.slice(0, 140).trim()}…`
+      lastReply.content.length > 240
+        ? `${lastReply.content.slice(0, 240).trim()}…`
         : lastReply.content.trim();
-    toast.message("Acorn replied", {
-      description: preview,
-      duration: 8000,
-      action: {
-        label: "Open",
-        onClick: () => setView("chat"),
-      },
-    });
+    const payload: SummaryPayload = {
+      content: lastReply.content,
+      preview,
+      providerId: chatCurrent?.providerId ?? null,
+      ts: Date.now(),
+    };
+    latestSummary.current = payload;
+    void overlay
+      .showSummary()
+      .then(() => emit("summary:show", payload))
+      .catch(() => {});
   }, [chatPhase, chatCurrent, view]);
 
   const defaultView = current && current.tasks.length > 0 ? "stash" : "input";
@@ -280,10 +396,10 @@ function App() {
       <AnimatePresence mode="wait">
         <motion.div
           key={view}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
         >
           {view === "settings" ? (
             <SettingsPage onClose={() => setView(defaultView)} />
@@ -293,6 +409,14 @@ function App() {
             <CalendarView onBack={() => setView(defaultView)} />
           ) : view === "canvas" ? (
             <CanvasView onBack={() => setView(defaultView)} />
+          ) : view === "cloud" ? (
+            <KnowledgeCloud
+              onBack={() => setView(defaultView)}
+              onOpen={(conversationId) => {
+                void useChatStore.getState().open(conversationId);
+                setView("chat");
+              }}
+            />
           ) : view === "stash" ? (
             <AcornStash
               onOpenSettings={() => setView("settings")}
@@ -314,15 +438,15 @@ function App() {
           )}
         </motion.div>
       </AnimatePresence>
-      <CornieMascot />
-      <StatusCapsule />
       <Toaster
         position="top-center"
         toastOptions={{
           style: {
-            background: "var(--acorn-paper)",
-            color: "var(--acorn-ink)",
-            border: "0.5px solid rgba(139, 69, 19, 0.18)",
+            background: "var(--popover)",
+            color: "var(--popover-foreground)",
+            border: "0.5px solid var(--border)",
+            boxShadow: "var(--shadow-overlay)",
+            borderRadius: "10px",
             fontSize: "13px",
           },
         }}

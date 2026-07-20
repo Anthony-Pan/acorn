@@ -45,25 +45,28 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
   const current: SettingsSection = selected ?? { kind: "general" };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between px-7 py-4 border-b-[0.5px] border-border">
-        <div className="flex items-center gap-2.5">
-          <AcornLogo size={24} />
-          <div className="text-base font-medium text-foreground">Settings</div>
-        </div>
-        <Button variant="outline" size="icon-sm" onClick={onClose} aria-label="Close settings">
-          <X />
-        </Button>
-      </header>
+    <div className="flex h-screen bg-background">
+      <SettingsSidebar
+        providers={catalog}
+        selected={current}
+        activeId={activeId}
+        hasCredentials={hasCredentials}
+        onSelect={setSelected}
+      />
 
-      <div className="flex" style={{ minHeight: "calc(100vh - 65px)" }}>
-        <SettingsSidebar
-          providers={catalog}
-          selected={current}
-          activeId={activeId}
-          hasCredentials={hasCredentials}
-          onSelect={setSelected}
-        />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header
+          data-tauri-drag-region
+          className="flex h-[52px] flex-shrink-0 select-none items-center justify-between border-b-[0.5px] border-border px-6"
+        >
+          <div className="pointer-events-none flex items-center gap-2.5">
+            <AcornLogo size={20} />
+            <div className="text-[15px] font-semibold text-foreground">Settings</div>
+          </div>
+          <Button variant="outline" size="icon-sm" onClick={onClose} aria-label="Close settings">
+            <X />
+          </Button>
+        </header>
 
         <SettingsContent section={current} />
       </div>
@@ -104,7 +107,7 @@ function SettingsContent({ section }: { section: SettingsSection }) {
   const provider = catalog.find((p) => p.id === section.providerId);
   if (!provider) {
     return (
-      <section className="flex-1 px-8 py-7 text-muted-foreground text-sm">
+      <section className="min-h-0 flex-1 overflow-y-auto px-8 py-7 text-[13px] text-muted-foreground">
         Pick a section on the left.
       </section>
     );

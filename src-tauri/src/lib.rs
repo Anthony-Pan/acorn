@@ -49,6 +49,14 @@ pub fn run() {
                     let _ = app.emit(commands::shortcut::SHORTCUT_QUICK_ASK_EVENT, ());
                     return;
                 }
+                if shortcut_matches(shortcut, commands::shortcut::KNOWLEDGE_CLOUD_SHORTCUT) {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                    let _ = app.emit(commands::shortcut::SHORTCUT_KNOWLEDGE_CLOUD_EVENT, ());
+                    return;
+                }
                 toggle_quick_window(app);
             })
             .build(),
@@ -80,11 +88,17 @@ pub fn run() {
                 .ok()
                 .flatten()
                 .unwrap_or_else(|| commands::shortcut::DEFAULT_SHORTCUT.to_string());
-                register_global_shortcuts(app.handle(), &stored)?;
-                build_tray(app.handle())?;
+                let summon = Shortcut::from_str(&stored)
+                    .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
+                register_global_shortcuts(app.handle(), summon)?;
+                build_tray(app.handle(), &stored)?;
                 wire_quick_window_blur(app.handle());
                 wire_main_window_close_to_hide(app.handle());
                 wire_deep_link(app.handle());
+                commands::overlay::ensure_notch(app.handle());
+                restore_pins(app.handle());
+                maybe_spawn_pet(app.handle());
+                commands::overlay::ensure_approval_window(app.handle());
             }
 
             Ok(())
@@ -120,11 +134,31 @@ pub fn run() {
             commands::conversation::delete_conversation,
             commands::conversation::rename_conversation,
             commands::conversation::set_conversation_provider,
+            commands::conversation::list_conversation_cloud,
+            commands::conversation::set_conversation_favorite,
+            commands::conversation::set_conversation_archived,
             commands::chat::chat,
             commands::window::show_main,
             commands::window::toggle_quick,
             commands::window::hide_quick,
             commands::window::open_settings,
+            commands::overlay::set_overlay_interactive,
+            commands::overlay::show_notch_overlay,
+            commands::overlay::hide_notch_overlay,
+            commands::overlay::open_pin_window,
+            commands::overlay::close_pin_window,
+            commands::overlay::show_summary_overlay,
+            commands::overlay::hide_summary_overlay,
+            commands::overlay::show_pet_overlay,
+            commands::overlay::hide_pet_overlay,
+            commands::overlay::teleport_pet,
+            commands::overlay::show_approval_overlay,
+            commands::overlay::hide_approval_overlay,
+            commands::pin::list_pins,
+            commands::pin::get_pin,
+            commands::pin::create_pin,
+            commands::pin::update_pin_position,
+            commands::pin::delete_pin,
             commands::shortcut::get_summon_shortcut,
             commands::shortcut::set_summon_shortcut,
             commands::shortcut::reset_summon_shortcut,
@@ -170,15 +204,21 @@ pub fn run() {
         });
 }
 
+/// Register the summon shortcut plus the fixed extras. `set_summon_shortcut`
+/// re-runs this after its `unregister_all`, so every shortcut the app owns must
+/// be registered here — a shortcut registered anywhere else would silently die
+/// the first time the user rebinds the summon key.
 #[cfg(desktop)]
-fn register_global_shortcuts(app: &tauri::AppHandle, shortcut_str: &str) -> anyhow::Result<()> {
-    let summon = Shortcut::from_str(shortcut_str)
-        .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
+pub(crate) fn register_global_shortcuts(
+    app: &tauri::AppHandle,
+    summon: Shortcut,
+) -> anyhow::Result<()> {
     let extras = [
         commands::shortcut::PIN_SHORTCUT,
         commands::shortcut::SCREENSHOT_SHORTCUT,
         commands::shortcut::PUSH_TO_TALK_SHORTCUT,
         commands::shortcut::QUICK_ASK_SHORTCUT,
+        commands::shortcut::KNOWLEDGE_CLOUD_SHORTCUT,
     ];
     let gs = app.global_shortcut();
     gs.register(summon)?;
@@ -199,13 +239,8 @@ fn shortcut_matches(target: &Shortcut, spec: &str) -> bool {
         .unwrap_or(false)
 }
 
-fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {
-    let show = MenuItem::with_id(app, "show", "Show Acorn", true, None::<&str>)?;
-    let summon = MenuItem::with_id(app, "summon", "Summon  ⌘⇧A", true, None::<&str>)?;
-    let settings = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
-    let separator = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit Acorn", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &summon, &settings, &separator, &quit])?;
+fn build_tray(app: &tauri::AppHandle, summon_shortcut: &str) -> anyhow::Result<()> {
+    let menu = tray_menu(app, summon_shortcut)?;
 
     let icon = app
         .default_window_icon()
@@ -220,6 +255,51 @@ fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {
         .build(app)?;
 
     Ok(())
+}
+
+fn tray_menu(app: &tauri::AppHandle, summon_shortcut: &str) -> anyhow::Result<Menu<tauri::Wry>> {
+    let summon_label = format!("Summon  {}", format_shortcut_label(summon_shortcut));
+    let show = MenuItem::with_id(app, "show", "Show Acorn", true, None::<&str>)?;
+    let summon = MenuItem::with_id(app, "summon", summon_label, true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Acorn", true, None::<&str>)?;
+    Ok(Menu::with_items(
+        app,
+        &[&show, &summon, &settings, &separator, &quit],
+    )?)
+}
+
+/// Refresh the tray's "Summon" entry after a rebind so the menu never
+/// advertises a shortcut that is no longer registered.
+pub(crate) fn update_tray_summon_shortcut(app: &tauri::AppHandle, shortcut: &str) {
+    if let Some(tray) = app.tray_by_id("acorn-tray") {
+        match tray_menu(app, shortcut) {
+            Ok(menu) => {
+                if let Err(err) = tray.set_menu(Some(menu)) {
+                    eprintln!("acorn: could not update tray menu: {err}");
+                }
+            }
+            Err(err) => eprintln!("acorn: could not rebuild tray menu: {err}"),
+        }
+    }
+}
+
+/// "CmdOrCtrl+Shift+KeyA" → "⌘⇧A" for menu labels.
+fn format_shortcut_label(raw: &str) -> String {
+    raw.split('+')
+        .map(|part| match part {
+            "CmdOrCtrl" | "CommandOrControl" | "Cmd" | "Command" | "Super" | "Meta" => {
+                "⌘".to_string()
+            }
+            "Ctrl" | "Control" => "⌃".to_string(),
+            "Shift" => "⇧".to_string(),
+            "Alt" | "Option" => "⌥".to_string(),
+            p if p.starts_with("Key") => p[3..].to_string(),
+            p if p.starts_with("Digit") => p[5..].to_string(),
+            p => p.to_string(),
+        })
+        .collect()
 }
 
 #[cfg(desktop)]
@@ -271,6 +351,29 @@ fn wire_deep_link(app: &tauri::AppHandle) {
             }
         });
     });
+}
+
+#[cfg(desktop)]
+fn restore_pins(app: &tauri::AppHandle) {
+    let pins = tauri::async_runtime::block_on(async {
+        commands::pin::load_pins(app.state::<db::Database>().inner()).await
+    })
+    .unwrap_or_default();
+    for pin in pins {
+        commands::overlay::open_pin(app, &pin.id, pin.x, pin.y);
+    }
+}
+
+#[cfg(desktop)]
+fn maybe_spawn_pet(app: &tauri::AppHandle) {
+    let hidden = tauri::async_runtime::block_on(async {
+        commands::settings::load_setting(app.state::<db::Database>().inner(), "pet-hidden").await
+    })
+    .ok()
+    .flatten();
+    if hidden.as_deref() != Some("true") {
+        commands::overlay::ensure_pet(app);
+    }
 }
 
 fn handle_tray_menu(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {

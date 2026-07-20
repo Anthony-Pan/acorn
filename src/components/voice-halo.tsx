@@ -4,6 +4,13 @@ interface VoiceHaloProps {
   visible: boolean;
 }
 
+/**
+ * Full-viewport edge glow shown while the mic is live: a warm conic gradient
+ * sweeping around a masked border band, over a breathing inner bloom. The sweep
+ * animates the gradient's start angle (a registered custom property) rather
+ * than rotating the element, so the band hugs the window edges at any aspect
+ * ratio; without `@property` support it degrades to a static frame.
+ */
 export function VoiceHalo({ visible }: VoiceHaloProps) {
   return (
     <div
@@ -21,8 +28,13 @@ export function VoiceHalo({ visible }: VoiceHaloProps) {
 }
 
 const voiceHaloKeyframes = `
-@keyframes acorn-voice-halo-spin {
-  to { transform: rotate(360deg); }
+@property --acorn-halo-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes acorn-voice-halo-sweep {
+  to { --acorn-halo-angle: 360deg; }
 }
 @keyframes acorn-voice-halo-breathe {
   0%, 100% { opacity: 0.55; }
@@ -30,7 +42,7 @@ const voiceHaloKeyframes = `
 }
 .voice-halo-frame {
   background: conic-gradient(
-    from 0deg,
+    from var(--acorn-halo-angle),
     rgba(255, 138, 76, 0.85),
     rgba(217, 70, 70, 0.82),
     rgba(168, 92, 50, 0.7),
@@ -47,7 +59,7 @@ const voiceHaloKeyframes = `
     linear-gradient(#000, #000);
   mask-composite: exclude;
   padding: 6px;
-  animation: acorn-voice-halo-spin 12s linear infinite;
+  animation: acorn-voice-halo-sweep 8s linear infinite;
   filter: blur(2px);
 }
 .voice-halo-glow {
@@ -55,5 +67,11 @@ const voiceHaloKeyframes = `
     inset 0 0 32px 4px rgba(255, 138, 76, 0.45),
     inset 0 0 96px 12px rgba(217, 70, 70, 0.18);
   animation: acorn-voice-halo-breathe 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .voice-halo-frame,
+  .voice-halo-glow {
+    animation: none;
+  }
 }
 `;

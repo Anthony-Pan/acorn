@@ -13,20 +13,20 @@ export function PlaceholderPanel({ title, description }: PlaceholderPanelProps) 
   const t = strings(language);
 
   return (
-    <section className="flex-1 px-8 py-7 overflow-y-auto">
+    <section className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
       <header className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <h1 className="text-lg font-medium text-foreground">{title}</h1>
-          <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
+        <div className="mb-2 flex items-center gap-2">
+          <h1 className="text-[20px] font-semibold text-foreground">{title}</h1>
+          <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
             {t.comingSoonBadge}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-[13px] text-muted-foreground">{description}</p>
       </header>
 
-      <div className="border-[0.5px] border-dashed border-border rounded-md p-8 text-center max-w-md">
-        <Sprout className="w-6 h-6 text-acorn-orange/60 mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">
+      <div className="max-w-md rounded-lg border-[0.5px] border-dashed border-border p-8 text-center">
+        <Sprout className="mx-auto mb-3 h-6 w-6 text-acorn-orange/60" />
+        <p className="text-[13px] text-muted-foreground">
           {language.startsWith("zh")
             ? "这部分正在路上,下次版本会落地。"
             : "Sprouting soon — landing in a future Acorn release."}

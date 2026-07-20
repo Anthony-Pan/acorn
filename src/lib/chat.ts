@@ -1,11 +1,26 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 
-import type { ChatEvent, Conversation, ConversationWithMessages, Message } from "@/types/chat";
+import type {
+  ChatEvent,
+  CloudNode,
+  Conversation,
+  ConversationWithMessages,
+  Message,
+} from "@/types/chat";
 
 export const conversations = {
   create: (title?: string) => invoke<Conversation>("create_conversation", { title: title ?? null }),
 
   list: () => invoke<Conversation[]>("list_conversations"),
+
+  cloud: (includeArchived = false) =>
+    invoke<CloudNode[]>("list_conversation_cloud", { includeArchived }),
+
+  setFavorite: (conversationId: string, favorite: boolean) =>
+    invoke<void>("set_conversation_favorite", { conversationId, favorite }),
+
+  setArchived: (conversationId: string, archived: boolean) =>
+    invoke<void>("set_conversation_archived", { conversationId, archived }),
 
   get: (conversationId: string) =>
     invoke<ConversationWithMessages>("get_conversation", { conversationId }),

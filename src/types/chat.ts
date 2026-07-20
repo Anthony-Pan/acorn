@@ -29,6 +29,16 @@ export interface ConversationWithMessages extends Conversation {
   messages: Message[];
 }
 
+/** A conversation summarized for the knowledge-cloud starfield. */
+export interface CloudNode {
+  id: string;
+  title: string;
+  lastMessageAt: string;
+  messageCount: number;
+  favorite: boolean;
+  archived: boolean;
+}
+
 export type ChatEvent =
   | { kind: "thinking" }
   | { kind: "toolCall"; call: ToolCall }

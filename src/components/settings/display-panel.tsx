@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { settings } from "@/lib/db";
 import { strings } from "@/lib/i18n";
+import { pet } from "@/lib/pet";
 import { cn } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settings";
 
-const CORNIE_HIDDEN_KEY = "acorn:cornie-hidden";
+const PET_HIDDEN_KEY = "pet-hidden";
 const SOUNDS_MUTED_KEY = "acorn:sounds-muted";
 
 function readBool(key: string): boolean {
@@ -30,15 +32,16 @@ export function DisplayPanel() {
   const [soundsMuted, setSoundsMuted] = useState(false);
 
   useEffect(() => {
-    setCornieHidden(readBool(CORNIE_HIDDEN_KEY));
+    void settings.get(PET_HIDDEN_KEY).then((value) => setCornieHidden(value === "true"));
     setSoundsMuted(readBool(SOUNDS_MUTED_KEY));
   }, []);
 
   const toggleCornie = () => {
-    const next = !cornieHidden;
-    writeBool(CORNIE_HIDDEN_KEY, next);
-    setCornieHidden(next);
-    if (!next) window.location.reload();
+    const nextHidden = !cornieHidden;
+    setCornieHidden(nextHidden);
+    void settings.set(PET_HIDDEN_KEY, nextHidden ? "true" : "");
+    if (nextHidden) void pet.hide();
+    else void pet.show();
   };
 
   const toggleSounds = () => {
@@ -48,13 +51,13 @@ export function DisplayPanel() {
   };
 
   return (
-    <section className="flex-1 px-8 py-7 overflow-y-auto">
+    <section className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
       <header className="mb-6">
-        <h1 className="text-lg font-medium text-foreground">{t.displayPanelTitle}</h1>
-        <p className="text-xs text-muted-foreground mt-1">{t.displayPanelSubtitle}</p>
+        <h1 className="text-[20px] font-semibold text-foreground">{t.displayPanelTitle}</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">{t.displayPanelSubtitle}</p>
       </header>
 
-      <div className="space-y-4 max-w-2xl">
+      <div className="max-w-xl divide-y-[0.5px] divide-border rounded-lg border-[0.5px] border-border bg-card shadow-[var(--shadow-card)]">
         <ToggleRow
           label={t.displayCornieLabel}
           caption={t.displayCornieCaption}
@@ -81,10 +84,10 @@ interface ToggleRowProps {
 
 function ToggleRow({ label, caption, checked, onChange }: ToggleRowProps) {
   return (
-    <div className="flex items-start justify-between gap-6 border-[0.5px] border-border rounded-md px-4 py-3 bg-card">
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-foreground">{label}</div>
-        <div className="text-xs text-muted-foreground mt-0.5">{caption}</div>
+    <div className="flex items-center justify-between gap-6 px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <div className="text-[13px] text-foreground">{label}</div>
+        <div className="mt-0.5 text-[11px] text-muted-foreground">{caption}</div>
       </div>
       <button
         type="button"
@@ -92,13 +95,13 @@ function ToggleRow({ label, caption, checked, onChange }: ToggleRowProps) {
         aria-checked={checked}
         onClick={onChange}
         className={cn(
-          "relative w-10 h-6 rounded-full transition-colors flex-shrink-0",
-          checked ? "bg-acorn-orange" : "bg-muted",
+          "relative h-6 w-10 flex-shrink-0 rounded-full transition-colors",
+          checked ? "bg-acorn-orange" : "bg-muted-foreground/25",
         )}
       >
         <span
           className={cn(
-            "absolute top-0.5 w-5 h-5 rounded-full bg-acorn-paper shadow transition-transform",
+            "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
             checked ? "translate-x-[18px]" : "translate-x-0.5",
           )}
         />

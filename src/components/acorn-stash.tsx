@@ -51,34 +51,37 @@ export function AcornStash({
   const handleSkip = (task: Task) => updateTaskStatus(task.id, "skipped");
 
   return (
-    <div className="min-h-screen bg-background p-7">
-      <div className="max-w-2xl mx-auto">
-        <header className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2.5">
-            <AcornLogo size={28} />
-            <div className="text-[15px] font-medium text-foreground">{t.todaysStash}</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <CountsLine counts={counts} t={t} />
-            <Button variant="outline" size="sm" onClick={onOpenChat}>
-              <MessageCircle />
-              {t.chat}
-            </Button>
-            <Button variant="outline" size="icon-sm" onClick={onOpenCanvas} aria-label="Canvas">
-              <FileText className="w-3.5 h-3.5" />
-            </Button>
-            <Button variant="outline" size="icon-sm" onClick={onOpenCalendar} aria-label="Calendar">
-              <CalendarDays />
-            </Button>
-            <Button variant="outline" size="icon-sm" onClick={onOpenSettings} aria-label="Settings">
-              <SettingsIcon />
-            </Button>
-          </div>
-        </header>
+    <div className="min-h-screen bg-background">
+      <header
+        data-tauri-drag-region
+        className="flex h-[52px] items-center justify-between pl-[76px] pr-4 select-none"
+      >
+        <div className="pointer-events-none flex items-center gap-2.5">
+          <AcornLogo size={24} />
+          <div className="text-[13px] font-semibold text-foreground">{t.todaysStash}</div>
+        </div>
+        <div className="flex items-center gap-3">
+          <CountsLine counts={counts} t={t} />
+          <Button variant="outline" size="sm" onClick={onOpenChat}>
+            <MessageCircle />
+            {t.chat}
+          </Button>
+          <Button variant="outline" size="icon-sm" onClick={onOpenCanvas} aria-label="Canvas">
+            <FileText className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="outline" size="icon-sm" onClick={onOpenCalendar} aria-label="Calendar">
+            <CalendarDays />
+          </Button>
+          <Button variant="outline" size="icon-sm" onClick={onOpenSettings} aria-label="Settings">
+            <SettingsIcon />
+          </Button>
+        </div>
+      </header>
 
+      <div className="max-w-2xl mx-auto px-7 pb-7 pt-4">
         {current.aiSummary ? (
           <div className="bg-acorn-orange/5 border-l-2 border-acorn-orange rounded-r-md px-3.5 py-2.5 mb-5">
-            <div className="text-xs text-muted-foreground leading-relaxed flex gap-2">
+            <div className="text-[13px] text-muted-foreground leading-relaxed flex gap-2">
               <Sparkles className="w-3.5 h-3.5 text-acorn-orange flex-shrink-0 mt-0.5" />
               <span>{current.aiSummary}</span>
             </div>
@@ -102,7 +105,7 @@ export function AcornStash({
         <button
           type="button"
           onClick={onAddMore}
-          className="mt-3.5 w-full inline-flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground rounded-md border border-dashed border-acorn-brown/25 hover:bg-muted/50 transition-colors"
+          className="mt-3.5 w-full inline-flex items-center justify-center gap-1.5 py-2.5 text-[13px] text-muted-foreground rounded-lg border border-dashed border-border hover:bg-muted/50 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           {t.addAnother}
@@ -120,7 +123,7 @@ function CountsLine({
   t: ReturnType<typeof strings>;
 }) {
   return (
-    <div className="text-xs text-muted-foreground">
+    <div className="text-[11px] text-muted-foreground tabular-nums">
       <span className="font-medium text-acorn-brown-deep">{t.doneCount(counts.done)}</span>
       <span className="mx-1.5">·</span>
       <span className="font-medium text-acorn-orange">{t.inProgressCount(counts.inProgress)}</span>

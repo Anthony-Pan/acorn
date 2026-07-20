@@ -102,19 +102,12 @@ export function QuickApp() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.18, ease: "easeOut" }}
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
       className="flex items-center justify-center w-screen h-screen p-3"
     >
-      <div
-        className="w-full max-w-2xl rounded-3xl px-5 py-4 shadow-2xl border border-acorn-brown/15"
-        style={{
-          background: "rgba(250, 244, 236, 0.82)",
-          backdropFilter: "blur(40px) saturate(180%)",
-          WebkitBackdropFilter: "blur(40px) saturate(180%)",
-        }}
-      >
+      <div className="glass w-full max-w-2xl rounded-xl px-4 py-3">
         <div className="flex items-center gap-2.5 mb-2">
           <AcornLogo size={22} />
           <div className="text-[11px] text-muted-foreground">{hint}</div>
@@ -142,18 +135,19 @@ export function QuickApp() {
             disabled={phase === "submitting"}
           />
 
-          <button
+          <motion.button
             type="button"
             onClick={() => void handleAction()}
             disabled={phase === "submitting"}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-acorn-brown text-acorn-paper hover:bg-acorn-brown-deep transition-colors disabled:opacity-50"
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center justify-center w-8 h-8 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
             aria-label={recState === "recording" ? "Stop recording" : "Submit"}
           >
             {buttonIcon}
-          </button>
+          </motion.button>
         </div>
 
-        {error ? <div className="mt-2 text-[11px] text-acorn-red">{error}</div> : null}
+        {error ? <div className="mt-2 text-[11px] text-destructive">{error}</div> : null}
       </div>
     </motion.div>
   );

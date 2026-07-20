@@ -1,10 +1,79 @@
 use chrono::Utc;
+use serde::Serialize;
+use sqlx::FromRow;
 use tauri::State;
 use uuid::Uuid;
 
 use crate::db::models::{Conversation, ConversationWithMessages, Message};
 use crate::db::Database;
 use crate::error::{AppError, AppResult};
+
+/// A conversation summarized for the knowledge-cloud starfield: enough to size,
+/// place, and label a star without loading message bodies.
+#[derive(Debug, Serialize, FromRow)]
+#[serde(rename_all = "camelCase")]
+pub struct CloudNode {
+    pub id: String,
+    pub title: String,
+    pub last_message_at: String,
+    pub message_count: i64,
+    pub favorite: bool,
+    pub archived: bool,
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub async fn list_conversation_cloud(
+    db: State<'_, Database>,
+    include_archived: bool,
+) -> AppResult<Vec<CloudNode>> {
+    sqlx::query_as::<_, CloudNode>(
+        "SELECT c.id, c.title, c.last_message_at,
+                (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.id) AS message_count,
+                c.favorite AS favorite,
+                (c.archived_at IS NOT NULL) AS archived
+         FROM conversations c
+         WHERE (? OR c.archived_at IS NULL)
+         ORDER BY c.last_message_at DESC
+         LIMIT 500",
+    )
+    .bind(include_archived)
+    .fetch_all(db.pool())
+    .await
+    .map_err(Into::into)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub async fn set_conversation_favorite(
+    db: State<'_, Database>,
+    conversation_id: String,
+    favorite: bool,
+) -> AppResult<()> {
+    sqlx::query("UPDATE conversations SET favorite = ? WHERE id = ?")
+        .bind(favorite)
+        .bind(&conversation_id)
+        .execute(db.pool())
+        .await?;
+    Ok(())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+pub async fn set_conversation_archived(
+    db: State<'_, Database>,
+    conversation_id: String,
+    archived: bool,
+) -> AppResult<()> {
+    let archived_at = if archived {
+        Some(Utc::now().to_rfc3339())
+    } else {
+        None
+    };
+    sqlx::query("UPDATE conversations SET archived_at = ? WHERE id = ?")
+        .bind(archived_at)
+        .bind(&conversation_id)
+        .execute(db.pool())
+        .await?;
+    Ok(())
+}
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn create_conversation(

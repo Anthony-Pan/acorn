@@ -45,7 +45,7 @@ export function NoteCards({ raw }: NoteCardsProps) {
 
   if (notes.length === 0) {
     return (
-      <pre className="text-xs font-mono bg-muted/40 rounded-md p-3 overflow-x-auto">
+      <pre className="text-[11px] font-mono bg-muted/40 rounded-md p-3 overflow-x-auto">
         <code>{raw}</code>
       </pre>
     );
@@ -56,7 +56,7 @@ export function NoteCards({ raw }: NoteCardsProps) {
     .filter(({ idx }) => !dismissed.has(idx));
 
   if (visible.length === 0) {
-    return <div className="text-xs text-muted-foreground italic">All notes dismissed.</div>;
+    return <div className="text-[11px] text-muted-foreground italic">All notes dismissed.</div>;
   }
 
   return (
@@ -64,14 +64,14 @@ export function NoteCards({ raw }: NoteCardsProps) {
       {visible.map(({ note, idx }) => (
         <article
           key={idx}
-          className="border-[0.5px] border-acorn-orange/40 rounded-lg px-3 py-2.5 bg-acorn-orange/5 flex items-start gap-3"
+          className="border-[0.5px] border-acorn-orange/25 rounded-lg px-3 py-2.5 bg-acorn-orange/5 flex items-start gap-3"
         >
           <StickyNote className="w-4 h-4 text-acorn-orange flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             {note.title ? (
-              <div className="text-sm font-medium text-foreground mb-0.5">{note.title}</div>
+              <div className="text-[13px] font-medium text-foreground mb-0.5">{note.title}</div>
             ) : null}
-            <div className="text-sm text-foreground/85 whitespace-pre-wrap break-words">
+            <div className="text-[13px] text-foreground/85 whitespace-pre-wrap break-words">
               {note.body}
             </div>
           </div>

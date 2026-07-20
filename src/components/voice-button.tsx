@@ -1,4 +1,4 @@
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Loader2, Mic, Square } from "lucide-react";
 import { useEffect } from "react";
@@ -14,6 +14,21 @@ interface VoiceButtonProps {
 
 export function VoiceButton({ onTranscript, onError }: VoiceButtonProps) {
   const { state, start, stopAndTranscribe, cancel } = useRecorder();
+
+  // Mirror voice capture to the dynamic island so the mic state is visible even
+  // when this window is behind another app.
+  useEffect(() => {
+    void emit("overlay:voice", { state });
+  }, [state]);
+
+  // The recorder dies with this component (navigating away mid-capture), so
+  // make sure the island doesn't stay stuck on "Listening…".
+  useEffect(
+    () => () => {
+      void emit("overlay:voice", { state: "idle" });
+    },
+    [],
+  );
 
   const handleClick = async () => {
     try {
@@ -64,7 +79,7 @@ export function VoiceButton({ onTranscript, onError }: VoiceButtonProps) {
         onClick={handleClick}
         disabled={state === "transcribing"}
         className={cn(
-          "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-colors",
+          "inline-flex h-8 items-center gap-1.5 px-2.5 text-[13px] rounded-md transition-colors",
           "border-[0.5px] border-border",
           state === "recording" && "bg-acorn-red text-acorn-paper border-transparent animate-pulse",
           state === "idle" && "text-muted-foreground hover:bg-muted",

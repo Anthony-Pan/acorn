@@ -51,13 +51,13 @@ export function PrivacyPanel() {
   };
 
   return (
-    <section className="flex-1 px-8 py-7 overflow-y-auto">
+    <section className="min-h-0 flex-1 overflow-y-auto px-8 py-7">
       <header className="mb-5">
-        <h1 className="text-lg font-medium text-foreground">{t.privacyPanelTitle}</h1>
-        <p className="text-xs text-muted-foreground mt-1">{t.privacyPanelSubtitle}</p>
+        <h1 className="text-[20px] font-semibold text-foreground">{t.privacyPanelTitle}</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">{t.privacyPanelSubtitle}</p>
       </header>
 
-      <div className="flex items-center gap-2 mb-4 max-w-3xl">
+      <div className="mb-4 flex max-w-3xl items-center gap-2">
         <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading}>
           {loading ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -80,30 +80,29 @@ export function PrivacyPanel() {
         </span>
       </div>
 
-      <div className="space-y-1.5 max-w-3xl">
+      <div className="max-w-3xl">
         {entries.length === 0 && !loading ? (
-          <div className="border-[0.5px] border-dashed border-border rounded-md p-6 text-center text-xs text-muted-foreground">
+          <div className="rounded-lg border-[0.5px] border-dashed border-border p-6 text-center text-[11px] text-muted-foreground">
             {t.privacyEmptyState}
           </div>
         ) : (
-          entries.map((entry) => (
-            <article
-              key={entry.id}
-              className="border-[0.5px] border-border rounded-md px-3 py-2 bg-card"
-            >
-              <div className="flex items-center justify-between gap-3 mb-1">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-acorn-orange">
-                  {labels[entry.kind] ?? entry.kind}
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  {formatDistanceToNowStrict(new Date(entry.createdAt), { addSuffix: true })}
-                </span>
-              </div>
-              <div className="text-xs text-foreground/85 break-words line-clamp-2">
-                {entry.content}
-              </div>
-            </article>
-          ))
+          <div className="divide-y-[0.5px] divide-border overflow-hidden rounded-lg border-[0.5px] border-border bg-card shadow-[var(--shadow-card)]">
+            {entries.map((entry) => (
+              <article key={entry.id} className="px-4 py-2.5">
+                <div className="mb-1 flex items-center justify-between gap-3">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-acorn-orange">
+                    {labels[entry.kind] ?? entry.kind}
+                  </span>
+                  <span className="text-[11px] tabular-nums text-muted-foreground">
+                    {formatDistanceToNowStrict(new Date(entry.createdAt), { addSuffix: true })}
+                  </span>
+                </div>
+                <div className="line-clamp-2 break-words text-[13px] text-foreground/85">
+                  {entry.content}
+                </div>
+              </article>
+            ))}
+          </div>
         )}
       </div>
     </section>
