@@ -22,12 +22,22 @@
 //! # Remote identifier choice
 //!
 //! `remote_id` is the item's `calendarItemIdentifier`: a locally-unique handle
-//! that round-trips through `calendarItemWithIdentifier:`, which is all the
-//! Phase 1 push path (create / update / delete) needs. It is not sync-proof
-//! across devices or full resyncs — Phase 2 pull can additionally store
-//! `calendarItemExternalIdentifier` for cross-device matching.
+//! that round-trips through `calendarItemWithIdentifier:`, which is what both
+//! the push path (create / update / delete) and the pull path key on. It is
+//! not sync-proof across devices or full resyncs — a later phase can
+//! additionally store `calendarItemExternalIdentifier` for cross-device
+//! matching.
 //!
-//! `pull` / `full_pull` stay [`SyncError::NotImplemented`] until Phase 2.
+//! # Pull — per-link verify
+//!
+//! The classic EventKit API has no change feed or sync token, so `pull` /
+//! `full_pull` re-verify every linked `remote_id` instead of walking a delta:
+//! each id is looked up with `calendarItemWithIdentifier:` — a miss becomes a
+//! deletion tombstone, a hit becomes a full [`RemoteItem`] snapshot with
+//! `lastModifiedDate` as `updated`, which feeds the engine's last-writer-wins
+//! conflict resolution. Unchanged items are returned too; the engine's
+//! content-hash echo suppression drops the no-ops. There is no cursor —
+//! `next_cursor` is always `None`, and `full_pull` is the same verify pass.
 
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
@@ -47,8 +57,8 @@ use objc2_foundation::{NSCalendar, NSCalendarUnit, NSDate, NSDateComponents, NSE
 use crate::sync::error::{SyncError, SyncResult};
 use crate::sync::provider::SyncProvider;
 use crate::sync::types::{
-    PullBatch, PushOutcome, PushResult, RemoteContainer, RemoteItem, SyncAccount, SyncOp,
-    SyncProviderKind,
+    PullBatch, PushOutcome, PushResult, RemoteChange, RemoteContainer, RemoteItem, SyncAccount,
+    SyncOp, SyncProviderKind,
 };
 
 /// How long we wait for the user to answer the one-time permission prompt.
@@ -100,20 +110,25 @@ impl SyncProvider for AppleEventKitProvider {
         run_blocking(move || push_blocking(kind, container_id, ops)).await
     }
 
+    /// EventKit has no change feed, so the cursor is meaningless here — every
+    /// pull is a per-link verify pass and `next_cursor` stays `None`.
     async fn pull(
         &self,
         _cursor: Option<String>,
-        _linked_ids: Vec<String>,
+        linked_ids: Vec<String>,
     ) -> SyncResult<PullBatch> {
-        Err(SyncError::NotImplemented(
-            "EventKit pull lands in Phase 2".into(),
-        ))
+        if linked_ids.is_empty() {
+            // Nothing is linked yet — do not touch EventKit (no store, no
+            // permission prompt) just to return an empty batch.
+            return Ok(PullBatch::default());
+        }
+        let kind = self.kind;
+        run_blocking(move || pull_blocking(kind, linked_ids)).await
     }
 
-    async fn full_pull(&self, _linked_ids: Vec<String>) -> SyncResult<PullBatch> {
-        Err(SyncError::NotImplemented(
-            "EventKit pull lands in Phase 2".into(),
-        ))
+    async fn full_pull(&self, linked_ids: Vec<String>) -> SyncResult<PullBatch> {
+        // A "full" pull is the same verify pass — there is no cursor to reset.
+        self.pull(None, linked_ids).await
     }
 }
 
@@ -455,6 +470,111 @@ fn fetch_item(store: &EKEventStore, remote_id: &str) -> Option<Retained<EKCalend
     // SAFETY: Identifier lookup on a valid store; returns nil when the item no
     // longer exists.
     unsafe { store.calendarItemWithIdentifier(&ns_id) }
+}
+
+// ---------------------------------------------------------------------------
+// Pull — per-link verify
+// ---------------------------------------------------------------------------
+
+/// Verify every linked remote id against ONE store in a single blocking pass.
+/// A missing id is an external deletion; a resolved one becomes a full
+/// snapshot. All ids come back as changes — the engine's content-hash echo
+/// suppression skips the unchanged ones.
+fn pull_blocking(kind: SyncProviderKind, linked_ids: Vec<String>) -> SyncResult<PullBatch> {
+    let store = new_store();
+    let entity = entity_type(kind);
+    ensure_authorized_blocking(&store, entity)?;
+    let reminders = kind == SyncProviderKind::AppleReminders;
+
+    let changes = linked_ids
+        .into_iter()
+        .filter_map(|remote_id| verify_link(&store, reminders, remote_id))
+        .collect();
+    Ok(PullBatch {
+        changes,
+        next_cursor: None,
+    })
+}
+
+/// The current remote state of one linked id. Returns `None` only when the
+/// identifier resolves to the wrong item type for this provider's kind (e.g.
+/// a reminder id on a calendar account) — skipped defensively rather than
+/// misread as a deletion or a bogus snapshot.
+fn verify_link(store: &EKEventStore, reminders: bool, remote_id: String) -> Option<RemoteChange> {
+    let Some(existing) = fetch_item(store, &remote_id) else {
+        // The identifier no longer resolves — deleted externally.
+        return Some(RemoteChange {
+            remote_id,
+            etag: None,
+            updated: None,
+            deleted: true,
+            item: None,
+        });
+    };
+    let (updated, item) = if reminders {
+        let reminder = existing.downcast::<EKReminder>().ok()?;
+        (last_modified(&reminder), read_reminder(&reminder))
+    } else {
+        let event = existing.downcast::<EKEvent>().ok()?;
+        (last_modified(&event), read_event(&event))
+    };
+    Some(RemoteChange {
+        remote_id,
+        etag: None,
+        updated,
+        deleted: false,
+        item: Some(item),
+    })
+}
+
+fn read_event(event: &EKEvent) -> RemoteItem {
+    // SAFETY: Plain property getters on a valid EKEvent fetched from the
+    // store; retained return values are converted before the block ends.
+    unsafe {
+        RemoteItem {
+            title: event.title().to_string(),
+            notes: event.notes().map(|n| n.to_string()),
+            start: utc_from_ns_date(&event.startDate()),
+            end: utc_from_ns_date(&event.endDate()),
+            due: None,
+            all_day: event.isAllDay(),
+            completed: false,
+            completed_at: None,
+        }
+    }
+}
+
+fn read_reminder(reminder: &EKReminder) -> RemoteItem {
+    // SAFETY: Plain property getters on a valid EKReminder fetched from the
+    // store; retained return values are converted before the block ends.
+    unsafe {
+        RemoteItem {
+            title: reminder.title().to_string(),
+            notes: reminder.notes().map(|n| n.to_string()),
+            start: None,
+            end: None,
+            due: reminder
+                .dueDateComponents()
+                .as_deref()
+                .and_then(due_from_components),
+            all_day: false,
+            completed: reminder.isCompleted(),
+            completed_at: reminder
+                .completionDate()
+                .as_deref()
+                .and_then(utc_from_ns_date),
+        }
+    }
+}
+
+/// Resolve a reminder's due-date components to a concrete instant via the
+/// user's current calendar — the inverse of [`due_date_components`]. `None`
+/// when the components do not name a resolvable date.
+fn due_from_components(components: &NSDateComponents) -> Option<DateTime<Utc>> {
+    NSCalendar::currentCalendar()
+        .dateFromComponents(components)
+        .as_deref()
+        .and_then(utc_from_ns_date)
 }
 
 // ---------------------------------------------------------------------------

@@ -1,10 +1,12 @@
 //! Google Calendar v3 provider. Tasks map to events; the Acorn task id and a
 //! done flag round-trip through `extendedProperties.private` so a pulled event
-//! can be matched back and its completion state recovered. Push only for now;
-//! `pull`/`full_pull` land with the Phase 2 read path.
+//! can be matched back and its completion state recovered. Pull rides the
+//! `events.list` syncToken protocol: `full_pull` walks the whole feed and keeps
+//! the final page's `nextSyncToken` as the cursor; an expired token 410s and
+//! surfaces as [`SyncError::FullResyncRequired`] for the engine to recover.
 
 use async_trait::async_trait;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, NaiveDate, Utc};
 use serde_json::{json, Value};
 
 use super::google_http::GoogleClient;
@@ -12,8 +14,8 @@ use crate::sync::error::{SyncError, SyncResult};
 use crate::sync::keychain;
 use crate::sync::provider::SyncProvider;
 use crate::sync::types::{
-    PullBatch, PushOutcome, PushResult, RemoteContainer, RemoteItem, SyncAccount, SyncOp,
-    SyncProviderKind,
+    PullBatch, PushOutcome, PushResult, RemoteChange, RemoteContainer, RemoteItem, SyncAccount,
+    SyncOp, SyncProviderKind,
 };
 
 const BASE: &str = "https://www.googleapis.com/calendar/v3";
@@ -101,6 +103,46 @@ impl GoogleCalendarProvider {
         }
     }
 
+    /// Walk `events.list`, either incrementally from a `syncToken` or as a full
+    /// listing. Pages are chained via `pageToken`; the final page carries the
+    /// `nextSyncToken` that becomes the new cursor. No time filters are passed —
+    /// they are incompatible with syncToken continuation. An expired token 410s
+    /// inside `send()` and propagates as [`SyncError::FullResyncRequired`].
+    async fn list_events(&self, sync_token: Option<&str>) -> SyncResult<PullBatch> {
+        let mut changes = Vec::new();
+        let mut page_token: Option<String> = None;
+        let next_sync_token = loop {
+            let mut query: Vec<(&str, String)> = vec![
+                ("maxResults", "250".to_string()),
+                // Must stay consistent with the listing the syncToken was
+                // minted from, so it is always on.
+                ("showDeleted", "true".to_string()),
+            ];
+            if let Some(token) = sync_token {
+                query.push(("syncToken", token.to_string()));
+            }
+            if let Some(page) = &page_token {
+                query.push(("pageToken", page.clone()));
+            }
+            let resp = self
+                .client
+                .send(self.client.get(&self.events_url()).query(&query))
+                .await?;
+            let value: Value = resp.json().await?;
+            if let Some(items) = value.get("items").and_then(Value::as_array) {
+                changes.extend(items.iter().filter_map(event_change));
+            }
+            page_token = string_field(&value, "nextPageToken");
+            if page_token.is_none() {
+                break string_field(&value, "nextSyncToken");
+            }
+        };
+        Ok(PullBatch {
+            changes,
+            next_cursor: next_sync_token,
+        })
+    }
+
     async fn find_by_dedupe(&self, dedupe_key: &str) -> SyncResult<Option<PushResult>> {
         let resp = self
             .client
@@ -183,18 +225,14 @@ impl SyncProvider for GoogleCalendarProvider {
 
     async fn pull(
         &self,
-        _cursor: Option<String>,
+        cursor: Option<String>,
         _linked_ids: Vec<String>,
     ) -> SyncResult<PullBatch> {
-        Err(SyncError::NotImplemented(
-            "google calendar pull is Phase 2".into(),
-        ))
+        self.list_events(cursor.as_deref()).await
     }
 
     async fn full_pull(&self, _linked_ids: Vec<String>) -> SyncResult<PullBatch> {
-        Err(SyncError::NotImplemented(
-            "google calendar pull is Phase 2".into(),
-        ))
+        self.list_events(None).await
     }
 }
 
@@ -232,6 +270,72 @@ fn event_times(item: &RemoteItem) -> (Value, Value) {
             json!({ "dateTime": end.to_rfc3339(), "timeZone": "UTC" }),
         )
     }
+}
+
+/// Map one pulled event onto a [`RemoteChange`]. Events without an id (never
+/// seen in practice) are skipped. A `cancelled` status is Google's tombstone —
+/// it carries no payload.
+fn event_change(event: &Value) -> Option<RemoteChange> {
+    let remote_id = string_field(event, "id")?;
+    let deleted = event.get("status").and_then(Value::as_str) == Some("cancelled");
+    let item = if deleted {
+        None
+    } else {
+        Some(event_item(event))
+    };
+    Some(RemoteChange {
+        remote_id,
+        etag: string_field(event, "etag"),
+        updated: datetime_field(event, "updated"),
+        deleted,
+        item,
+    })
+}
+
+fn event_item(event: &Value) -> RemoteItem {
+    let (start, all_day) = parse_event_time(event, "start");
+    // Google's all-day `end.date` is the EXCLUSIVE next day; drop it and let
+    // Acorn derive the all-day window from `start` alone so a one-day event
+    // round-trips to the same start date.
+    let end = if all_day {
+        None
+    } else {
+        parse_event_time(event, "end").0
+    };
+    let completed = event
+        .pointer("/extendedProperties/private/acornDone")
+        .and_then(Value::as_str)
+        == Some("true");
+    RemoteItem {
+        title: string_field(event, "summary").unwrap_or_default(),
+        notes: string_field(event, "description"),
+        start,
+        end,
+        due: None,
+        all_day,
+        completed,
+        completed_at: None,
+    }
+}
+
+/// Parse a Calendar `start`/`end` object. Timed events carry `dateTime`
+/// (RFC3339, possibly with an offset — normalized to UTC); all-day events carry
+/// a bare `date` (parsed as midnight UTC, flagged `all_day`).
+fn parse_event_time(event: &Value, key: &str) -> (Option<DateTime<Utc>>, bool) {
+    let Some(time) = event.get(key) else {
+        return (None, false);
+    };
+    if let Some(dt) = datetime_field(time, "dateTime") {
+        return (Some(dt), false);
+    }
+    let date = time
+        .get("date")
+        .and_then(Value::as_str)
+        .and_then(|s| s.parse::<NaiveDate>().ok())
+        .and_then(|d| d.and_hms_opt(0, 0, 0))
+        .map(|midnight| midnight.and_utc());
+    let all_day = date.is_some();
+    (date, all_day)
 }
 
 fn created_result(value: &Value) -> SyncResult<PushResult> {

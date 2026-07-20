@@ -39,6 +39,10 @@ pub enum SyncError {
     #[error("feature unavailable: {0}")]
     Unavailable(String),
 
+    /// No live constructor now that all providers implement pull, but kept as
+    /// the graceful "push-only provider" escape hatch: the engine turns it
+    /// into a skipped pull instead of a failed cycle.
+    #[allow(dead_code)]
     #[error("not implemented: {0}")]
     NotImplemented(String),
 
