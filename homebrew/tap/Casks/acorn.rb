@@ -2,8 +2,7 @@ cask "acorn" do
   version "1.0.0"
   sha256 "4543f0c272ce7b051beb1d371eefdb1f2a5ac9c97f3401922e21accb3a3c6e64"
 
-  url "https://github.com/onyxcraft/acorn/releases/download/v#{version}/Acorn_#{version}_universal.dmg",
-      verified: "github.com/onyxcraft/acorn/"
+  url "https://github.com/onyxcraft/acorn/releases/download/v#{version}/Acorn_#{version}_universal.dmg"
   name "Acorn"
   desc "Warm AI desktop companion that turns a messy day into focused task cards"
   homepage "https://github.com/onyxcraft/acorn"
