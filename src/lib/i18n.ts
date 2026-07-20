@@ -38,6 +38,48 @@ interface UiStrings {
   modelsGroup: string;
   generalSection: string;
   shortcutsSection: string;
+  mascotSection: string;
+  displaySection: string;
+  soundsSection: string;
+  privacySection: string;
+  memorySection: string;
+  aboutSection: string;
+  comingSoonBadge: string;
+  aboutPanelTitle: string;
+  aboutPanelSubtitle: string;
+  aboutVersionLabel: string;
+  aboutBuildLabel: string;
+  aboutRepoLabel: string;
+  aboutLicenseLabel: string;
+  aboutLicenseValue: string;
+  memoryPanelTitle: string;
+  memoryPanelSubtitle: string;
+  memoryPlaceholder: string;
+  memorySaveButton: string;
+  memoryClearButton: string;
+  memoryHint: string;
+  memorySavedToast: string;
+  memoryClearedToast: string;
+  displayPanelTitle: string;
+  displayPanelSubtitle: string;
+  displayCornieLabel: string;
+  displayCornieCaption: string;
+  displaySoundsLabel: string;
+  displaySoundsCaption: string;
+  privacyPanelTitle: string;
+  privacyPanelSubtitle: string;
+  privacyRefreshButton: string;
+  privacyClearButton: string;
+  privacyEntryCount: (n: number) => string;
+  privacyEmptyState: string;
+  privacyClearedToast: string;
+  soundsPanelTitle: string;
+  soundsPanelSubtitle: string;
+  soundsMutedLabel: string;
+  soundsOnLabel: string;
+  soundsClickToMute: string;
+  soundsClickToUnmute: string;
+  soundsPreviewButton: string;
   categoryRecommended: string;
   categoryLocal: string;
   categoryAdvanced: string;
@@ -95,6 +137,54 @@ const EN: UiStrings = {
   modelsGroup: "Models",
   generalSection: "General",
   shortcutsSection: "Shortcuts",
+  mascotSection: "Mascot",
+  displaySection: "Display",
+  soundsSection: "Sounds",
+  privacySection: "Privacy",
+  memorySection: "Memory",
+  aboutSection: "About",
+  comingSoonBadge: "SOON",
+  aboutPanelTitle: "About Acorn",
+  aboutPanelSubtitle: "Build info, license, and a link back to the repo.",
+  aboutVersionLabel: "Version",
+  aboutBuildLabel: "Build",
+  aboutRepoLabel: "Repository",
+  aboutLicenseLabel: "License",
+  aboutLicenseValue: "MIT",
+  memoryPanelTitle: "Shared memory",
+  memoryPanelSubtitle:
+    "Notes Acorn carries across every provider and every chat. Lives on your machine; never sent anywhere except into the next AI request.",
+  memoryPlaceholder:
+    "Anything you want every Acorn provider to remember about you — preferred working hours, recurring projects, the name of your dog, the cadence of your week.",
+  memorySaveButton: "Save",
+  memoryClearButton: "Clear",
+  memoryHint: "Stored locally only.",
+  memorySavedToast: "Memory saved",
+  memoryClearedToast: "Memory cleared",
+  displayPanelTitle: "Display",
+  displayPanelSubtitle:
+    "Window companions and per-event feedback that live on top of every Acorn view.",
+  displayCornieLabel: "Show Cornie, the desktop mascot",
+  displayCornieCaption:
+    "A small bouncing acorn in the bottom-right corner. Click Cornie to dismiss it inline; bring it back here.",
+  displaySoundsLabel: "Play event sounds",
+  displaySoundsCaption: "A soft chime when a chat reply lands, a low tone when something fails.",
+  privacyPanelTitle: "Privacy",
+  privacyPanelSubtitle:
+    "Everything Acorn has noticed about your day. Lives in a local SQLite file, never sent anywhere, and filtered through a sensitive-content blocklist before it's even written.",
+  privacyRefreshButton: "Refresh",
+  privacyClearButton: "Clear all",
+  privacyEntryCount: (n) => (n === 1 ? "1 entry" : `${n} entries`),
+  privacyEmptyState: "Nothing logged yet. Once you start chatting, entries show up here.",
+  privacyClearedToast: "Activity log cleared",
+  soundsPanelTitle: "Sounds",
+  soundsPanelSubtitle:
+    "Acorn's three small synthesized tones, all generated in-browser via Web Audio — no assets shipped, nothing leaves your machine.",
+  soundsMutedLabel: "Sounds are muted",
+  soundsOnLabel: "Sounds are on",
+  soundsClickToMute: "Click to mute",
+  soundsClickToUnmute: "Click to unmute",
+  soundsPreviewButton: "Preview",
   categoryRecommended: "Recommended",
   categoryLocal: "Local",
   categoryAdvanced: "Advanced",
@@ -151,6 +241,52 @@ const ZH: UiStrings = {
   modelsGroup: "模型",
   generalSection: "通用",
   shortcutsSection: "快捷键",
+  mascotSection: "桌面伴侣",
+  displaySection: "显示",
+  soundsSection: "音效",
+  privacySection: "隐私",
+  memorySection: "共享记忆",
+  aboutSection: "关于",
+  comingSoonBadge: "即将",
+  aboutPanelTitle: "关于 Acorn",
+  aboutPanelSubtitle: "版本信息、协议、以及仓库链接。",
+  aboutVersionLabel: "版本",
+  aboutBuildLabel: "构建",
+  aboutRepoLabel: "仓库",
+  aboutLicenseLabel: "协议",
+  aboutLicenseValue: "MIT",
+  memoryPanelTitle: "共享记忆",
+  memoryPanelSubtitle:
+    "Acorn 在所有 provider 和所有对话之间共享的笔记。只存本地,不会送到第三方,只会拼进下一次 AI 请求里。",
+  memoryPlaceholder:
+    "你希望每个 provider 都记住的事:工作时段、长期项目、宠物名字、一周节奏 ——任意一段文字。",
+  memorySaveButton: "保存",
+  memoryClearButton: "清空",
+  memoryHint: "仅存本地。",
+  memorySavedToast: "记忆已保存",
+  memoryClearedToast: "记忆已清空",
+  displayPanelTitle: "显示",
+  displayPanelSubtitle: "桌面陪伴和事件反馈,覆盖在所有 Acorn 视图之上。",
+  displayCornieLabel: "显示桌宠 Cornie",
+  displayCornieCaption: "右下角一只轻轻弹跳的小橡子。点 Cornie 可以暂时收起,在这里能再请回来。",
+  displaySoundsLabel: "播放事件提示音",
+  displaySoundsCaption: "AI 回复落地时有一声轻轻的叮,出错时是一个低音。",
+  privacyPanelTitle: "隐私",
+  privacyPanelSubtitle:
+    "Acorn 注意到的所有事:全部存在本地 SQLite 里,不会发到任何地方,写入前还过一遍敏感内容黑名单。",
+  privacyRefreshButton: "刷新",
+  privacyClearButton: "全部清空",
+  privacyEntryCount: (n) => `共 ${n} 条`,
+  privacyEmptyState: "暂时还没有记录。开始聊几句就有了。",
+  privacyClearedToast: "记录已清空",
+  soundsPanelTitle: "音效",
+  soundsPanelSubtitle:
+    "Acorn 的三个简单合成音,全部由 Web Audio 现场生成 —— 不内嵌任何音频文件,也不上传到任何地方。",
+  soundsMutedLabel: "已静音",
+  soundsOnLabel: "已开启",
+  soundsClickToMute: "点击静音",
+  soundsClickToUnmute: "点击开启",
+  soundsPreviewButton: "试听",
   categoryRecommended: "推荐",
   categoryLocal: "本地",
   categoryAdvanced: "进阶",

@@ -1,7 +1,10 @@
+import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 import { create } from "zustand";
 
+import { activity } from "@/lib/activity";
 import { conversations as conversationsApi, chat as runChat } from "@/lib/chat";
+import { sounds } from "@/lib/sounds";
 import { useSessionStore } from "@/stores/session";
 import type { ChatEvent, Conversation, ConversationWithMessages, Message } from "@/types/chat";
 
@@ -24,6 +27,7 @@ interface ChatState {
   open: (conversationId: string) => Promise<void>;
   startNew: () => Promise<void>;
   rename: (title: string) => Promise<void>;
+  switchProvider: (providerId: string) => Promise<void>;
   send: (text: string, providerId: string) => Promise<void>;
 }
 
@@ -67,6 +71,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
   },
 
+  switchProvider: async (providerId) => {
+    const current = get().current;
+    if (!current) return;
+    const updated = await conversationsApi.setProvider(current.id, providerId, null);
+    set((s) => ({
+      current: s.current
+        ? { ...s.current, providerId: updated.providerId, model: updated.model }
+        : s.current,
+      conversations: s.conversations.map((c) =>
+        c.id === updated.id ? { ...c, providerId: updated.providerId, model: updated.model } : c,
+      ),
+    }));
+    toast.success("Provider switched", {
+      description: `Future replies in this chat will use ${providerId}.`,
+    });
+  },
+
   send: async (text, providerId) => {
     let conversation = get().current;
     if (!conversation) {
@@ -97,6 +118,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       error: null,
     }));
 
+    void activity.record("chat:user-message", text).catch(() => {});
+
     const handleEvent = (event: ChatEvent) => {
       if (event.kind === "thinking") {
         set({ phase: "thinking" });
@@ -107,6 +130,35 @@ export const useChatStore = create<ChatState>((set, get) => ({
           phase: "tool",
           activeTools: [...s.activeTools, { id: event.call.id, name: event.call.name }],
         }));
+        return;
+      }
+      if (event.kind === "toolApprovalRequest") {
+        const requestId = event.requestId;
+        const toolName = event.call.name;
+        const argsPreview = JSON.stringify(event.call.arguments).slice(0, 80);
+        toast.message(`Confirm tool: ${toolName}`, {
+          description: argsPreview,
+          duration: 28000,
+          id: `tool-approval-${requestId}`,
+          action: {
+            label: "Allow",
+            onClick: () => {
+              void invoke("respond_tool_approval", { requestId, allow: true });
+            },
+          },
+          cancel: {
+            label: "Deny",
+            onClick: () => {
+              void invoke("respond_tool_approval", { requestId, allow: false });
+            },
+          },
+        });
+        return;
+      }
+      if (event.kind === "toolDenied") {
+        toast.warning(`${event.call.name} denied`, {
+          description: "Acorn will tell the model it was blocked.",
+        });
         return;
       }
       if (event.kind === "toolResult") {
@@ -140,10 +192,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const refreshed = await conversationsApi.get(conversation.id);
       set({ current: refreshed, phase: "idle", activeTools: [] });
       await useSessionStore.getState().hydrate();
+      sounds.chime();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       set({ phase: "idle", error: message });
-      toast.error("Chat failed", { description: message });
+      if (message.includes("conversation locked to provider")) {
+        toast.error("Provider locked", {
+          description:
+            "This conversation is bound to its original provider. Start a new chat to use a different one.",
+        });
+      } else {
+        toast.error("Chat failed", { description: message });
+      }
+      sounds.error();
     }
   },
 }));

@@ -2,6 +2,7 @@ import {
   AlertCircle,
   CalendarDays,
   Clipboard,
+  FileText,
   Loader2,
   MessageCircle,
   Settings as SettingsIcon,
@@ -22,6 +23,7 @@ interface TaskInputProps {
   onOpenSettings: () => void;
   onOpenChat: () => void;
   onOpenCalendar: () => void;
+  onOpenCanvas: () => void;
 }
 
 function pickHint(error: string | null, t: ReturnType<typeof strings>): string {
@@ -42,7 +44,12 @@ function pickHint(error: string | null, t: ReturnType<typeof strings>): string {
   return t.stashFailedHint;
 }
 
-export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskInputProps) {
+export function TaskInput({
+  onOpenSettings,
+  onOpenChat,
+  onOpenCalendar,
+  onOpenCanvas,
+}: TaskInputProps) {
   const [value, setValue] = useState(() => {
     const pending = typeof window !== "undefined" ? sessionStorage.getItem("acorn:prefill") : null;
     if (pending) {
@@ -110,6 +117,9 @@ export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskIn
               <MessageCircle />
               {t.chat}
             </Button>
+            <Button variant="outline" size="icon-sm" onClick={onOpenCanvas} aria-label="Canvas">
+              <FileText className="w-3.5 h-3.5" />
+            </Button>
             <Button variant="outline" size="icon-sm" onClick={onOpenCalendar} aria-label="Calendar">
               <CalendarDays />
             </Button>
@@ -127,6 +137,12 @@ export function TaskInput({ onOpenSettings, onOpenChat, onOpenCalendar }: TaskIn
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              e.preventDefault();
+              if (canStash) void handleStash();
+            }
+          }}
           placeholder={t.inputPlaceholder}
           disabled={isStashing}
           className="w-full min-h-[180px] bg-card border-[0.5px] border-border rounded-2xl px-4.5 py-4 text-[14px] leading-[1.7] resize-none focus:outline-none focus:ring-2 focus:ring-ring/30 placeholder:text-[var(--acorn-orange-muted)]/60 disabled:opacity-60"

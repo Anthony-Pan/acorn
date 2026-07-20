@@ -33,6 +33,8 @@ export type ChatEvent =
   | { kind: "thinking" }
   | { kind: "toolCall"; call: ToolCall }
   | { kind: "toolResult"; result: { toolCallId: string; content: string } }
+  | { kind: "toolApprovalRequest"; requestId: string; call: ToolCall }
+  | { kind: "toolDenied"; call: ToolCall }
   | { kind: "text"; content: string }
   | { kind: "done" }
   | { kind: "error"; message: string };

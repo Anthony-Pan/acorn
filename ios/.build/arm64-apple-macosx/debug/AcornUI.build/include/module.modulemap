@@ -1,0 +1,3 @@
+module AcornUI {
+    header "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/include/AcornUI-Swift.h"
+}

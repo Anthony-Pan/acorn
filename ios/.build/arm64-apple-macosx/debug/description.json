@@ -1,0 +1,992 @@
+{
+  "builtTestProducts": [
+    {
+      "binaryPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.xctest/Contents/MacOS/AcornIOSPackageTests",
+      "packagePath": "/Users/anthonypan/Developer/acorn/ios",
+      "productName": "AcornIOSPackageTests"
+    }
+  ],
+  "copyCommands": {},
+  "explicitTargetDependencyImportCheckingMode": {
+    "none": {}
+  },
+  "generatedSourceTargetSet": [],
+  "pluginDescriptions": [],
+  "swiftCommands": {
+    "C.AcornApp-arm64-apple-macosx-debug.module": {
+      "executable": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/sources",
+      "importPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "inputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/AcornApp.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/RootView.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCore.swiftmodule"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornUI.swiftmodule"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/sources"
+        }
+      ],
+      "isLibrary": true,
+      "moduleName": "AcornApp",
+      "moduleOutputPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornApp.swiftmodule",
+      "objects": [
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.swift.o",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.swift.o"
+      ],
+      "otherArguments": [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j15",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/include/AcornApp-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/output-file-map.json",
+      "outputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornApp.swiftmodule"
+        }
+      ],
+      "prepareForIndexing": false,
+      "sources": [
+        "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/AcornApp.swift",
+        "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/RootView.swift"
+      ],
+      "tempsPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build",
+      "wholeModuleOptimization": false
+    },
+    "C.AcornCore-arm64-apple-macosx-debug.module": {
+      "executable": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/sources",
+      "importPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "inputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornCore/AcornCore.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/sources"
+        }
+      ],
+      "isLibrary": true,
+      "moduleName": "AcornCore",
+      "moduleOutputPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCore.swiftmodule",
+      "objects": [
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/AcornCore.swift.o"
+      ],
+      "otherArguments": [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j15",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/include/AcornCore-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/output-file-map.json",
+      "outputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/AcornCore.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCore.swiftmodule"
+        }
+      ],
+      "prepareForIndexing": false,
+      "sources": ["/Users/anthonypan/Developer/acorn/ios/Sources/AcornCore/AcornCore.swift"],
+      "tempsPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build",
+      "wholeModuleOptimization": false
+    },
+    "C.AcornCoreTests-arm64-apple-macosx-debug.module": {
+      "executable": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/sources",
+      "importPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "inputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Tests/AcornCoreTests/AcornCoreTests.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCore.swiftmodule"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/sources"
+        }
+      ],
+      "isLibrary": true,
+      "moduleName": "AcornCoreTests",
+      "moduleOutputPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCoreTests.swiftmodule",
+      "objects": [
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/AcornCoreTests.swift.o"
+      ],
+      "otherArguments": [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j15",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/output-file-map.json",
+      "outputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/AcornCoreTests.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCoreTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing": false,
+      "sources": [
+        "/Users/anthonypan/Developer/acorn/ios/Tests/AcornCoreTests/AcornCoreTests.swift"
+      ],
+      "tempsPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build",
+      "wholeModuleOptimization": false
+    },
+    "C.AcornIOSPackageTests-arm64-apple-macosx-debug.module": {
+      "executable": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/sources",
+      "importPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "inputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCoreTests.swiftmodule"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/sources"
+        }
+      ],
+      "isLibrary": true,
+      "moduleName": "AcornIOSPackageTests",
+      "moduleOutputPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornIOSPackageTests.swiftmodule",
+      "objects": [
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments": [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j15",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/include/AcornIOSPackageTests-Swift.h",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/output-file-map.json",
+      "outputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornIOSPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing": false,
+      "sources": [
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift"
+      ],
+      "tempsPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build",
+      "wholeModuleOptimization": false
+    },
+    "C.AcornUI-arm64-apple-macosx-debug.module": {
+      "executable": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/sources",
+      "importPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "inputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornUI/AcornUI.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornCore.swiftmodule"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/sources"
+        }
+      ],
+      "isLibrary": true,
+      "moduleName": "AcornUI",
+      "moduleOutputPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornUI.swiftmodule",
+      "objects": [
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.swift.o"
+      ],
+      "otherArguments": [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j15",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/include/AcornUI-Swift.h",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/output-file-map.json",
+      "outputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules/AcornUI.swiftmodule"
+        }
+      ],
+      "prepareForIndexing": false,
+      "sources": ["/Users/anthonypan/Developer/acorn/ios/Sources/AcornUI/AcornUI.swift"],
+      "tempsPath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build",
+      "wholeModuleOptimization": false
+    }
+  },
+  "swiftFrontendCommands": {},
+  "swiftTargetScanArgs": {
+    "AcornApp": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AcornApp",
+      "-package-name",
+      "ios",
+      "-c",
+      "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/AcornApp.swift",
+      "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/RootView.swift",
+      "-I",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j15",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/include/AcornApp-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "AcornCore": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AcornCore",
+      "-package-name",
+      "ios",
+      "-c",
+      "/Users/anthonypan/Developer/acorn/ios/Sources/AcornCore/AcornCore.swift",
+      "-I",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j15",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/include/AcornCore-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "AcornCoreTests": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AcornCoreTests",
+      "-package-name",
+      "ios",
+      "-c",
+      "/Users/anthonypan/Developer/acorn/ios/Tests/AcornCoreTests/AcornCoreTests.swift",
+      "-I",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j15",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "AcornIOSPackageTests": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AcornIOSPackageTests",
+      "-package-name",
+      "ios",
+      "-c",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j15",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/include/AcornIOSPackageTests-Swift.h",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "AcornUI": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "AcornUI",
+      "-package-name",
+      "ios",
+      "-c",
+      "/Users/anthonypan/Developer/acorn/ios/Sources/AcornUI/AcornUI.swift",
+      "-I",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j15",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/include/AcornUI-Swift.h",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap": {
+    "AcornApp": ["AcornUI", "AcornCore"],
+    "AcornCore": [],
+    "AcornCoreTests": ["AcornCore"],
+    "AcornIOSPackageTests": ["AcornCoreTests", "AcornCore"],
+    "AcornUI": ["AcornCore"]
+  },
+  "testDiscoveryCommands": {},
+  "testEntryPointCommands": {
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift": {
+      "inputs": [],
+      "outputs": [
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration": {
+    "default": {}
+  },
+  "writeCommands": {
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/sources": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<sources-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/AcornApp.swift"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornApp/RootView.swift"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/sources"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.product/Objects.LinkFileList": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<link-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/AcornApp.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.build/RootView.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/AcornCore.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.swift.o"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornApp.product/Objects.LinkFileList"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/sources": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<sources-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornCore/AcornCore.swift"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/sources"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.product/Objects.LinkFileList": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<link-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/AcornCore.swift.o"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.product/Objects.LinkFileList"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/sources": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<sources-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Tests/AcornCoreTests/AcornCoreTests.swift"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/sources"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/sources": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<sources-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/sources"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.product/Objects.LinkFileList": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<link-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/AcornCore.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCoreTests.build/AcornCoreTests.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.build/runner.swift.o"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornIOSPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/sources": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<sources-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/Sources/AcornUI/AcornUI.swift"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/sources"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.product/Objects.LinkFileList": {
+      "alwaysOutOfDate": false,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<link-file-list>"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornCore.build/AcornCore.swift.o"
+        },
+        {
+          "kind": "file",
+          "name": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.swift.o"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.product/Objects.LinkFileList"
+    },
+    "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt": {
+      "alwaysOutOfDate": true,
+      "inputs": [
+        {
+          "kind": "virtual",
+          "name": "<swift-get-version>"
+        },
+        {
+          "kind": "file",
+          "name": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

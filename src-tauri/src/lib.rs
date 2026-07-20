@@ -29,10 +29,27 @@ pub fn run() {
     #[cfg(desktop)]
     let builder = builder.plugin(
         tauri_plugin_global_shortcut::Builder::new()
-            .with_handler(|app, _shortcut, event| {
-                if event.state() == ShortcutState::Pressed {
-                    toggle_quick_window(app);
+            .with_handler(|app, shortcut, event| {
+                if event.state() != ShortcutState::Pressed {
+                    return;
                 }
+                if shortcut_matches(shortcut, commands::shortcut::PIN_SHORTCUT) {
+                    let _ = app.emit(commands::shortcut::SHORTCUT_PIN_EVENT, ());
+                    return;
+                }
+                if shortcut_matches(shortcut, commands::shortcut::SCREENSHOT_SHORTCUT) {
+                    let _ = app.emit(commands::shortcut::SHORTCUT_SCREENSHOT_EVENT, ());
+                    return;
+                }
+                if shortcut_matches(shortcut, commands::shortcut::PUSH_TO_TALK_SHORTCUT) {
+                    let _ = app.emit(commands::shortcut::SHORTCUT_PUSH_TO_TALK_EVENT, ());
+                    return;
+                }
+                if shortcut_matches(shortcut, commands::shortcut::QUICK_ASK_SHORTCUT) {
+                    let _ = app.emit(commands::shortcut::SHORTCUT_QUICK_ASK_EVENT, ());
+                    return;
+                }
+                toggle_quick_window(app);
             })
             .build(),
     );
@@ -46,6 +63,7 @@ pub fn run() {
                 tauri::async_runtime::block_on(async { db::Database::initialize(&db_path).await })?;
 
             app.manage(database);
+            app.manage(commands::tool_approval::ApprovalBroker::default());
 
             #[cfg(target_os = "macos")]
             {
@@ -99,6 +117,7 @@ pub fn run() {
             commands::conversation::get_conversation,
             commands::conversation::delete_conversation,
             commands::conversation::rename_conversation,
+            commands::conversation::set_conversation_provider,
             commands::chat::chat,
             commands::window::show_main,
             commands::window::toggle_quick,
@@ -113,6 +132,19 @@ pub fn run() {
             commands::speech::get_active_speech_provider,
             commands::speech::set_active_speech_provider,
             commands::speech::transcribe_audio,
+            commands::activity::record_activity,
+            commands::activity::list_recent_activity,
+            commands::activity::clear_activity,
+            commands::activity::build_daily_brief,
+            commands::updater::check_for_update,
+            commands::capture::capture_primary_screen,
+            commands::canvas::list_canvases,
+            commands::canvas::get_canvas,
+            commands::canvas::create_canvas,
+            commands::canvas::update_canvas,
+            commands::canvas::delete_canvas,
+            commands::search::search_index,
+            commands::tool_approval::respond_tool_approval,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -122,8 +154,29 @@ pub fn run() {
 fn register_global_shortcuts(app: &tauri::AppHandle, shortcut_str: &str) -> anyhow::Result<()> {
     let summon = Shortcut::from_str(shortcut_str)
         .or_else(|_| Shortcut::from_str(commands::shortcut::DEFAULT_SHORTCUT))?;
-    app.global_shortcut().register(summon)?;
+    let extras = [
+        commands::shortcut::PIN_SHORTCUT,
+        commands::shortcut::SCREENSHOT_SHORTCUT,
+        commands::shortcut::PUSH_TO_TALK_SHORTCUT,
+        commands::shortcut::QUICK_ASK_SHORTCUT,
+    ];
+    let gs = app.global_shortcut();
+    gs.register(summon)?;
+    for raw in extras {
+        if let Ok(parsed) = Shortcut::from_str(raw) {
+            if let Err(err) = gs.register(parsed) {
+                eprintln!("acorn: could not register shortcut '{raw}': {err}");
+            }
+        }
+    }
     Ok(())
+}
+
+#[cfg(desktop)]
+fn shortcut_matches(target: &Shortcut, spec: &str) -> bool {
+    Shortcut::from_str(spec)
+        .map(|expected| expected == *target)
+        .unwrap_or(false)
 }
 
 fn build_tray(app: &tauri::AppHandle) -> anyhow::Result<()> {

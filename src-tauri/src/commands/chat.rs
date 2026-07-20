@@ -10,14 +10,19 @@ use crate::ai::prompts::CHAT_SYSTEM_PROMPT;
 use crate::ai::provider::{build_provider, ProviderInputs};
 use crate::ai::tools::{execute_tool, tool_catalog};
 use crate::ai::{keychain, Provider};
+use crate::commands::tool_approval::ApprovalBroker;
 use crate::db::models::{Message, MessageRole, ProviderConfig};
 use crate::db::Database;
+
+const TOOL_CONFIRM_KEY: &str = "require_tool_confirm";
+const TOOL_APPROVAL_TIMEOUT_SECS: u64 = 30;
 
 const MAX_TOOL_ITERATIONS: usize = 5;
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn chat(
     db: State<'_, Database>,
+    broker: State<'_, ApprovalBroker>,
     provider_id: String,
     conversation_id: String,
     user_message: String,
@@ -27,6 +32,8 @@ pub async fn chat(
     if trimmed.is_empty() {
         return Err(ProviderError::InvalidResponse("empty message".into()));
     }
+
+    enforce_provider_lock(db.pool(), &conversation_id, &provider_id).await?;
 
     insert_message(
         db.pool(),
@@ -48,13 +55,18 @@ pub async fn chat(
         Vec::new()
     };
 
+    let shared_memory = load_shared_memory(db.pool()).await;
+    let preferred_language = load_preferred_language(db.pool()).await;
+    let system_prompt =
+        compose_system_prompt(shared_memory.as_deref(), preferred_language.as_deref());
+
     let _ = on_event.send(ChatEvent::Thinking);
 
     let mut final_text = String::new();
 
     for _ in 0..MAX_TOOL_ITERATIONS {
         let turn = provider
-            .chat_turn(&chat_messages, &tools, CHAT_SYSTEM_PROMPT)
+            .chat_turn(&chat_messages, &tools, &system_prompt)
             .await?;
 
         let ChatTurn { text, tool_calls } = turn;
@@ -82,8 +94,61 @@ pub async fn chat(
         )
         .await?;
 
+        let require_confirm = load_setting_value(db.pool(), TOOL_CONFIRM_KEY)
+            .await
+            .map(|v| v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false);
+
         for call in tool_calls {
             let _ = on_event.send(ChatEvent::ToolCall { call: call.clone() });
+
+            if require_confirm {
+                let request_id = Uuid::new_v4().to_string();
+                let receiver = broker.register(request_id.clone());
+                let _ = on_event.send(ChatEvent::ToolApprovalRequest {
+                    request_id: request_id.clone(),
+                    call: call.clone(),
+                });
+                let approved = match tokio::time::timeout(
+                    std::time::Duration::from_secs(TOOL_APPROVAL_TIMEOUT_SECS),
+                    receiver,
+                )
+                .await
+                {
+                    Ok(Ok(decision)) => decision,
+                    _ => {
+                        broker.forget(&request_id);
+                        false
+                    }
+                };
+                if !approved {
+                    let denied_payload =
+                        format!(r#"{{"error": "user denied tool '{}'"}}"#, call.name);
+                    let _ = on_event.send(ChatEvent::ToolDenied { call: call.clone() });
+                    let _ = on_event.send(ChatEvent::ToolResult {
+                        result: ToolResult {
+                            tool_call_id: call.id.clone(),
+                            content: denied_payload.clone(),
+                        },
+                    });
+                    chat_messages.push(ChatMessage {
+                        role: ChatRole::Tool,
+                        content: denied_payload.clone(),
+                        tool_calls: Vec::new(),
+                        tool_call_id: Some(call.id.clone()),
+                    });
+                    insert_message(
+                        db.pool(),
+                        &conversation_id,
+                        MessageRole::Tool,
+                        &denied_payload,
+                        None,
+                        Some(&call.id),
+                    )
+                    .await?;
+                    continue;
+                }
+            }
 
             let result_content = match execute_tool(db.pool(), &call.name, &call.arguments).await {
                 Ok(s) => s,
@@ -142,6 +207,64 @@ pub async fn chat(
     Ok(assistant)
 }
 
+const SHARED_MEMORY_KEY: &str = "shared_memory";
+const LANGUAGE_KEY: &str = "language";
+
+async fn load_setting_value(pool: &sqlx::SqlitePool, key: &str) -> Option<String> {
+    let row: Option<(String,)> = sqlx::query_as("SELECT value FROM settings WHERE key = ?")
+        .bind(key)
+        .fetch_optional(pool)
+        .await
+        .ok()
+        .flatten();
+    row.map(|(v,)| v)
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+}
+
+async fn load_shared_memory(pool: &sqlx::SqlitePool) -> Option<String> {
+    load_setting_value(pool, SHARED_MEMORY_KEY).await
+}
+
+async fn load_preferred_language(pool: &sqlx::SqlitePool) -> Option<String> {
+    load_setting_value(pool, LANGUAGE_KEY).await
+}
+
+fn language_display(code: &str) -> &'static str {
+    if code.starts_with("zh") {
+        "Chinese (Simplified)"
+    } else if code.starts_with("ja") {
+        "Japanese"
+    } else if code.starts_with("ko") {
+        "Korean"
+    } else if code.starts_with("es") {
+        "Spanish"
+    } else if code.starts_with("fr") {
+        "French"
+    } else if code.starts_with("de") {
+        "German"
+    } else {
+        "English"
+    }
+}
+
+fn compose_system_prompt(shared_memory: Option<&str>, preferred_language: Option<&str>) -> String {
+    let mut out = CHAT_SYSTEM_PROMPT.to_string();
+    if let Some(lang) = preferred_language {
+        out.push_str("\n\nYour friend has set the app language to ");
+        out.push_str(language_display(lang));
+        out.push_str(". Default to replying in that language unless they switch on their own.\n");
+    }
+    if let Some(memory) = shared_memory {
+        out.push_str(
+            "\n\nLong-term notes about your friend (user-editable, stored locally, opt-out via Settings → Memory):\n",
+        );
+        out.push_str(memory);
+        out.push('\n');
+    }
+    out
+}
+
 async fn insert_message(
     pool: &sqlx::SqlitePool,
     conversation_id: &str,
@@ -186,6 +309,34 @@ async fn load_messages(
     .map_err(Into::into)
 }
 
+async fn conversation_provider_lock(
+    pool: &sqlx::SqlitePool,
+    conversation_id: &str,
+) -> ProviderResult<Option<String>> {
+    let locked: Option<Option<String>> =
+        sqlx::query_scalar("SELECT provider_id FROM conversations WHERE id = ?")
+            .bind(conversation_id)
+            .fetch_optional(pool)
+            .await?;
+    Ok(locked.flatten())
+}
+
+async fn enforce_provider_lock(
+    pool: &sqlx::SqlitePool,
+    conversation_id: &str,
+    attempted_provider: &str,
+) -> ProviderResult<()> {
+    if let Some(locked_to) = conversation_provider_lock(pool, conversation_id).await? {
+        if locked_to != attempted_provider {
+            return Err(ProviderError::ConversationLocked {
+                locked_to,
+                attempted: attempted_provider.to_string(),
+            });
+        }
+    }
+    Ok(())
+}
+
 async fn bump_conversation_timestamp(
     pool: &sqlx::SqlitePool,
     conversation_id: &str,
@@ -194,7 +345,11 @@ async fn bump_conversation_timestamp(
 ) {
     let now = Utc::now();
     let _ = sqlx::query(
-        "UPDATE conversations SET last_message_at = ?, provider_id = ?, model = ? WHERE id = ?",
+        "UPDATE conversations
+         SET last_message_at = ?,
+             provider_id = COALESCE(provider_id, ?),
+             model = COALESCE(model, ?)
+         WHERE id = ?",
     )
     .bind(now)
     .bind(provider_id)

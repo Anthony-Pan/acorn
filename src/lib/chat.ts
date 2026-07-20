@@ -14,6 +14,9 @@ export const conversations = {
 
   rename: (conversationId: string, title: string) =>
     invoke<Conversation>("rename_conversation", { conversationId, title }),
+
+  setProvider: (conversationId: string, providerId: string, model: string | null = null) =>
+    invoke<Conversation>("set_conversation_provider", { conversationId, providerId, model }),
 };
 
 export function chat(

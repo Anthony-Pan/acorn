@@ -1,10 +1,16 @@
+pub mod activity;
 pub mod ai;
+pub mod canvas;
+pub mod capture;
 pub mod chat;
 pub mod conversation;
 pub mod provider_config;
+pub mod search;
 pub mod session;
 pub mod settings;
 pub mod shortcut;
 pub mod speech;
 pub mod task;
+pub mod tool_approval;
+pub mod updater;
 pub mod window;

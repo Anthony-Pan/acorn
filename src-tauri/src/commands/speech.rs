@@ -164,5 +164,11 @@ fn map_provider_error(err: crate::ai::error::ProviderError) -> SpeechError {
         ProviderError::NotImplemented(s) => SpeechError::NotImplemented(s),
         ProviderError::OllamaNotRunning(s) => SpeechError::Network(s),
         ProviderError::ChannelClosed => SpeechError::ProviderResponse("channel closed".into()),
+        ProviderError::ConversationLocked {
+            locked_to,
+            attempted,
+        } => SpeechError::ProviderResponse(format!(
+            "conversation locked to {locked_to}, attempted {attempted}"
+        )),
     }
 }

@@ -97,3 +97,23 @@ pub async fn rename_conversation(
         .await
         .map_err(Into::into)
 }
+
+#[tauri::command(rename_all = "camelCase")]
+pub async fn set_conversation_provider(
+    db: State<'_, Database>,
+    conversation_id: String,
+    provider_id: String,
+    model: Option<String>,
+) -> AppResult<Conversation> {
+    sqlx::query("UPDATE conversations SET provider_id = ?, model = ? WHERE id = ?")
+        .bind(&provider_id)
+        .bind(model.as_deref())
+        .bind(&conversation_id)
+        .execute(db.pool())
+        .await?;
+    sqlx::query_as::<_, Conversation>("SELECT * FROM conversations WHERE id = ?")
+        .bind(&conversation_id)
+        .fetch_one(db.pool())
+        .await
+        .map_err(Into::into)
+}

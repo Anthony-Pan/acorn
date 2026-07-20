@@ -31,3 +31,8 @@ dist-ssr
 
 # Tauri / Rust artifacts (src-tauri has its own .gitignore for target/)
 *.tmp
+
+# Local reference / inspiration material - never commit
+ex/
+.sisyphus/
+.serena/

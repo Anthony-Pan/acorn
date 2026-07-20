@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/primary.swiftdeps"
+  },
+  "/Users/anthonypan/Developer/acorn/ios/Sources/AcornUI/AcornUI.swift": {
+    "dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.d",
+    "object": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.swift.o",
+    "swiftmodule": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI~partial.swiftmodule",
+    "swift-dependencies": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.swiftdeps",
+    "diagnostics": "/Users/anthonypan/Developer/acorn/ios/.build/arm64-apple-macosx/debug/AcornUI.build/AcornUI.dia"
+  }
+}

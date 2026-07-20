@@ -48,6 +48,8 @@ pub enum ChatEvent {
     Thinking,
     ToolCall { call: ToolCall },
     ToolResult { result: ToolResult },
+    ToolApprovalRequest { request_id: String, call: ToolCall },
+    ToolDenied { call: ToolCall },
     Text { content: String },
     Done,
     Error { message: String },

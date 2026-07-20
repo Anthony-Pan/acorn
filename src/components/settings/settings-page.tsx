@@ -2,11 +2,18 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AcornLogo } from "@/components/acorn-logo";
+import { AboutPanel } from "@/components/settings/about-panel";
+import { DisplayPanel } from "@/components/settings/display-panel";
 import { GeneralPanel } from "@/components/settings/general-panel";
+import { MemoryPanel } from "@/components/settings/memory-panel";
+import { PlaceholderPanel } from "@/components/settings/placeholder-panel";
+import { PrivacyPanel } from "@/components/settings/privacy-panel";
 import { ProviderConfigPanel } from "@/components/settings/provider-config";
 import { type SettingsSection, SettingsSidebar } from "@/components/settings/settings-sidebar";
 import { ShortcutsPanel } from "@/components/settings/shortcuts-panel";
+import { SoundsPanel } from "@/components/settings/sounds-panel";
 import { Button } from "@/components/ui/button";
+import { strings } from "@/lib/i18n";
 import { useProvidersStore } from "@/stores/providers";
 import { useSettingsStore } from "@/stores/settings";
 
@@ -66,9 +73,33 @@ export function SettingsPage({ onClose }: SettingsPageProps) {
 
 function SettingsContent({ section }: { section: SettingsSection }) {
   const catalog = useProvidersStore((s) => s.catalog);
+  const language = useSettingsStore((s) => s.language);
+  const t = strings(language);
 
   if (section.kind === "general") return <GeneralPanel />;
   if (section.kind === "shortcuts") return <ShortcutsPanel />;
+  if (section.kind === "about") return <AboutPanel />;
+
+  if (section.kind === "mascot") {
+    return (
+      <PlaceholderPanel
+        title={t.mascotSection}
+        description={
+          language.startsWith("zh")
+            ? "选一只桌面小伴侣,它会在你工作时陪着你。"
+            : "Pick a small desktop companion that keeps you company while you work."
+        }
+      />
+    );
+  }
+
+  if (section.kind === "display") return <DisplayPanel />;
+
+  if (section.kind === "sounds") return <SoundsPanel />;
+
+  if (section.kind === "privacy") return <PrivacyPanel />;
+
+  if (section.kind === "memory") return <MemoryPanel />;
 
   const provider = catalog.find((p) => p.id === section.providerId);
   if (!provider) {
